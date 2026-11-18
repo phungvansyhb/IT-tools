@@ -33,6 +33,7 @@ import {
 import { optimizeSvgMarkup } from '../src/lib/tools/engines/image';
 import { buildCollectionPageJsonLd, buildToolJsonLd, buildWebSiteJsonLd } from '../src/lib/seo';
 import sitemap from '../src/app/sitemap';
+import robots from '../src/app/robots';
 import {
   DEFAULT_LOCALE,
   LOCALE_META,
@@ -44,6 +45,18 @@ import {
 import { detectBestLocale, parseAcceptLanguage } from '../src/i18n/detect';
 import { getBundle, getFixedT } from '../src/i18n/translator';
 import { CHEATSHEET_ENTRIES, getLocalizedCheatsheetEntries } from '../src/lib/tools/data/cheatsheets';
+import {
+  FEEDBACK_COOLDOWN_MS,
+  aggregateToolRatings,
+  buildSafeDebugContext,
+  filterAdminRecords,
+  sanitizePathname,
+  validateAdminUpdate,
+  validateFeedbackSubmission,
+  validateRatingInput,
+  type FeedbackSubmission,
+  type ToolRatingEntry,
+} from '../src/lib/feedback';
 
 async function runVerification() {
   console.log('1. Verifying Registry Integrity...');
@@ -167,7 +180,14 @@ async function runVerification() {
   assert.equal(toolSchema[0].inLanguage, 'zh-Hans');
   assert.equal(toolSchema[1]['@type'], 'BreadcrumbList');
   assert.equal(toolSchema[2]['@type'], 'FAQPage');
-  console.log('   ✓ SEO sitemap (124 routes across 4 locales) and Schema.org JSON-LD validated.');
+
+  const robotsConfig = robots();
+  const rules = Array.isArray(robotsConfig.rules) ? robotsConfig.rules : [robotsConfig.rules];
+  const disallowList = rules.flatMap((r) => (Array.isArray(r.disallow) ? r.disallow : r.disallow ? [r.disallow] : []));
+  for (const requiredDisallow of ['/*/admin', '/*/admin/*', '/admin', '/admin/*']) {
+    assert.ok(disallowList.includes(requiredDisallow), `Expected robots.ts disallow to include ${requiredDisallow}`);
+  }
+  console.log('   ✓ SEO sitemap (124 routes across 4 locales), robots.ts admin guard, and Schema.org JSON-LD validated.');
 
   console.log('4. Verifying i18n Core Runtime, Locale Detection & Canonical English Bundle...');
   assert.deepEqual([...SUPPORTED_LOCALES], ['en', 'vi', 'ja', 'zh']);
@@ -288,7 +308,19 @@ async function runVerification() {
     }
     const tLoc = getFixedT(loc);
     assert.equal(tLoc('brand.name'), 'OmniDev');
+    assert.ok(tLoc('feedback.navButton').length > 0, `Expected feedback.navButton in ${loc}`);
+    assert.ok(
+      tLoc('feedback.errors.cooldown', { seconds: 15 }).includes('15'),
+      `Expected feedback.errors.cooldown interpolation in ${loc}`
+    );
+    assert.ok(tLoc('adminFeedback.heading').length > 0, `Expected adminFeedback.heading in ${loc}`);
+    assert.ok(
+      tLoc('adminFeedback.kpiRatingsAvg', { avg: '4.8', count: 12 }).includes('4.8'),
+      `Expected adminFeedback.kpiRatingsAvg interpolation in ${loc}`
+    );
   }
+  assert.equal(tEn('feedback.navButton'), 'Send Feedback');
+  assert.equal(tEn('adminFeedback.heading'), 'Feedback Moderation Console');
   console.log(`   ✓ i18n runtime, detection, URL helpers, and 4-locale parity (${enLeaves.size} keys × 4) validated.`);
 
   console.log('5. Verifying Locale-Aware Registry, Cheatsheets & Engines...');
@@ -332,9 +364,226 @@ async function runVerification() {
         htmlTagMatches[0].includes(`lang="${expectedLang}"`),
         `Expected lang="${expectedLang}" in ${loc}.html, got: ${htmlTagMatches[0]}`
       );
+
+      const adminHtmlPath = path.join(nextAppDir, loc, 'admin', 'feedback.html');
+      assert.ok(fs.existsSync(adminHtmlPath), `Missing built admin HTML file: ${adminHtmlPath}`);
+      const adminHtml = fs.readFileSync(adminHtmlPath, 'utf8');
+      const adminHtmlTags = adminHtml.match(/<html\b[^>]*>/g) ?? [];
+      assert.equal(
+        adminHtmlTags.length,
+        1,
+        `Expected single <html> tag in ${loc}/admin/feedback.html, got ${adminHtmlTags.length}`
+      );
+      assert.ok(
+        adminHtmlTags[0].includes(`lang="${expectedLang}"`),
+        `Expected lang="${expectedLang}" in ${loc}/admin/feedback.html, got: ${adminHtmlTags[0]}`
+      );
+      assert.ok(
+        /<meta[^>]+name="robots"[^>]+content="[^"]*noindex[^"]*nofollow[^"]*"/i.test(adminHtml),
+        `Expected noindex, nofollow robots meta tag in ${loc}/admin/feedback.html`
+      );
     }
-    console.log('   ✓ Built HTML <html lang="..."> validated for en, vi, ja, zh-Hans.');
+    console.log('   ✓ Built HTML <html lang="..."> and admin noindex meta validated for en, vi, ja, zh-Hans.');
   }
+
+  console.log('7. Verifying Pure Feedback Core (Validation, Debug Context, Aggregation & Filtering)...');
+  // Honeypot triggered
+  const honeypotRes = validateFeedbackSubmission({
+    type: 'bug',
+    toolId: 'jwt-decoder',
+    title: 'Bot test',
+    message: 'This message is definitely longer than 10 characters.',
+    contactEmail: 'bot@example.com',
+    website: 'https://spam.example.com',
+  });
+  assert.equal(honeypotRes.ok, false);
+  assert.equal(honeypotRes.honeypotTriggered, true);
+
+  // Cooldown < 30s
+  const nowMs = 1_700_000_050_000;
+  const cooldownRes = validateFeedbackSubmission(
+    {
+      type: 'feedback',
+      toolId: 'general',
+      title: 'Quick follow-up',
+      message: 'Valid length feedback message here.',
+    },
+    { lastSubmittedAt: nowMs - (FEEDBACK_COOLDOWN_MS - 12_000), now: nowMs }
+  );
+  assert.equal(cooldownRes.ok, false);
+  assert.equal(cooldownRes.honeypotTriggered, false);
+  assert.ok(cooldownRes.cooldownRemainingSec >= 12);
+
+  // Length & email validation + valid submission
+  const shortMsgRes = validateFeedbackSubmission({
+    type: 'bug',
+    toolId: 'jwt-decoder',
+    message: 'too short',
+    contactEmail: 'not-an-email',
+  });
+  assert.equal(shortMsgRes.ok, false);
+  assert.equal(shortMsgRes.fieldErrors.message, 'message_too_short');
+  assert.equal(shortMsgRes.fieldErrors.contactEmail, 'invalid_email');
+
+  const longTitleRes = validateFeedbackSubmission({
+    type: 'feature',
+    toolId: 'general',
+    title: 'x'.repeat(141),
+    message: 'A valid feature request message with enough characters.',
+  });
+  assert.equal(longTitleRes.ok, false);
+  assert.equal(longTitleRes.fieldErrors.title, 'title_too_long');
+
+  const validFeedbackRes = validateFeedbackSubmission(
+    {
+      type: 'bug',
+      toolId: 'jwt-decoder',
+      title: '  Expiry badge hint  ',
+      message: '  Shows UTC instead of local timezone on hover.  ',
+      contactEmail: '  dev@example.com  ',
+      website: '',
+    },
+    { lastSubmittedAt: nowMs - FEEDBACK_COOLDOWN_MS - 1000, now: nowMs }
+  );
+  assert.equal(validFeedbackRes.ok, true);
+  assert.equal(validFeedbackRes.sanitized?.toolId, 'jwt-decoder');
+  assert.equal(validFeedbackRes.sanitized?.title, 'Expiry badge hint');
+  assert.equal(validFeedbackRes.sanitized?.contactEmail, 'dev@example.com');
+
+  // Rating validation
+  assert.equal(validateRatingInput({ toolId: 'general', rating: 5 }).ok, false);
+  assert.equal(validateRatingInput({ toolId: 'jwt-decoder', rating: 0 }).ok, false);
+  assert.equal(validateRatingInput({ toolId: 'jwt-decoder', rating: 6 }).ok, false);
+  assert.equal(validateRatingInput({ toolId: 'jwt-decoder', rating: 3.5 }).ok, false);
+  assert.equal(
+    validateRatingInput({ toolId: 'jwt-decoder', rating: 5, comment: 'c'.repeat(501) }).ok,
+    false
+  );
+  const validRating = validateRatingInput({
+    toolId: 'jwt-decoder',
+    rating: 5,
+    comment: '  Super fast!  ',
+  });
+  assert.equal(validRating.ok, true);
+  assert.equal(validRating.sanitized?.rating, 5);
+  assert.equal(validRating.sanitized?.comment, 'Super fast!');
+
+  // Admin update validation
+  assert.equal(validateAdminUpdate({ status: 'unknown', adminNote: '' }).ok, false);
+  assert.equal(
+    validateAdminUpdate({ status: 'resolved', adminNote: 'Fixed in v0.2' }).ok,
+    true
+  );
+
+  // Safe debug context strips ?state= and #hash
+  assert.equal(
+    sanitizePathname('/vi/tools/text/jwt-decoder?state=SECRET_JWT#frag'),
+    '/vi/tools/text/jwt-decoder'
+  );
+  const safeCtx = buildSafeDebugContext({
+    toolId: 'jwt-decoder',
+    locale: 'vi',
+    pathname: '/vi/tools/text/jwt-decoder?state=SECRET_JWT#frag',
+    theme: 'dark',
+    viewport: '1440x900',
+    platform: 'Linux x86_64',
+    userAgent: 'Mozilla/5.0 ' + 'A'.repeat(200),
+  });
+  assert.equal(safeCtx.pathname, '/vi/tools/text/jwt-decoder');
+  assert.ok(!safeCtx.pathname.includes('SECRET_JWT'));
+  assert.ok(!safeCtx.pathname.includes('?'));
+  assert.ok(!safeCtx.pathname.includes('#'));
+  assert.ok(safeCtx.userAgentShort.length <= 120);
+
+  // Rating aggregation (1-decimal rounding)
+  const sampleRatings: ToolRatingEntry[] = [
+    {
+      id: 'r1',
+      clientId: 'client-11111111',
+      toolId: 'jwt-decoder',
+      rating: 5,
+      comment: 'Great',
+      createdAt: '2026-11-18T00:00:00Z',
+      updatedAt: '2026-11-18T00:00:00Z',
+    },
+    {
+      id: 'r2',
+      clientId: 'client-22222222',
+      toolId: 'jwt-decoder',
+      rating: 4,
+      comment: 'Solid',
+      createdAt: '2026-11-18T00:00:00Z',
+      updatedAt: '2026-11-18T00:00:00Z',
+    },
+    {
+      id: 'r3',
+      clientId: 'client-33333333',
+      toolId: 'jwt-decoder',
+      rating: 4,
+      comment: '',
+      createdAt: '2026-11-18T00:00:00Z',
+      updatedAt: '2026-11-18T00:00:00Z',
+    },
+  ];
+  const agg = aggregateToolRatings(sampleRatings);
+  assert.equal(agg['jwt-decoder'].ratingCount, 3);
+  assert.equal(agg['jwt-decoder'].avgRating, 4.3);
+
+  // Admin filter records
+  const sampleSubmissions: FeedbackSubmission[] = [
+    {
+      id: 'f1',
+      clientId: 'client-11111111',
+      type: 'bug',
+      toolId: 'jwt-decoder',
+      title: 'JWT bug',
+      message: 'Detailed bug description for jwt decoder.',
+      contactEmail: '',
+      debugContext: safeCtx,
+      status: 'open',
+      adminNote: '',
+      createdAt: '2026-11-18T00:00:00Z',
+      updatedAt: '2026-11-18T00:00:00Z',
+    },
+    {
+      id: 'f2',
+      clientId: 'client-22222222',
+      type: 'feature',
+      toolId: 'general',
+      title: 'Add XML formatter',
+      message: 'Please consider adding an XML formatter tool.',
+      contactEmail: 'user@example.com',
+      debugContext: null,
+      status: 'resolved',
+      adminNote: 'Planned',
+      createdAt: '2026-11-18T00:00:00Z',
+      updatedAt: '2026-11-18T00:00:00Z',
+    },
+  ];
+  const bugOnly = filterAdminRecords({
+    submissions: sampleSubmissions,
+    ratings: sampleRatings,
+    typeFilter: 'bug',
+    statusFilter: 'open',
+    toolFilter: 'jwt-decoder',
+    query: 'jwt',
+  });
+  assert.equal(bugOnly.submissions.length, 1);
+  assert.equal(bugOnly.submissions[0].id, 'f1');
+  assert.equal(bugOnly.ratings.length, 0);
+
+  const ratingOnly = filterAdminRecords({
+    submissions: sampleSubmissions,
+    ratings: sampleRatings,
+    typeFilter: 'rating',
+    toolFilter: 'jwt-decoder',
+    query: 'solid',
+  });
+  assert.equal(ratingOnly.submissions.length, 0);
+  assert.equal(ratingOnly.ratings.length, 1);
+  assert.equal(ratingOnly.ratings[0].id, 'r2');
+
+  console.log('   ✓ Pure feedback core (validation, honeypot, cooldown, debug context, aggregation, filters) validated.');
 
   console.log('\nALL AIDLC VERIFICATION CHECKS PASSED!');
 }

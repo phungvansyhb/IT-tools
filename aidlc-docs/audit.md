@@ -55,3 +55,22 @@
   - Refactored `src/components/tools/ToolWorkspace.tsx` (`currentStateRef` + `1_500_000`-char `sourceImg.dataUrl` cap) and completed `initialState`/`onStateChange` fields in `ImageToolsSuite.tsx`, `FileToolsSuite.tsx`, `TextToolsSuite.tsx`, `CalculatorToolsSuite.tsx`, and `CheatsheetToolsSuite.tsx`.
   - Updated `aidlc-docs/construction/plans/construction-plan.md` (`[x]` for `UNIT-05`..`UNIT-09` and verification items) and added built HTML `<html lang="...">` checks in `scripts/verify-aidlc.ts`.
 - **Verification & Gate Status**: `npm run lint`, `npx tsx scripts/verify-aidlc.ts`, and `npm run build` verified cleanly with SSR `<html lang="en|vi|ja|zh-Hans">` across static HTML outputs.
+
+## [2026-11-18T11:30:00Z] — Prompt 4: Feedback, Tool Ratings, Bug Reporting & Admin Moderation Console (`UNIT-10`–`UNIT-13`)
+- **Phase / Stage**: `CONSTRUCTION / UNIT-10..UNIT-13 Complete (Gate 1 Approved → Full Verification Passed)`
+- **User Input**: `"dùng /do_task làm tính góp ý, đánh giá, báo lỗi"`
+- **Clarifications / Decisions**:
+  - **Storage & Sync**: Hybrid `localStorage` + Supabase client SDK (`@supabase/supabase-js`) with zero server secrets and full `local` mode fallback (`FR-18`, `FR-25`, `CON-07`, `CON-09`).
+  - **UI Scope & Placement**: Two-level UX — per-tool `1–5★` rating & quick bug report inside `ToolWorkspace.tsx`, plus site-wide trigger in `AppShell.tsx` Sidebar Footer opening unified `FeedbackModal` (preserving `375px` mobile Topbar fit).
+  - **Visibility & Privacy (`NFR-08`, `NFR-09`)**: Public average star rating & count only; client-scoped "My Feedback" via `omnidev_client_id`; strict RLS blocking direct `anon SELECT/UPDATE/DELETE` with `SECURITY DEFINER` RPCs; opt-in debug context with live JSON preview stripping `?query`/`#hash` (zero tool input/state capture).
+  - **Anti-Spam**: `1` rating per `(client_id, tool_id)` upsert, hidden Honeypot field, `30s` cooldown, and length/email validation.
+  - **Admin Console (`/[locale]/admin/feedback`)**: Supabase Email/Password Auth + `feedback_admins` allowlist RLS + isolated `persistSession: true` client (plus Local Mode managing `localStorage`), 4 statuses (`open`, `in_progress`, `resolved`, `closed`), multi-filter bar, `admin_note` replies, 2-step spam `DELETE`, `noindex/nofollow`, `robots.ts` disallow, and excluded from `sitemap.ts` (`124` public URLs).
+  - **Gate 1 Sign-Off**: Approved by user prior to `UNIT-10`–`UNIT-13` implementation.
+- **Artifacts & Code Updated**:
+  - `aidlc-docs/` (`requirements.md`, `user-stories.md`, `architecture.md`, `ui-design.md`, `units.md`, `execution-plan.md`, `construction-plan.md`, `aidlc-state.md`, `audit.md`).
+  - `supabase/schema.sql`, `src/lib/supabase/client.ts`.
+  - `src/lib/feedback/{types,validation,debug-context,aggregation,local-store,index}.ts`.
+  - `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/common.ts`, `src/app/robots.ts`.
+  - `src/hooks/{useUserWorkspace,useFeedback}.tsx`, `src/components/feedback/{StarRatingWidget,FeedbackModal}.tsx`, `src/components/layout/AppShell.tsx`, `src/components/tools/ToolWorkspace.tsx`, `src/components/bento/BentoCard.tsx`, `src/app/[locale]/layout.tsx`, `src/app/globals.css`.
+  - `src/app/[locale]/admin/feedback/page.tsx`, `src/components/admin/AdminFeedbackClient.tsx`, `scripts/verify-aidlc.ts`.
+- **Verification & Gate Status**: `npm run lint`, `npx tsx scripts/verify-aidlc.ts`, and `npm run build` (134 static routes including 4 `noindex` admin pages; 1067 keys × 4 locales; 124 sitemap URLs; `robots.ts` admin disallow; pure feedback & debug-context assertions) passed with exit code 0.

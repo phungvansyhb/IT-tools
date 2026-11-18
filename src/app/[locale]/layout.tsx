@@ -9,6 +9,7 @@ import { LOCALE_META, SUPPORTED_LOCALES, isValidLocale } from '@/i18n/config';
 import { I18nProvider } from '@/i18n/client';
 import { LocaleHtmlLangSync } from '@/i18n/LocaleHtmlLangSync';
 import { UserWorkspaceProvider } from '@/hooks/useUserWorkspace';
+import { FeedbackProvider } from '@/hooks/useFeedback';
 import { AppShell } from '@/components/layout/AppShell';
 import { buildHomeMetadata } from '@/lib/seo';
 
@@ -71,7 +72,9 @@ export default async function LocaleRootLayout({
         <I18nProvider locale={locale}>
           <LocaleHtmlLangSync locale={locale} />
           <UserWorkspaceProvider>
-            <AppShell>{children}</AppShell>
+            <FeedbackProvider>
+              <AppShell>{children}</AppShell>
+            </FeedbackProvider>
           </UserWorkspaceProvider>
         </I18nProvider>
       </body>

@@ -14,19 +14,23 @@ import {
   X,
   Cloud,
   HardDrive,
+  MessageSquarePlus,
 } from 'lucide-react';
 import { getLocalizedCategories, getLocalizedTools } from '@/lib/tools/registry';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
+import { useFeedback } from '@/hooks/useFeedback';
 import { useI18n } from '@/i18n/client';
 import { localePath, stripLocalePrefix } from '@/i18n/config';
 import { ToolIcon } from '@/components/common/ToolIcon';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { FeedbackModal } from '@/components/feedback/FeedbackModal';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { locale, t } = useI18n();
   const { theme, toggleTheme, favorites, toggleFavorite, syncMode, hydrated } = useUserWorkspace();
+  const { myFeedback, hydrated: feedbackHydrated, openFeedbackModal } = useFeedback();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
@@ -225,17 +229,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             })}
         </div>
 
-        {/* Privacy & Sync Footer */}
-        <div
-          className="glass-panel"
-          style={{
-            marginTop: 'auto',
-            padding: '0.75rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.45rem',
-          }}
-        >
+        {/* Sidebar Footer: Feedback Trigger + Privacy & Sync */}
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          <button
+            type="button"
+            className="btn"
+            style={{
+              width: '100%',
+              justifyContent: 'space-between',
+            }}
+            onClick={() => {
+              setSidebarOpen(false);
+              openFeedbackModal({ defaultTab: 'submit', defaultType: 'feedback' });
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <MessageSquarePlus size={15} style={{ color: 'var(--accent)' }} />
+              <span>{t('feedback.navButton')}</span>
+            </span>
+            {feedbackHydrated && myFeedback.length > 0 && (
+              <span
+                className="glass-pill glass-pill-active"
+                style={{ padding: '0.05rem 0.45rem' }}
+                aria-label={t('feedback.navBadgeAria', { count: myFeedback.length })}
+              >
+                {myFeedback.length}
+              </span>
+            )}
+          </button>
+
+          <div
+            className="glass-panel"
+            style={{
+              padding: '0.75rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.45rem',
+            }}
+          >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.78rem', fontWeight: 600 }}>
             <ShieldCheck size={14} style={{ color: 'var(--accent)' }} />
             <span>{t('nav.privacyTitle')}</span>
@@ -256,6 +287,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             {syncMode === 'supabase' ? <Cloud size={12} style={{ color: 'var(--accent)' }} /> : <HardDrive size={12} />}
             <span>{syncMode === 'supabase' ? t('nav.syncSupabase') : t('nav.syncLocal')}</span>
+          </div>
           </div>
         </div>
       </aside>
@@ -409,6 +441,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
+      <FeedbackModal />
     </div>
   );
 }

@@ -423,3 +423,77 @@ kbd,
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
 }
+
+/* Feedback & Ratings UI (UNIT-12) */
+.sr-only-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feedback-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .feedback-workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+.star-rating-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: transform 140ms ease, color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.star-rating-btn:hover {
+  transform: scale(1.08);
+  background: var(--glass-pill-bg);
+  border-color: var(--glass-border-highlight);
+}
+
+.star-rating-btn.active {
+  color: var(--warning);
+}
+
+.status-badge-open {
+  color: var(--text-primary);
+  background: var(--glass-pill-bg);
+  border-color: var(--glass-border-highlight);
+}
+
+.status-badge-in-progress {
+  color: var(--warning);
+  background: var(--warning-bg);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.status-badge-resolved {
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-color: var(--accent-border);
+}
+
+.status-badge-closed {
+  color: var(--text-muted);
+  background: var(--bg-input);
+  border-color: var(--glass-border);
+}
+

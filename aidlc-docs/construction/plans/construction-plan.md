@@ -81,10 +81,38 @@
   - Complete `initialState` / `onStateChange` coverage across all 24 tools
 - **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
 
+### [x] `UNIT-10`: Database Schema, RLS/RPC Security & Pure Feedback Core
+- **Files**: `supabase/schema.sql`, `src/lib/supabase/client.ts`, `src/lib/feedback/{types.ts,validation.ts,debug-context.ts,aggregation.ts,local-store.ts,index.ts}`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `tool_ratings`, `feedback_submissions`, `feedback_admins`, `is_feedback_admin()`, `check_is_feedback_admin()`, `get_tool_rating_summaries()`, `upsert_tool_rating()`, `get_my_tool_ratings()`, `get_my_feedback()`
+  - `getSupabaseAdminClient()` (`persistSession: true`, `storageKey: 'omnidev_admin_supabase_auth'`) alongside unchanged `getSupabaseClient()` (`persistSession: false`)
+  - `validateFeedbackSubmission()`, `validateRatingInput()`, `validateAdminUpdate()`, `buildSafeDebugContext()`, `aggregateToolRatings()`, `filterAdminRecords()`
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-11`: 4-Locale Feedback & Admin Dictionaries (`en`, `vi`, `ja`, `zh`) & SEO Robots Guard
+- **Files**: `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/common.ts`, `src/app/robots.ts`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `CommonDictionary['feedback']` & `CommonDictionary['adminFeedback']` with 100% recursive leaf-key & placeholder parity across `en`, `vi`, `ja`, `zh`
+  - `robots()` disallowing `/*/admin`, `/*/admin/*`, `/admin`, `/admin/*` while `sitemap()` retains 124 URLs
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-12`: Feedback Provider, Unified Modal, Per-Tool Rating Widget & Shell Integration
+- **Files**: `src/hooks/useUserWorkspace.tsx`, `src/hooks/useFeedback.tsx`, `src/components/feedback/{StarRatingWidget.tsx,FeedbackModal.tsx}`, `src/components/layout/AppShell.tsx`, `src/components/tools/ToolWorkspace.tsx`, `src/components/bento/BentoCard.tsx`, `src/app/[locale]/layout.tsx`, `src/app/globals.css`
+- **Key Interfaces / Contracts**:
+  - `useFeedback()` exposing `ratingSummaries`, `myRatings`, `myFeedback`, `cooldownRemainingSec`, `submitRating()`, `submitFeedback()`, `openFeedbackModal()`, `closeFeedbackModal()`, `refreshFeedbackData()`
+  - Sidebar Footer trigger + `<FeedbackModal />` mounted once in `AppShell.tsx` (Topbar untouched for `375px` parity); `StarRatingWidget` card placed below tool suite in `ToolWorkspace.tsx`
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-13`: Admin Moderation Console (`/[locale]/admin/feedback`) & Final Verification
+- **Files**: `src/app/[locale]/admin/feedback/page.tsx`, `src/components/admin/AdminFeedbackClient.tsx`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `generateStaticParams()` across 4 locales + `generateMetadata()` with `robots: { index: false, follow: false, nocache: true }`
+  - `AdminFeedbackClient` handling Supabase Email/Password sign-in (`check_is_feedback_admin()`) and Local Mode `localStorage` management, KPI row, multi-filters, `status`/`admin_note` updates, `debug_context` viewer, and 2-step confirmed `DELETE`
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
 ---
 
-## Pending / Active Verification Checklist
-- [x] `npm install && npm install i18next` in target environment (`UNIT-05`)
+## Pending / Active Verification Checklist (Feedback Cycle)
 - [x] `npm run lint` passes with 0 errors
-- [x] `npx tsx scripts/verify-aidlc.ts` passes all registry, i18n parity, engine, and 124-URL SEO schema assertions
-- [x] `npm run build` statically generates all 124 localized routes into `.next/` with SSR `<html lang="...">` per locale
+- [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline, i18n 4-locale parity, `robots.ts` `/admin` disallow, `124` sitemap URLs, feedback validation/honeypot/cooldown, rating aggregation, and `buildSafeDebugContext()` `?state=`-stripping assertions
+- [x] `npm run build` statically generates all routes cleanly with `noindex` on `/[locale]/admin/feedback`

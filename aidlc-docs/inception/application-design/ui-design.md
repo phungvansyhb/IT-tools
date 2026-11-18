@@ -3,7 +3,7 @@
 - **Phase**: `INCEPTION`
 - **Stage**: `Stage 1.4 — Application & UI Design`
 - **Design System**: `Monochrome Zinc Glass + Single Emerald-Mint Accent + 12-Column Bento Grid`
-- **Status**: `Validated Baseline (v0.1.0) + i18n UI Delta`
+- **Status**: `Validated Baseline (v0.1.0) + i18n UI Delta + Feedback & Admin UI Delta`
 
 ---
 
@@ -82,3 +82,24 @@
    - `Inter` and `JetBrains_Mono` loaded with `subsets: ['latin', 'vietnamese']`.
    - `:lang(ja)` appends `'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic UI', Meiryo, 'Noto Sans JP', sans-serif` after `--font-sans`.
    - `:lang(zh-Hans)` appends `'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Hiragino Sans GB', sans-serif` after `--font-sans` (preserving `Inter` / `JetBrains Mono` for Latin/numeric characters).
+
+---
+
+## 5. Feedback, Ratings & Admin Console UI Specs (`UNIT-12`–`UNIT-13`)
+
+1. **Sidebar Footer Feedback Trigger (`AppShell.tsx`)**:
+   - Full-width `.btn` placed in the Sidebar Footer (above the Privacy & Sync panel) with `<MessageSquarePlus size={15} />`, localized label, and subtle count pill when the user has submitted items.
+   - Topbar remains untouched so `375px` mobile layout stays overflow-free. No public link to `/admin/feedback`.
+2. **Bento Card & Workspace Rating Pill (`BentoCard.tsx`, `ToolWorkspace.tsx`)**:
+   - Render `★ 4.8 (12)` using `var(--warning)` (`#fbbf24`) only when `hydrated && ratingCount > 0`.
+   - `ToolWorkspace.tsx` adds a compact Bug Report action button (`Bug` icon) in the header actions bar and a `BentoCard span="12"` **below** the interactive tool suite (before How-It-Works/FAQ) hosting `StarRatingWidget` (left) + quick Feedback/Bug CTAs (right).
+3. **StarRatingWidget (`src/components/feedback/StarRatingWidget.tsx`)**:
+   - Accessible `role="radiogroup"` with 5 star buttons (`ArrowLeft`/`ArrowRight` keyboard support), hover/selected highlight in `var(--warning)`, optional single-line comment (`<= 500` chars), and `.btn-primary` save/update button.
+4. **Unified FeedbackModal (`src/components/feedback/FeedbackModal.tsx`)**:
+   - Monochrome `.glass-modal-backdrop` + `.glass-modal` (`max-height: 90vh; overflow-y: auto`), `Escape` to close, two tabs: **Submit** and **My Feedback (N)**.
+   - Submit tab: type pills (`feedback`, `bug`, `feature`), tool selector (`general` + 24 localized tools), optional title, required message (`10..2000` with live counter), optional email, **Opt-in Debug Context** checkbox + live sanitized JSON `<pre>` preview, hidden `.sr-only-honeypot` field, and `30s` cooldown button countdown.
+   - My Feedback tab: status badges (`open`, `in_progress`, `resolved` via `.badge-success`, `closed`) and highlighted `admin_note` reply box when present.
+5. **Admin Moderation Console (`/[locale]/admin/feedback` — `AdminFeedbackClient.tsx`)**:
+   - `syncMode === 'local'`: `.badge-warning` **Local Mode** banner managing `localStorage` data directly.
+   - `syncMode === 'supabase'`: Email/Password sign-in card (zero sign-up UI) when unauthenticated or non-allowlisted; full moderation view once verified via `check_is_feedback_admin()`.
+   - 4 Bento KPI cards (`span="3"`), multi-filter bar (type including `rating`, status, tool, keyword), expandable `debug_context` JSON drawer, status selector + `admin_note` editor + Save, and 2-step confirmed Delete action.

@@ -153,3 +153,55 @@
 - **Given** `npm run build` completes,
 - **When** inspecting `/en/...`, `/vi/...`, `/ja/...`, `/zh/...`, and `/sitemap.xml`,
 - **Then** all 124 routes are statically generated with matching `<html lang>` (`en`, `vi`, `ja`, `zh-Hans`), canonical + 5 `hreflang` tags (including `x-default`), localized `BreadcrumbList`/`FAQPage`/`SoftwareApplication` JSON-LD, and 124 sitemap entries with `alternates.languages`.
+
+---
+
+## `US-12`: Per-Tool Star Rating & Public Aggregate Display (`FR-18`, `FR-19`)
+**As** Alex,
+**I want** to rate each tool from 1 to 5 stars (with an optional short comment) and see the aggregated community star rating on tool cards and workspaces,
+**So that** I can signal tool quality and gauge utility reliability without reading anyone else's private comments.
+
+### Acceptance Criteria
+- **Given** the user opens `/[locale]/tools/[category]/[slug]`,
+- **When** the user selects `1–5` stars in `StarRatingWidget` and submits (or updates their previous rating),
+- **Then** the rating is saved locally (`omnidev_tool_ratings`) and upserted to Supabase (`upsert_tool_rating` RPC for `(client_id, tool_id)` when configured),
+- **And** the updated average score and rating count appear in `ToolWorkspace` and `ToolBentoCard` while other users' comments remain invisible.
+
+---
+
+## `US-13`: Site-Wide & Tool-Specific Feedback / Bug Submission with Privacy Guard (`FR-20`, `FR-22`, `FR-23`)
+**As** Maya,
+**I want** to open a unified Feedback modal from the Sidebar Footer (or directly from a tool workspace), preview the exact anonymized technical metadata if I opt in, and submit a feedback/bug/feature report,
+**So that** I can report issues effortlessly with full confidence that none of my tool inputs, JWTs, or files leave my browser.
+
+### Acceptance Criteria
+- **Given** the user clicks the Sidebar Footer feedback button in `AppShell` or the report button in `ToolWorkspace`,
+- **When** the user chooses `feedback`, `bug`, or `feature`, selects a tool (or `'general'`), enters a valid message (`10–2000` chars), and optionally ticks the Debug Context opt-in checkbox,
+- **Then** the modal displays the exact sanitized JSON preview (`toolId`, `locale`, stripped `pathname`, `theme`, `viewport`, `platform`, `userAgentShort`) excluding any `?state=` or tool payload,
+- **And** submitting passes honeypot and `30s` cooldown checks and persists the item with initial status `'open'`.
+
+---
+
+## `US-14`: Tracking "My Feedback" Status & Admin Replies (`FR-21`, `NFR-08`)
+**As** Minh,
+**I want** to open the "My Feedback" tab inside the Feedback modal and check whether my submission is `open`, `in_progress`, `resolved`, or `closed` along with any `admin_note`,
+**So that** I know the progress of my report without creating an account or exposing other users' submissions.
+
+### Acceptance Criteria
+- **Given** the browser has an `omnidev_client_id`,
+- **When** the user switches to the "My Feedback" tab in `FeedbackModal`,
+- **Then** only submissions belonging to that `omnidev_client_id` are loaded (via `get_my_feedback(p_client_id)` RPC or `localStorage`),
+- **And** each item renders its localized status badge and `admin_note` reply if set by an admin.
+
+---
+
+## `US-15`: Secure Admin Feedback Moderation & Local Mode Parity (`FR-24`, `FR-25`, `NFR-10`)
+**As** the OmniDev maintainer,
+**I want** to visit `/[locale]/admin/feedback` directly to authenticate via Supabase Email/Password (or manage `localStorage` directly in Local Mode), filter all feedback/bugs/features/ratings, reply with `admin_note`, update status, and delete spam,
+**So that** I can triage community feedback securely without exposing admin routes to search engines or affecting normal client sessions.
+
+### Acceptance Criteria
+- **Given** a search crawler or visitor inspects `/robots.txt`, `/sitemap.xml`, or `/[locale]/admin/feedback`,
+- **Then** `/[locale]/admin/feedback` emits `noindex, nofollow`, `/robots.txt` disallows `/admin` and `/*/admin`, and `/sitemap.xml` retains exactly `124` public URLs;
+- **When** `syncMode === 'supabase'`, an unauthenticated visitor or non-allowlisted user sees the Email/Password sign-in gate (using the isolated `persistSession: true` admin client) and cannot read or mutate rows;
+- **When** an allowlisted `feedback_admins` user signs in (or when `syncMode === 'local'` displays the "Local Mode" banner), the maintainer can filter by type/status/tool/keyword, save status + `admin_note`, inspect `debug_context`, and delete spam entries.

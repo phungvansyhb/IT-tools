@@ -42,6 +42,7 @@ interface WorkspaceContextValue {
   trackToolView: (toolId: string) => void;
   trackToolUse: (toolId: string) => void;
   syncMode: 'local' | 'supabase';
+  clientId: string;
   hydrated: boolean;
 }
 
@@ -76,7 +77,7 @@ function writeJsonStorage(key: string, value: unknown): void {
   }
 }
 
-function getOrCreateClientId(): string {
+export function getOrCreateClientId(): string {
   if (typeof window === 'undefined') return 'server';
   const existing = window.localStorage.getItem(STORAGE_KEYS.clientId);
   if (existing) return existing;
@@ -269,6 +270,7 @@ export function UserWorkspaceProvider({ children }: { children: React.ReactNode 
         trackToolView,
         trackToolUse,
         syncMode,
+        clientId,
         hydrated,
       }}
     >

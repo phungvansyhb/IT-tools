@@ -92,3 +92,43 @@ src/i18n/
 - Clicking a locale in `LanguageSwitcher` writes `omnidev_locale` to `localStorage` and Cookie, dispatches synchronous `window.dispatchEvent(new CustomEvent('omnidev:before-locale-switch'))`, and navigates via `router.push()` preserving `?q=` / `?state=`.
 - `ToolWorkspace.tsx` listens to `'omnidev:before-locale-switch'` and writes `currentStateRef.current` to `sessionStorage` (`omnidev_locale_draft_${tool.id}`; image `dataUrl` capped at `1_500_000` chars).
 - On mount in the target locale, `ToolWorkspace.tsx` restores state with priority `URL ?state= → sessionStorage draft (read + immediate removeItem) → suite defaults`. All 6 suites expose complete state fields via `initialState` / `onStateChange`.
+
+---
+
+## 4. Feedback, Ratings & Admin Moderation Architecture (`UNIT-10`–`UNIT-13`)
+
+### 4.1 Privacy-Preserving Supabase RLS & `SECURITY DEFINER` RPC Model (`NFR-08`, `CON-07`)
+
+To keep visitor flows zero-login (`EX-01`) and zero-server-secret (`CON-09`) while preventing anonymous REST clients (`NEXT_PUBLIC_SUPABASE_ANON_KEY`) from reading other users' feedback, contact emails, or comments:
+
+1. **Additive Tables (`supabase/schema.sql`)**:
+   - `public.tool_ratings` (`id`, `client_id`, `tool_id`, `rating 1..5`, `comment <= 500`, `created_at`, `updated_at`, unique `(client_id, tool_id)`).
+   - `public.feedback_submissions` (`id`, `client_id`, `type in ('feedback','bug','feature')`, `tool_id`, `title <= 140`, `message 10..2000`, `contact_email <= 160`, `debug_context jsonb <= 2KB`, `status in ('open','in_progress','resolved','closed')`, `admin_note <= 1000`, `created_at`, `updated_at`).
+   - `public.feedback_admins` (`id`, `user_id` FK `auth.users`, `email` unique) — populated manually via Supabase SQL Editor (with email signups disabled in Supabase Auth Dashboard).
+2. **Strict RLS Boundary**:
+   - `anon` has **zero `SELECT`/`UPDATE`/`DELETE` policies** on `tool_ratings` and `feedback_submissions`.
+   - `anon` may only `INSERT` into `feedback_submissions` with `WITH CHECK` forcing `status = 'open'` and `admin_note = ''`.
+   - All anonymous reads and rating upserts go exclusively through pinned `SECURITY DEFINER` RPCs (`set search_path = public`):
+     - `get_tool_rating_summaries()` → returns only `(tool_id, avg_rating, rating_count)`.
+     - `upsert_tool_rating(p_client_id, p_tool_id, p_rating, p_comment)` → atomic `ON CONFLICT (client_id, tool_id) DO UPDATE`.
+     - `get_my_tool_ratings(p_client_id)` → scoped to caller's unguessable UUIDv4 `omnidev_client_id`.
+     - `get_my_feedback(p_client_id)` → scoped to caller's `omnidev_client_id` (max 100 recent rows).
+   - Admin access is guarded by `is_feedback_admin()` / `check_is_feedback_admin()` (`auth.role() = 'authenticated'`, verified `email_confirmed_at is not null`, and matching `feedback_admins` by `user_id` or `email`).
+3. **Isolated Supabase Clients (`src/lib/supabase/client.ts`)**:
+   - `getSupabaseClient()` retains `auth: { persistSession: false, autoRefreshToken: false }` for anonymous visitor flows.
+   - `getSupabaseAdminClient()` creates an isolated client with `auth: { persistSession: true, autoRefreshToken: true, storageKey: 'omnidev_admin_supabase_auth' }` used solely by `/[locale]/admin/feedback`.
+
+### 4.2 Pure Domain Core (`src/lib/feedback/`) & Client State (`src/hooks/useFeedback.tsx`)
+
+- **`src/lib/feedback/types.ts`**: Shared TypeScript contracts (`FeedbackType`, `FeedbackStatus`, `DebugContextPayload`, `FeedbackSubmission`, `ToolRatingEntry`, `ToolRatingSummary`).
+- **`src/lib/feedback/validation.ts`**: Node-executable validation (`FEEDBACK_COOLDOWN_MS = 30_000`, hidden honeypot check, length/email/toolId validation).
+- **`src/lib/feedback/debug-context.ts`**: `sanitizePathname()` strips `?query` and `#hash`; `buildSafeDebugContext()` collects only `toolId`, `locale`, stripped `pathname`, `theme`, `viewport`, `platform`, and `userAgentShort` (`<= 120` chars) — never reading `currentStateRef` or `?state=`.
+- **`src/lib/feedback/aggregation.ts`**: `aggregateToolRatings()` (1-decimal rounding) and `filterAdminRecords()`.
+- **`src/lib/feedback/local-store.ts`**: Safe `localStorage` persistence under `omnidev_tool_ratings`, `omnidev_feedback_submissions`, and `omnidev_feedback_last_submit_at`.
+- **`src/hooks/useFeedback.tsx`**: `<FeedbackProvider>` mounted inside `<UserWorkspaceProvider>` in `src/app/[locale]/layout.tsx`, syncing local state immediately and mirroring to Supabase when configured.
+
+### 4.3 Admin Route SEO Isolation (`NFR-10`)
+
+- `src/app/[locale]/admin/feedback/page.tsx` exports `generateStaticParams()` for all 4 locales and `generateMetadata()` with `robots: { index: false, follow: false, nocache: true }`.
+- `src/app/sitemap.ts` remains strictly `124` public URLs (no admin routes).
+- `src/app/robots.ts` explicitly adds `disallow: ['/*/admin', '/*/admin/*', '/admin', '/admin/*']`.

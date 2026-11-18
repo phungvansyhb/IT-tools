@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Star, ArrowUpRight } from 'lucide-react';
 import { CategoryDefinition, ToolDefinition } from '@/lib/tools/registry';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
+import { useFeedback } from '@/hooks/useFeedback';
 import { useI18n } from '@/i18n/client';
 import { localePath } from '@/i18n/config';
 import { ToolIcon } from '@/components/common/ToolIcon';
@@ -48,15 +49,18 @@ interface ToolBentoCardProps {
 
 export function ToolBentoCard({ tool, category, spanOverride }: ToolBentoCardProps) {
   const { locale, t } = useI18n();
-  const { isFavorite, toggleFavorite, metrics } = useUserWorkspace();
+  const { isFavorite, toggleFavorite, metrics, hydrated: workspaceHydrated } = useUserWorkspace();
+  const { ratingSummaries, hydrated: feedbackHydrated } = useFeedback();
   const pinned = isFavorite(tool.id);
   const uses = metrics[tool.id]?.uses ?? 0;
+  const summary = ratingSummaries[tool.id];
+  const hydrated = workspaceHydrated && feedbackHydrated;
   const span = spanOverride ?? tool.bentoSpan;
 
   return (
     <BentoCard span={span} interactive>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className="glass-pill">
             <ToolIcon name={category?.iconName ?? 'Wrench'} size={13} />
             <span>{category?.name ?? tool.category}</span>
@@ -64,6 +68,17 @@ export function ToolBentoCard({ tool, category, spanOverride }: ToolBentoCardPro
           {uses > 0 && (
             <span className="subtle-text" style={{ fontSize: '0.72rem' }}>
               {uses} {uses === 1 ? t('bentoCard.runSingular') : t('bentoCard.runPlural')}
+            </span>
+          )}
+          {hydrated && summary && summary.ratingCount > 0 && (
+            <span className="glass-pill" style={{ padding: '0.18rem 0.5rem', fontSize: '0.72rem' }}>
+              <Star size={12} fill="currentColor" style={{ color: 'var(--warning)' }} />
+              <span>
+                {t('feedback.ratingCountPill', {
+                  avg: summary.avgRating.toFixed(1),
+                  count: summary.ratingCount,
+                })}
+              </span>
             </span>
           )}
         </div>

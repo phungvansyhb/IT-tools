@@ -2,13 +2,24 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { BookmarkPlus, Check, ChevronRight, Share2, Star, Trash2 } from 'lucide-react';
+import {
+  BookmarkPlus,
+  Bug,
+  Check,
+  ChevronRight,
+  MessageSquarePlus,
+  Share2,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { CategoryDefinition, ToolDefinition } from '@/lib/tools/registry';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
+import { useFeedback } from '@/hooks/useFeedback';
 import { BEFORE_LOCALE_SWITCH_EVENT, useI18n } from '@/i18n/client';
 import { localePath } from '@/i18n/config';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard, ToolBentoCard } from '@/components/bento/BentoCard';
+import { StarRatingWidget } from '@/components/feedback/StarRatingWidget';
 import { ImageToolsSuite } from '@/components/tools/suites/ImageToolsSuite';
 import { FileToolsSuite } from '@/components/tools/suites/FileToolsSuite';
 import { TextToolsSuite } from '@/components/tools/suites/TextToolsSuite';
@@ -52,7 +63,9 @@ export function ToolWorkspace({ tool, category, relatedTools }: ToolWorkspacePro
     trackToolView,
     trackToolUse,
     metrics,
+    hydrated: workspaceHydrated,
   } = useUserWorkspace();
+  const { ratingSummaries, hydrated: feedbackHydrated, openFeedbackModal } = useFeedback();
 
   const [currentState, setCurrentState] = useState<Record<string, unknown>>({});
   const currentStateRef = useRef<Record<string, unknown>>({});
@@ -65,6 +78,8 @@ export function ToolWorkspace({ tool, category, relatedTools }: ToolWorkspacePro
   const pinned = isFavorite(tool.id);
   const toolPresets = presets.filter((p) => p.toolId === tool.id);
   const toolMetric = metrics[tool.id];
+  const ratingSummary = ratingSummaries[tool.id];
+  const hydrated = workspaceHydrated && feedbackHydrated;
 
   useEffect(() => {
     trackToolView(tool.id);
@@ -205,6 +220,17 @@ export function ToolWorkspace({ tool, category, relatedTools }: ToolWorkspacePro
                     {t('toolWorkspace.localRunsPill', { count: toolMetric.uses })}
                   </span>
                 )}
+                {hydrated && ratingSummary && ratingSummary.ratingCount > 0 && (
+                  <span className="glass-pill">
+                    <Star size={12} fill="currentColor" style={{ color: 'var(--warning)' }} />
+                    <span>
+                      {t('feedback.ratingCountPill', {
+                        avg: ratingSummary.avgRating.toFixed(1),
+                        count: ratingSummary.ratingCount,
+                      })}
+                    </span>
+                  </span>
+                )}
               </div>
               <h1 className="page-title" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2rem)' }}>
                 {tool.name}
@@ -234,6 +260,20 @@ export function ToolWorkspace({ tool, category, relatedTools }: ToolWorkspacePro
               <button type="button" className="btn" onClick={handleCopyShareUrl}>
                 {sharedCopied ? <Check size={15} /> : <Share2 size={15} />}
                 <span>{sharedCopied ? t('toolWorkspace.linkCopied') : t('toolWorkspace.shareState')}</span>
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  openFeedbackModal({
+                    defaultTab: 'submit',
+                    defaultType: 'bug',
+                    defaultToolId: tool.id,
+                  })
+                }
+              >
+                <Bug size={15} />
+                <span>{t('feedback.reportIssueBtn')}</span>
               </button>
             </div>
           </div>
@@ -309,6 +349,63 @@ export function ToolWorkspace({ tool, category, relatedTools }: ToolWorkspacePro
       <section aria-label={t('toolWorkspace.workspaceAria', { name: tool.name })}>
         {renderSuite()}
       </section>
+
+      {/* Per-Tool Rating & Quick Feedback Bento Card */}
+      <BentoGrid>
+        <BentoCard span="12">
+          <div className="feedback-workspace-grid">
+            <StarRatingWidget toolId={tool.id} />
+
+            <div
+              className="glass-panel"
+              style={{
+                padding: '1rem 1.1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '0.85rem',
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <h2 className="section-title">{t('feedback.quickCtaTitle')}</h2>
+                <p className="muted-text" style={{ margin: 0, fontSize: '0.86rem' }}>
+                  {t('feedback.quickCtaDesc')}
+                </p>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() =>
+                    openFeedbackModal({
+                      defaultTab: 'submit',
+                      defaultType: 'feedback',
+                      defaultToolId: tool.id,
+                    })
+                  }
+                >
+                  <MessageSquarePlus size={15} style={{ color: 'var(--accent)' }} />
+                  <span>{t('feedback.quickFeedbackBtn')}</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() =>
+                    openFeedbackModal({
+                      defaultTab: 'submit',
+                      defaultType: 'bug',
+                      defaultToolId: tool.id,
+                    })
+                  }
+                >
+                  <Bug size={15} />
+                  <span>{t('feedback.quickBugBtn')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </BentoCard>
+      </BentoGrid>
 
       {/* Semantic SEO Footer Bento Cards: How It Works, Technical Reference, FAQ Accordion */}
       <BentoGrid>
