@@ -32,3 +32,26 @@
     - [`aidlc-docs/operations/release-and-packaging.md`](operations/release-and-packaging.md)
   - Removed legacy non-standard files (`aidlc-docs/inception/requirements.md`, `aidlc-docs/inception/user-stories.md`, `aidlc-docs/inception/architecture.md`, `aidlc-docs/construction/units-plan.md`, `aidlc-docs/operations/runbook.md`).
 - **Verification & Gate Status**: AI-DLC structure standardized and migrated cleanly; baseline v0.1.0 construction recorded (`UNIT-01`..`UNIT-04`); ready for environment build verification (`Stage 3.1`) or new feature Inception (`Stage 1.2`).
+
+## [2026-11-18T10:20:00Z] — Prompt 2: Multi-Language i18n Expansion (`en`, `vi`, `ja`, `zh`) Implementation
+- **Phase / Stage**: `CONSTRUCTION / UNIT-05..UNIT-09 Complete`
+- **User Input**: Implemented full 4-language (`en`, `vi`, `ja`, `zh`) internationalization across all 24 tools, 6 categories, cheatsheets, pure deterministic engines, App Router `[locale]` SSG routes, `src/proxy.ts`, multi-language SEO (`hreflang`, `og:locale`, 124-route sitemap), Topbar `LanguageSwitcher`, and `sessionStorage` draft preservation.
+- **Artifacts & Code Updated**:
+  - `src/i18n/*` (`config.ts`, `types.ts`, `detect.ts`, `translator.ts`, `client.tsx`, `LocaleHtmlLangSync.tsx`)
+  - `src/i18n/locales/{en,vi,ja,zh}/*` (`common.ts`, `catalog.ts`, `tools.ts`, `cheatsheets.ts`, `index.ts` — 950 leaf keys × 4 locales)
+  - `src/lib/tools/registry.ts`, `src/lib/tools/data/cheatsheets.ts`, `src/lib/tools/engines/{file,text,calculators}.ts`
+  - `src/proxy.ts`, `src/lib/seo.ts`, `src/app/sitemap.ts`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/not-found.tsx`, `src/app/globals.css`, `src/app/[locale]/*`
+  - `src/components/layout/{LanguageSwitcher,AppShell,CommandPalette}.tsx`, `src/components/home/HomeHubClient.tsx`, `src/components/bento/BentoCard.tsx`, `src/components/common/CopyButton.tsx`, `src/components/tools/ToolWorkspace.tsx`, and all 6 suites in `src/components/tools/suites/*`
+  - `scripts/verify-aidlc.ts` (4-locale parity, 124-route sitemap, localized engines/registry/cheatsheets checks)
+- **Verification & Gate Status**: `npm run lint`, `npx tsx scripts/verify-aidlc.ts`, and `npm run build` (131 static routes generated) passed with exit code 0.
+
+## [2026-11-18T10:30:00Z] — Prompt 3: i18n Polish & Verification Fixes (`NFR-05`, `NFR-07`, `FR-17`, `ui-design.md`, `construction-plan.md`)
+- **Phase / Stage**: `CONSTRUCTION / UNIT-05..UNIT-09 Polish & Verification Gate`
+- **User Input**: Applied final compliance polish for SSR `<html lang>` per locale (`NFR-05`), `375px` mobile topbar responsiveness (`NFR-07`), `LanguageSwitcher` keyboard accessibility (`ui-design.md`), 100% state preservation across all 6 suites (`FR-17`), and `construction-plan.md` checklist sign-off.
+- **Artifacts & Code Updated**:
+  - Migrated Root Layout ownership to `src/app/[locale]/layout.tsx` (`<html lang={LOCALE_META[locale].htmlLang}>` + fonts + global CSS) and removed `src/app/{layout,page,not-found}.tsx`.
+  - Updated `src/components/layout/AppShell.tsx` and `src/app/globals.css` with `.topbar-search-btn`, `.topbar-search-text`, `.topbar-fav-label`, and `@media (max-width: 640px)` rules for zero horizontal overflow at `375px`.
+  - Added full `ArrowDown`, `ArrowUp`, `Home`, `End`, `Enter`, `Space`, and `Escape` focus management to `src/components/layout/LanguageSwitcher.tsx`.
+  - Refactored `src/components/tools/ToolWorkspace.tsx` (`currentStateRef` + `1_500_000`-char `sourceImg.dataUrl` cap) and completed `initialState`/`onStateChange` fields in `ImageToolsSuite.tsx`, `FileToolsSuite.tsx`, `TextToolsSuite.tsx`, `CalculatorToolsSuite.tsx`, and `CheatsheetToolsSuite.tsx`.
+  - Updated `aidlc-docs/construction/plans/construction-plan.md` (`[x]` for `UNIT-05`..`UNIT-09` and verification items) and added built HTML `<html lang="...">` checks in `scripts/verify-aidlc.ts`.
+- **Verification & Gate Status**: `npm run lint`, `npx tsx scripts/verify-aidlc.ts`, and `npm run build` verified cleanly with SSR `<html lang="en|vi|ja|zh-Hans">` across static HTML outputs.

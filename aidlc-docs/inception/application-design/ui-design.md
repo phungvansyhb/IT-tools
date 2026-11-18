@@ -3,7 +3,7 @@
 - **Phase**: `INCEPTION`
 - **Stage**: `Stage 1.4 — Application & UI Design`
 - **Design System**: `Monochrome Zinc Glass + Single Emerald-Mint Accent + 12-Column Bento Grid`
-- **Status**: `Validated Baseline (v0.1.0)`
+- **Status**: `Validated Baseline (v0.1.0) + i18n UI Delta`
 
 ---
 
@@ -59,10 +59,26 @@
 ## 3. Surface-by-Surface Component Specs
 1. **App Shell & Command Palette (`AppShell.tsx`, `CommandPalette.tsx`)**:
    - Fixed left navigation rail (`--sidebar-width: 268px`) with category links, pinned tools drawer, and sync mode pill (`Local` vs. `Cloud`).
-   - Topbar (`--topbar-height: 64px`) with mobile drawer button, global search trigger (`Cmd+K` / `Ctrl+K`), and Dark/Light theme switcher.
+   - Topbar (`--topbar-height: 64px`) with mobile drawer button, global search trigger (`Cmd+K` / `Ctrl+K`), compact Language Switcher dropdown, and Dark/Light theme switcher.
 2. **Bento Grid & Cards (`BentoGrid.tsx`, `BentoCard.tsx`, `src/styles/glass.css`)**:
    - Reusable `.bento-grid` with `.bento-span-12`, `.bento-span-8`, `.bento-span-7`, `.bento-span-6`, `.bento-span-5`, `.bento-span-4`, `.bento-span-3`, and `.bento-row-2` modifiers.
    - `.glass-surface` + `.glass-interactive` cards with specular top highlights and focus-visible outlines.
 3. **Tool Workspace (`ToolWorkspace.tsx`)**:
    - Header bar with breadcrumb, single `<h1>`, Pin toggle, Preset manager, and Shareable URL button.
    - Interactive suite area + dropzones/checkerboard previews + How-It-Works card + FAQ accordion + Related Tools Bento row.
+
+---
+
+## 4. Multilingual UI & Typography Specs (i18n Delta)
+
+1. **Topbar Language Switcher (`src/components/layout/LanguageSwitcher.tsx`)**:
+   - Positioned in `AppShell` Topbar immediately beside the Theme Toggle so it stays accessible on both Desktop and Mobile (`375px`+).
+   - Trigger uses `.btn` Monochrome Zinc Glass styling with `<Globe size={15} />`, uppercase locale code (`EN` / `VI` / `JA` / `ZH`), and `<ChevronDown size={13} />`.
+   - Popover menu uses `background: var(--bg-modal)`, `backdrop-filter: var(--glass-blur)`, `1px solid var(--glass-border-highlight)`, `border-radius: var(--radius-md)`, listing `English (EN)`, `Tiếng Việt (VI)`, `日本語 (JA)`, `简体中文 (ZH)` with emerald `<Check size={14} />` on the active option.
+   - Full ARIA & keyboard accessibility: `aria-haspopup="listbox"`, `aria-expanded`, `role="listbox"`/`role="option"`, `aria-selected`, `Escape` / outside-click close, `ArrowUp`/`ArrowDown` navigation.
+2. **Responsive Mobile Topbar (`<= 640px`)**:
+   - Replace fixed `minWidth: 'min(360px, 52vw)'` on the search trigger with responsive `.topbar-search-btn` (`flex: 1; max-width: 360px; min-width: 0`) and hide `<kbd>` shortcut hints and the `"Favorites"` text label below `520px`, keeping `<Star />` + count badge + Language Switcher + Theme Toggle cleanly aligned with zero horizontal overflow at `375px`.
+3. **Vietnamese & CJK Typography Stack**:
+   - `Inter` and `JetBrains_Mono` loaded with `subsets: ['latin', 'vietnamese']`.
+   - `:lang(ja)` appends `'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic UI', Meiryo, 'Noto Sans JP', sans-serif` after `--font-sans`.
+   - `:lang(zh-Hans)` appends `'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Hiragino Sans GB', sans-serif` after `--font-sans` (preserving `Inter` / `JetBrains Mono` for Latin/numeric characters).

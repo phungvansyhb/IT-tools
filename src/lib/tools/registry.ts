@@ -1,3 +1,7 @@
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/config';
+import { getBundle } from '@/i18n/translator';
+import type { ToolId } from '@/i18n/types';
+
 export type ToolCategorySlug =
   | 'image'
   | 'file'
@@ -775,4 +779,77 @@ export function getRelatedTools(tool: ToolDefinition, limit: number = 3): ToolDe
   const sameCategory = TOOLS.filter((t) => t.category === tool.category && t.id !== tool.id);
   const others = TOOLS.filter((t) => t.category !== tool.category && t.featured);
   return [...sameCategory, ...others].slice(0, limit);
+}
+
+export function localizeCategory(
+  category: CategoryDefinition,
+  locale: Locale = DEFAULT_LOCALE
+): CategoryDefinition {
+  const localized = getBundle(locale).catalog.categories[category.slug];
+  if (!localized) return category;
+  return {
+    ...category,
+    name: localized.name,
+    tagline: localized.tagline,
+    description: localized.description,
+    seoTitle: localized.seoTitle,
+    seoDescription: localized.seoDescription,
+  };
+}
+
+export function localizeTool(
+  tool: ToolDefinition,
+  locale: Locale = DEFAULT_LOCALE
+): ToolDefinition {
+  const localized = getBundle(locale).catalog.tools[tool.id as ToolId];
+  if (!localized) return tool;
+  return {
+    ...tool,
+    name: localized.name,
+    shortDescription: localized.shortDescription,
+    longDescription: localized.longDescription,
+    keywords: localized.keywords,
+    howItWorks: localized.howItWorks,
+    faqs: localized.faqs,
+  };
+}
+
+export function getLocalizedCategories(locale: Locale = DEFAULT_LOCALE): CategoryDefinition[] {
+  return CATEGORIES.map((cat) => localizeCategory(cat, locale));
+}
+
+export function getLocalizedTools(locale: Locale = DEFAULT_LOCALE): ToolDefinition[] {
+  return TOOLS.map((tool) => localizeTool(tool, locale));
+}
+
+export function getLocalizedCategoryBySlug(
+  slug: string,
+  locale: Locale = DEFAULT_LOCALE
+): CategoryDefinition | undefined {
+  const cat = getCategoryBySlug(slug);
+  return cat ? localizeCategory(cat, locale) : undefined;
+}
+
+export function getLocalizedToolsByCategory(
+  category: ToolCategorySlug,
+  locale: Locale = DEFAULT_LOCALE
+): ToolDefinition[] {
+  return getToolsByCategory(category).map((tool) => localizeTool(tool, locale));
+}
+
+export function getLocalizedToolBySlug(
+  category: string,
+  slug: string,
+  locale: Locale = DEFAULT_LOCALE
+): ToolDefinition | undefined {
+  const tool = getToolBySlug(category, slug);
+  return tool ? localizeTool(tool, locale) : undefined;
+}
+
+export function getLocalizedRelatedTools(
+  tool: ToolDefinition,
+  locale: Locale = DEFAULT_LOCALE,
+  limit: number = 3
+): ToolDefinition[] {
+  return getRelatedTools(tool, limit).map((t) => localizeTool(t, locale));
 }

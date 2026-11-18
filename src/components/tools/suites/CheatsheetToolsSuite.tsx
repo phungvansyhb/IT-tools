@@ -1,22 +1,40 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pin, Search } from 'lucide-react';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard } from '@/components/bento/BentoCard';
 import { CopyButton } from '@/components/common/CopyButton';
-import { CHEATSHEET_ENTRIES } from '@/lib/tools/data/cheatsheets';
+import { getLocalizedCheatsheetEntries, type CheatsheetEntry } from '@/lib/tools/data/cheatsheets';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
+import { useI18n } from '@/i18n/client';
 import type { ToolSuiteProps } from '@/components/tools/suites/types';
 
-export function CheatsheetToolsSuite({ toolId, onRun }: ToolSuiteProps) {
+export function CheatsheetToolsSuite({
+  toolId,
+  initialState,
+  onStateChange,
+  onRun,
+}: ToolSuiteProps) {
+  const { locale, t } = useI18n();
   const { pinnedSnippets, togglePinnedSnippet } = useUserWorkspace();
-  const [filterText, setFilterText] = useState('');
-  const [activeGroup, setActiveGroup] = useState<string>('all');
+  const [filterText, setFilterText] = useState<string>(() => {
+    if (typeof initialState?.filterText === 'string') {
+      return initialState.filterText;
+    }
+    if (typeof window !== 'undefined') {
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) return q;
+    }
+    return '';
+  });
+  const [activeGroup, setActiveGroup] = useState<string>(
+    typeof initialState?.activeGroup === 'string' ? initialState.activeGroup : 'all'
+  );
 
   const sheetEntries = useMemo(
-    () => CHEATSHEET_ENTRIES.filter((entry) => entry.sheet === toolId),
-    [toolId]
+    () => getLocalizedCheatsheetEntries(locale, toolId as CheatsheetEntry['sheet']),
+    [locale, toolId]
   );
 
   const groups = useMemo(
@@ -24,16 +42,23 @@ export function CheatsheetToolsSuite({ toolId, onRun }: ToolSuiteProps) {
     [sheetEntries]
   );
 
+  const currentActiveGroup =
+    activeGroup !== 'all' && !groups.includes(activeGroup) ? 'all' : activeGroup;
+
+  useEffect(() => {
+    onStateChange?.({ filterText, activeGroup: currentActiveGroup });
+  }, [filterText, currentActiveGroup, onStateChange]);
+
   const filtered = useMemo(() => {
     const q = filterText.trim().toLowerCase();
     const list = sheetEntries.filter((e) => {
-      if (activeGroup !== 'all' && e.group !== activeGroup) return false;
+      if (currentActiveGroup !== 'all' && e.group !== currentActiveGroup) return false;
       if (!q) return true;
       return (
         e.title.toLowerCase().includes(q) ||
         e.command.toLowerCase().includes(q) ||
         e.description.toLowerCase().includes(q) ||
-        e.tags.some((t) => t.toLowerCase().includes(q))
+        e.tags.some((tag) => tag.toLowerCase().includes(q))
       );
     });
     // Sort pinned snippets to top
@@ -42,7 +67,7 @@ export function CheatsheetToolsSuite({ toolId, onRun }: ToolSuiteProps) {
       const bPin = pinnedSnippets.includes(b.id) ? 1 : 0;
       return bPin - aPin;
     });
-  }, [sheetEntries, activeGroup, filterText, pinnedSnippets]);
+  }, [sheetEntries, currentActiveGroup, filterText, pinnedSnippets]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -65,26 +90,26 @@ export function CheatsheetToolsSuite({ toolId, onRun }: ToolSuiteProps) {
                 className="input-field"
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
-                placeholder="Filter commands, flags, status codes..."
+                placeholder={t('tools:cheatsheetSuite.filterPlaceholder')}
                 style={{ paddingLeft: '2.3rem' }}
-                aria-label="Filter cheatsheet entries"
+                aria-label={t('tools:cheatsheetSuite.filterAria')}
               />
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               <button
                 type="button"
-                className={`glass-pill ${activeGroup === 'all' ? 'glass-pill-active' : ''}`}
+                className={`glass-pill ${currentActiveGroup === 'all' ? 'glass-pill-active' : ''}`}
                 style={{ cursor: 'pointer' }}
                 onClick={() => setActiveGroup('all')}
               >
-                All ({sheetEntries.length})
+                {t('tools:cheatsheetSuite.allFilterPill', { count: sheetEntries.length })}
               </button>
               {groups.map((g) => (
                 <button
                   key={g}
                   type="button"
-                  className={`glass-pill ${activeGroup === g ? 'glass-pill-active' : ''}`}
+                  className={`glass-pill ${currentActiveGroup === g ? 'glass-pill-active' : ''}`}
                   style={{ cursor: 'pointer' }}
                   onClick={() => setActiveGroup(g)}
                 >
@@ -108,12 +133,16 @@ export function CheatsheetToolsSuite({ toolId, onRun }: ToolSuiteProps) {
                     type="button"
                     className="btn btn-ghost btn-icon"
                     onClick={() => togglePinnedSnippet(entry.id)}
-                    aria-label={isPinned ? 'Unpin snippet' : 'Pin snippet'}
+                    aria-label={
+                      isPinned
+                        ? t('tools:cheatsheetSuite.unpinSnippetAria')
+                        : t('tools:cheatsheetSuite.pinSnippetAria')
+                    }
                     style={{ color: isPinned ? 'var(--accent)' : 'var(--text-muted)' }}
                   >
                     <Pin size={15} />
                   </button>
-                  <CopyButton value={entry.command} label="Copy" onCopied={onRun} />
+                  <CopyButton value={entry.command} label={t('actions.copy')} onCopied={onRun} />
                 </div>
               </div>
 

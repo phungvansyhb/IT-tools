@@ -1,0 +1,80 @@
+import React from 'react';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono, Noto_Sans_JP, Noto_Sans_SC } from 'next/font/google';
+import '../globals.css';
+import '@/styles/glass.css';
+import '@/styles/bento.css';
+import { LOCALE_META, SUPPORTED_LOCALES, isValidLocale } from '@/i18n/config';
+import { I18nProvider } from '@/i18n/client';
+import { LocaleHtmlLangSync } from '@/i18n/LocaleHtmlLangSync';
+import { UserWorkspaceProvider } from '@/hooks/useUserWorkspace';
+import { AppShell } from '@/components/layout/AppShell';
+import { buildHomeMetadata } from '@/lib/seo';
+
+const inter = Inter({
+  variable: '--font-sans',
+  subsets: ['latin', 'vietnamese'],
+});
+
+const notoSansJp = Noto_Sans_JP({
+  variable: '--font-jp',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+});
+
+const notoSansSc = Noto_Sans_SC({
+  variable: '--font-sc',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-mono',
+  subsets: ['latin', 'vietnamese'],
+});
+
+export function generateStaticParams() {
+  return SUPPORTED_LOCALES.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isValidLocale(locale)) return {};
+  return buildHomeMetadata(locale);
+}
+
+export default async function LocaleRootLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  if (!isValidLocale(locale)) {
+    notFound();
+  }
+
+  return (
+    <html
+      lang={LOCALE_META[locale].htmlLang}
+      data-theme="dark"
+      suppressHydrationWarning
+      className={`${inter.variable} ${notoSansJp.variable} ${notoSansSc.variable} ${jetbrainsMono.variable}`}
+    >
+      <body>
+        <I18nProvider locale={locale}>
+          <LocaleHtmlLangSync locale={locale} />
+          <UserWorkspaceProvider>
+            <AppShell>{children}</AppShell>
+          </UserWorkspaceProvider>
+        </I18nProvider>
+      </body>
+    </html>
+  );
+}

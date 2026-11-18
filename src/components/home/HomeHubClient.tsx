@@ -3,27 +3,36 @@
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Search, ShieldCheck, Sparkles, Star } from 'lucide-react';
-import { CATEGORIES, TOOLS, type ToolCategorySlug } from '@/lib/tools/registry';
+import {
+  getLocalizedCategories,
+  getLocalizedTools,
+  type ToolCategorySlug,
+} from '@/lib/tools/registry';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
+import { useI18n } from '@/i18n/client';
+import { localePath } from '@/i18n/config';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard, ToolBentoCard } from '@/components/bento/BentoCard';
 import { ToolIcon } from '@/components/common/ToolIcon';
 
 export function HomeHubClient() {
+  const { locale, t } = useI18n();
   const { favorites, hydrated } = useUserWorkspace();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ToolCategorySlug | 'all'>('all');
 
-  const categoryMap = useMemo(() => new Map(CATEGORIES.map((c) => [c.slug, c])), []);
+  const categories = useMemo(() => getLocalizedCategories(locale), [locale]);
+  const tools = useMemo(() => getLocalizedTools(locale), [locale]);
+  const categoryMap = useMemo(() => new Map(categories.map((c) => [c.slug, c])), [categories]);
 
   const pinnedTools = useMemo(
-    () => TOOLS.filter((t) => favorites.includes(t.id)),
-    [favorites]
+    () => tools.filter((tool) => favorites.includes(tool.id)),
+    [tools, favorites]
   );
 
   const filteredTools = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return TOOLS.filter((tool) => {
+    return tools.filter((tool) => {
       if (activeCategory !== 'all' && tool.category !== activeCategory) return false;
       if (!q) return true;
       return (
@@ -32,27 +41,33 @@ export function HomeHubClient() {
         tool.keywords.some((k) => k.toLowerCase().includes(q))
       );
     });
-  }, [searchQuery, activeCategory]);
+  }, [tools, searchQuery, activeCategory]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       {/* Bento Hero Row */}
       <BentoGrid>
         <BentoCard span="8">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', justifyContent: 'space-between', height: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.85rem',
+              justifyContent: 'space-between',
+              height: '100%',
+            }}
+          >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
                 <span className="glass-pill glass-pill-active">
                   <ShieldCheck size={13} />
-                  <span>100% Browser-Native</span>
+                  <span>{t('home.badgeNative')}</span>
                 </span>
-                <span className="glass-pill">24 Utilities · 6 Categories</span>
+                <span className="glass-pill">{t('home.badgeCount')}</span>
               </div>
-              <h1 className="page-title">
-                Developer tools engineered for speed &amp; absolute local privacy.
-              </h1>
+              <h1 className="page-title">{t('home.heroTitle')}</h1>
               <p className="muted-text" style={{ margin: '0.75rem 0 0', fontSize: '0.98rem', maxWidth: '62ch' }}>
-                Transform images, payloads, JWTs, OKLCH colors, chmod matrices, and DevOps cheatsheets inside a monochrome Bento workspace. Zero server uploads.
+                {t('home.heroSubtitle')}
               </p>
             </div>
 
@@ -73,13 +88,13 @@ export function HomeHubClient() {
                   className="input-field"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter tools by name or keyword (e.g. jwt, oklch, sha256, cron)..."
-                  aria-label="Filter tools on home hub"
+                  placeholder={t('home.filterPlaceholder')}
+                  aria-label={t('home.filterAria')}
                   style={{ paddingLeft: '2.4rem' }}
                 />
               </div>
-              <Link href="/tools/text/jwt-decoder" className="btn btn-primary">
-                <span>Open JWT Decoder</span>
+              <Link href={localePath(locale, '/tools/text/jwt-decoder')} className="btn btn-primary">
+                <span>{t('home.openJwtDecoder')}</span>
                 <ArrowRight size={15} />
               </Link>
             </div>
@@ -87,34 +102,44 @@ export function HomeHubClient() {
         </BentoCard>
 
         <BentoCard span="4">
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', gap: '0.75rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              height: '100%',
+              gap: '0.75rem',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                 <Sparkles size={16} style={{ color: 'var(--accent)' }} />
-                Workspace Telemetry
+                {t('home.telemetryTitle')}
               </span>
               <kbd className="kbd">Cmd + K</kbd>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.65rem' }}>
               <div className="glass-panel" style={{ padding: '0.75rem' }}>
-                <div className="subtle-text">Browser Tools</div>
+                <div className="subtle-text">{t('home.statBrowserTools')}</div>
                 <div style={{ fontSize: '1.45rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
-                  {TOOLS.length}
+                  {tools.length}
                 </div>
               </div>
               <div className="glass-panel" style={{ padding: '0.75rem' }}>
-                <div className="subtle-text">Pinned</div>
+                <div className="subtle-text">{t('home.statPinned')}</div>
                 <div style={{ fontSize: '1.45rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--accent)' }}>
                   {hydrated ? pinnedTools.length : 0}
                 </div>
               </div>
               <div className="glass-panel" style={{ padding: '0.75rem' }}>
-                <div className="subtle-text">Network Uploads</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>0 Bytes</div>
+                <div className="subtle-text">{t('home.statNetworkUploads')}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{t('home.statNetworkUploadsValue')}</div>
               </div>
               <div className="glass-panel" style={{ padding: '0.75rem' }}>
-                <div className="subtle-text">Categories</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{CATEGORIES.length} Suites</div>
+                <div className="subtle-text">{t('home.statCategories')}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>
+                  {t('home.statSuitesValue', { count: categories.length })}
+                </div>
               </div>
             </div>
           </div>
@@ -127,9 +152,9 @@ export function HomeHubClient() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h2 id="pinned-heading" className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Star size={16} style={{ color: 'var(--accent)' }} fill="currentColor" />
-              Pinned Tools
+              {t('home.pinnedHeading')}
             </h2>
-            <span className="subtle-text">Saved to your workspace</span>
+            <span className="subtle-text">{t('home.pinnedSavedSub')}</span>
           </div>
           <BentoGrid>
             {pinnedTools.map((tool) => (
@@ -148,17 +173,17 @@ export function HomeHubClient() {
       <section aria-labelledby="categories-heading" style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
           <h2 id="categories-heading" className="section-title">
-            Category Suites
+            {t('home.categoriesHeading')}
           </h2>
-          <span className="subtle-text">Explore dedicated SEO category hubs</span>
+          <span className="subtle-text">{t('home.categoriesSub')}</span>
         </div>
         <BentoGrid>
-          {CATEGORIES.map((cat) => {
-            const count = TOOLS.filter((t) => t.category === cat.slug).length;
+          {categories.map((cat) => {
+            const count = tools.filter((tool) => tool.category === cat.slug).length;
             return (
               <BentoCard key={cat.slug} span="4" interactive>
                 <Link
-                  href={`/categories/${cat.slug}`}
+                  href={localePath(locale, `/categories/${cat.slug}`)}
                   style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', height: '100%' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -177,7 +202,7 @@ export function HomeHubClient() {
                     >
                       <ToolIcon name={cat.iconName} size={18} />
                     </span>
-                    <span className="glass-pill">{count} tools</span>
+                    <span className="glass-pill">{t('home.toolsCountPill', { count })}</span>
                   </div>
                   <h3 style={{ margin: '0.2rem 0 0', fontSize: '1.02rem', fontWeight: 600 }}>
                     {cat.name}
@@ -196,7 +221,7 @@ export function HomeHubClient() {
       <section aria-labelledby="all-tools-heading" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
           <h2 id="all-tools-heading" className="section-title">
-            All Developer Tools ({filteredTools.length})
+            {t('home.allToolsHeading', { count: filteredTools.length })}
           </h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
             <button
@@ -205,9 +230,9 @@ export function HomeHubClient() {
               className={`glass-pill ${activeCategory === 'all' ? 'glass-pill-active' : ''}`}
               style={{ cursor: 'pointer' }}
             >
-              All ({TOOLS.length})
+              {t('home.allFilterPill', { count: tools.length })}
             </button>
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat.slug}
                 type="button"
@@ -224,7 +249,7 @@ export function HomeHubClient() {
         {filteredTools.length === 0 ? (
           <BentoCard span="12">
             <p className="muted-text" style={{ margin: 0, textAlign: 'center', padding: '1.5rem 0' }}>
-              No tools match &ldquo;{searchQuery}&rdquo;. Try clearing the search filter.
+              {t('home.noToolsMatch', { query: searchQuery })}
             </p>
           </BentoCard>
         ) : (

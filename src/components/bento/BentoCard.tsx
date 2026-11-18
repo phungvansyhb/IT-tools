@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Star, ArrowUpRight } from 'lucide-react';
 import { CategoryDefinition, ToolDefinition } from '@/lib/tools/registry';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
+import { useI18n } from '@/i18n/client';
+import { localePath } from '@/i18n/config';
 import { ToolIcon } from '@/components/common/ToolIcon';
 
 interface BentoCardProps {
@@ -45,6 +47,7 @@ interface ToolBentoCardProps {
 }
 
 export function ToolBentoCard({ tool, category, spanOverride }: ToolBentoCardProps) {
+  const { locale, t } = useI18n();
   const { isFavorite, toggleFavorite, metrics } = useUserWorkspace();
   const pinned = isFavorite(tool.id);
   const uses = metrics[tool.id]?.uses ?? 0;
@@ -60,15 +63,19 @@ export function ToolBentoCard({ tool, category, spanOverride }: ToolBentoCardPro
           </span>
           {uses > 0 && (
             <span className="subtle-text" style={{ fontSize: '0.72rem' }}>
-              {uses} {uses === 1 ? 'run' : 'runs'}
+              {uses} {uses === 1 ? t('bentoCard.runSingular') : t('bentoCard.runPlural')}
             </span>
           )}
         </div>
         <button
           type="button"
           className="btn btn-ghost btn-icon"
-          aria-label={pinned ? `Unpin ${tool.name}` : `Pin ${tool.name}`}
-          title={pinned ? 'Remove from Favorites' : 'Pin to Favorites'}
+          aria-label={
+            pinned
+              ? t('nav.unpinToolAria', { name: tool.name })
+              : t('nav.pinToolAria', { name: tool.name })
+          }
+          title={pinned ? t('nav.removeFromFavorites') : t('nav.pinToFavorites')}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -83,7 +90,7 @@ export function ToolBentoCard({ tool, category, spanOverride }: ToolBentoCardPro
       </div>
 
       <Link
-        href={`/tools/${tool.category}/${tool.slug}`}
+        href={localePath(locale, `/tools/${tool.category}/${tool.slug}`)}
         style={{
           display: 'flex',
           flexDirection: 'column',

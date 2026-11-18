@@ -19,6 +19,7 @@ import {
   getTextStats,
   runRegexTest,
 } from '@/lib/tools/engines/text';
+import { useI18n } from '@/i18n/client';
 import type { ToolSuiteProps } from '@/components/tools/suites/types';
 
 // Sample HS256 JWT (no real secret, standard example payload)
@@ -26,6 +27,8 @@ const SAMPLE_JWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfMDFKUVhZIiwibmFtZSI6IkFsZXggRGV2ZWxvcGVyIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjE5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 
 export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: ToolSuiteProps) {
+  const { locale, t } = useI18n();
+
   // 1. Case converter
   const [caseInput, setCaseInput] = useState<string>(
     typeof initialState?.caseInput === 'string' ? initialState.caseInput : 'userProfile_apiResponse v2'
@@ -52,15 +55,43 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   );
 
   // 4. ID Generator
-  const [idKind, setIdKind] = useState<'uuid' | 'ulid' | 'nanoid' | 'token'>('uuid');
-  const [idCount, setIdCount] = useState<number>(6);
-  const [idLength, setIdLength] = useState<number>(21);
-  const [tokenCharset, setTokenCharset] = useState<'alphanumeric' | 'hex' | 'base64url' | 'symbols'>('alphanumeric');
+  const [idKind, setIdKind] = useState<'uuid' | 'ulid' | 'nanoid' | 'token'>(
+    initialState?.idKind === 'uuid' ||
+      initialState?.idKind === 'ulid' ||
+      initialState?.idKind === 'nanoid' ||
+      initialState?.idKind === 'token'
+      ? initialState.idKind
+      : 'uuid'
+  );
+  const [idCount, setIdCount] = useState<number>(
+    typeof initialState?.idCount === 'number' ? initialState.idCount : 6
+  );
+  const [idLength, setIdLength] = useState<number>(
+    typeof initialState?.idLength === 'number' ? initialState.idLength : 21
+  );
+  const [tokenCharset, setTokenCharset] = useState<'alphanumeric' | 'hex' | 'base64url' | 'symbols'>(
+    initialState?.tokenCharset === 'alphanumeric' ||
+      initialState?.tokenCharset === 'hex' ||
+      initialState?.tokenCharset === 'base64url' ||
+      initialState?.tokenCharset === 'symbols'
+      ? initialState.tokenCharset
+      : 'alphanumeric'
+  );
   const [generatedIds, setGeneratedIds] = useState<string[]>([]);
 
   // 5. Text Encoder
-  const [encMode, setEncMode] = useState<'base64' | 'url' | 'html'>('base64');
-  const [encDir, setEncDir] = useState<'encode' | 'decode'>('encode');
+  const [encMode, setEncMode] = useState<'base64' | 'url' | 'html'>(
+    initialState?.encMode === 'base64' ||
+      initialState?.encMode === 'url' ||
+      initialState?.encMode === 'html'
+      ? initialState.encMode
+      : 'base64'
+  );
+  const [encDir, setEncDir] = useState<'encode' | 'decode'>(
+    initialState?.encDir === 'encode' || initialState?.encDir === 'decode'
+      ? initialState.encDir
+      : 'encode'
+  );
   const [encInput, setEncInput] = useState<string>(
     typeof initialState?.encInput === 'string'
       ? initialState.encInput
@@ -68,8 +99,35 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   );
 
   useEffect(() => {
-    onStateChange?.({ caseInput, regexPattern, regexFlags, regexText, jwtToken, encInput });
-  }, [caseInput, regexPattern, regexFlags, regexText, jwtToken, encInput, onStateChange]);
+    onStateChange?.({
+      caseInput,
+      regexPattern,
+      regexFlags,
+      regexText,
+      jwtToken,
+      idKind,
+      idCount,
+      idLength,
+      tokenCharset,
+      encMode,
+      encDir,
+      encInput,
+    });
+  }, [
+    caseInput,
+    regexPattern,
+    regexFlags,
+    regexText,
+    jwtToken,
+    idKind,
+    idCount,
+    idLength,
+    tokenCharset,
+    encMode,
+    encDir,
+    encInput,
+    onStateChange,
+  ]);
 
   const regenerateIds = () => {
     const list: string[] = [];
@@ -100,8 +158,11 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
 
   const cases = useMemo(() => convertCases(caseInput), [caseInput]);
   const stats = useMemo(() => getTextStats(caseInput), [caseInput]);
-  const regexRes = useMemo(() => runRegexTest(regexPattern, regexFlags, regexText), [regexPattern, regexFlags, regexText]);
-  const jwtRes = useMemo(() => decodeJwt(jwtToken), [jwtToken]);
+  const regexRes = useMemo(
+    () => runRegexTest(regexPattern, regexFlags, regexText, locale),
+    [regexPattern, regexFlags, regexText, locale]
+  );
+  const jwtRes = useMemo(() => decodeJwt(jwtToken, undefined, locale), [jwtToken, locale]);
 
   const encOutput = useMemo(() => {
     try {
@@ -113,50 +174,53 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
       }
       return { ok: true, value: encDir === 'encode' ? encodeHtmlEntities(encInput) : decodeHtmlEntities(encInput) };
     } catch (err) {
-      return { ok: false, value: err instanceof Error ? err.message : 'Conversion failed' };
+      return {
+        ok: false,
+        value: err instanceof Error ? err.message : t('tools:textSuite.conversionFailed'),
+      };
     }
-  }, [encInput, encMode, encDir]);
+  }, [encInput, encMode, encDir, t]);
 
   if (toolId === 'case-converter') {
     return (
       <BentoGrid>
         <BentoCard span="5">
-          <h2 className="section-title">Input String</h2>
+          <h2 className="section-title">{t('tools:textSuite.inputStringTitle')}</h2>
           <textarea
             className="textarea-field font-mono"
             value={caseInput}
             onChange={(e) => setCaseInput(e.target.value)}
-            placeholder="Enter variable name, heading, or text..."
+            placeholder={t('tools:textSuite.casePlaceholder')}
             style={{ minHeight: '160px' }}
           />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
             <div className="glass-panel" style={{ padding: '0.6rem' }}>
-              <div className="subtle-text">Characters</div>
+              <div className="subtle-text">{t('tools:textSuite.statCharacters')}</div>
               <div style={{ fontWeight: 600 }}>{stats.characters}</div>
             </div>
             <div className="glass-panel" style={{ padding: '0.6rem' }}>
-              <div className="subtle-text">UTF-8 Bytes</div>
+              <div className="subtle-text">{t('tools:textSuite.statBytes')}</div>
               <div style={{ fontWeight: 600 }}>{stats.bytes}</div>
             </div>
             <div className="glass-panel" style={{ padding: '0.6rem' }}>
-              <div className="subtle-text">Words</div>
+              <div className="subtle-text">{t('tools:textSuite.statWords')}</div>
               <div style={{ fontWeight: 600 }}>{stats.words}</div>
             </div>
             <div className="glass-panel" style={{ padding: '0.6rem' }}>
-              <div className="subtle-text">Lines</div>
+              <div className="subtle-text">{t('tools:textSuite.statLines')}</div>
               <div style={{ fontWeight: 600 }}>{stats.lines}</div>
             </div>
           </div>
         </BentoCard>
 
         <BentoCard span="7">
-          <h2 className="section-title">Converted Conventions</h2>
+          <h2 className="section-title">{t('tools:textSuite.convertedConventionsTitle')}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '0.6rem' }}>
             {Object.entries(cases).map(([label, val]) => (
               <div key={label} className="glass-panel" style={{ padding: '0.65rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span className="subtle-text">{label}</span>
-                  <CopyButton value={val} label="Copy" onCopied={onRun} />
+                  <CopyButton value={val} label={t('actions.copy')} onCopied={onRun} />
                 </div>
                 <code className="font-mono" style={{ fontSize: '0.84rem', wordBreak: 'break-all' }}>
                   {val || '—'}
@@ -173,23 +237,23 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
     return (
       <BentoGrid>
         <BentoCard span="6">
-          <h2 className="section-title">Pattern &amp; Test Payload</h2>
+          <h2 className="section-title">{t('tools:textSuite.patternPayloadTitle')}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px', gap: '0.5rem' }}>
             <input
               type="text"
               className="input-field font-mono"
               value={regexPattern}
               onChange={(e) => setRegexPattern(e.target.value)}
-              placeholder="Regular expression pattern"
-              aria-label="Regex pattern"
+              placeholder={t('tools:textSuite.regexPatternPlaceholder')}
+              aria-label={t('tools:textSuite.regexPatternAria')}
             />
             <input
               type="text"
               className="input-field font-mono"
               value={regexFlags}
               onChange={(e) => setRegexFlags(e.target.value)}
-              placeholder="gim"
-              aria-label="Regex flags"
+              placeholder={t('tools:textSuite.regexFlagsPlaceholder')}
+              aria-label={t('tools:textSuite.regexFlagsAria')}
             />
           </div>
           {!regexRes.valid && (
@@ -202,26 +266,28 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
             value={regexText}
             onChange={(e) => setRegexText(e.target.value)}
             style={{ minHeight: '190px' }}
-            aria-label="Test string"
+            aria-label={t('tools:textSuite.regexTextAria')}
           />
         </BentoCard>
 
         <BentoCard span="6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Matches ({regexRes.matches.length})</h2>
-            <span className="glass-pill glass-pill-active">ECMAScript RegExp</span>
+            <h2 className="section-title">
+              {t('tools:textSuite.matchesTitle', { count: regexRes.matches.length })}
+            </h2>
+            <span className="glass-pill glass-pill-active">{t('tools:textSuite.regexEngineBadge')}</span>
           </div>
           {regexRes.matches.length === 0 ? (
-            <p className="muted-text">No matches found for current pattern and flags.</p>
+            <p className="muted-text">{t('tools:textSuite.noMatches')}</p>
           ) : (
             <div style={{ overflowX: 'auto', maxHeight: '280px', overflowY: 'auto' }}>
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Match</th>
-                    <th>Span</th>
-                    <th>Groups</th>
+                    <th>{t('tools:textSuite.thIndex')}</th>
+                    <th>{t('tools:textSuite.thMatch')}</th>
+                    <th>{t('tools:textSuite.thSpan')}</th>
+                    <th>{t('tools:textSuite.thGroups')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -257,13 +323,21 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
         : jwtRes.status === 'expired'
           ? 'badge-danger'
           : 'badge-warning';
+    const jwtStatusLabel =
+      jwtRes.status === 'valid'
+        ? t('tools:textSuite.jwtStatusValid')
+        : jwtRes.status === 'expired'
+          ? t('tools:textSuite.jwtStatusExpired')
+          : jwtRes.status === 'not-yet-valid'
+            ? t('tools:textSuite.jwtStatusNotYetValid')
+            : t('tools:textSuite.jwtStatusNoExpiry');
 
     return (
       <BentoGrid>
         <BentoCard span="5">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Encoded JWT Token</h2>
-            <CopyButton value={jwtToken} label="Copy Token" />
+            <h2 className="section-title">{t('tools:textSuite.encodedJwtTitle')}</h2>
+            <CopyButton value={jwtToken} label={t('tools:textSuite.copyTokenBtn')} />
           </div>
           <textarea
             className="textarea-field font-mono"
@@ -274,14 +348,16 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
           />
           {jwtRes.valid && (
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span className={`glass-pill ${badgeClass}`}>Status: {jwtRes.status}</span>
+              <span className={`glass-pill ${badgeClass}`}>
+                {t('tools:textSuite.jwtStatusPrefix', { status: jwtStatusLabel })}
+              </span>
               {jwtRes.expiresAt && <span className="glass-pill">exp: {jwtRes.expiresAt}</span>}
             </div>
           )}
         </BentoCard>
 
         <BentoCard span="7">
-          <h2 className="section-title">Decoded Header &amp; Payload Claims</h2>
+          <h2 className="section-title">{t('tools:textSuite.decodedClaimsTitle')}</h2>
           {!jwtRes.valid ? (
             <div className="glass-panel badge-danger" style={{ padding: '1rem' }}>
               {jwtRes.error}
@@ -290,8 +366,8 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div className="glass-panel" style={{ padding: '0.85rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                  <span className="subtle-text">JOSE Header</span>
-                  <CopyButton value={JSON.stringify(jwtRes.header, null, 2)} label="Copy" onCopied={onRun} />
+                  <span className="subtle-text">{t('tools:textSuite.joseHeader')}</span>
+                  <CopyButton value={JSON.stringify(jwtRes.header, null, 2)} label={t('actions.copy')} onCopied={onRun} />
                 </div>
                 <pre className="font-mono" style={{ margin: 0, fontSize: '0.8rem', overflowX: 'auto' }}>
                   {JSON.stringify(jwtRes.header, null, 2)}
@@ -299,8 +375,8 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
               </div>
               <div className="glass-panel" style={{ padding: '0.85rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                  <span className="subtle-text">Payload Claims</span>
-                  <CopyButton value={JSON.stringify(jwtRes.payload, null, 2)} label="Copy" onCopied={onRun} />
+                  <span className="subtle-text">{t('tools:textSuite.payloadClaims')}</span>
+                  <CopyButton value={JSON.stringify(jwtRes.payload, null, 2)} label={t('actions.copy')} onCopied={onRun} />
                 </div>
                 <pre className="font-mono" style={{ margin: 0, fontSize: '0.8rem', overflowX: 'auto' }}>
                   {JSON.stringify(jwtRes.payload, null, 2)}
@@ -317,23 +393,23 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
     return (
       <BentoGrid>
         <BentoCard span="5">
-          <h2 className="section-title">Generator Configuration</h2>
+          <h2 className="section-title">{t('tools:textSuite.generatorConfigTitle')}</h2>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem' }}>
-            <span className="muted-text">Identifier Format</span>
+            <span className="muted-text">{t('tools:textSuite.identifierFormatLabel')}</span>
             <select
               className="select-field"
               value={idKind}
               onChange={(e) => setIdKind(e.target.value as 'uuid' | 'ulid' | 'nanoid' | 'token')}
             >
-              <option value="uuid">UUID v4 (RFC 4122)</option>
-              <option value="ulid">ULID (Lexicographically Sortable)</option>
-              <option value="nanoid">NanoID (URL-Safe)</option>
-              <option value="token">Cryptographic Secret Token</option>
+              <option value="uuid">{t('tools:textSuite.formatUuid')}</option>
+              <option value="ulid">{t('tools:textSuite.formatUlid')}</option>
+              <option value="nanoid">{t('tools:textSuite.formatNanoid')}</option>
+              <option value="token">{t('tools:textSuite.formatToken')}</option>
             </select>
           </label>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem' }}>
-            <span className="muted-text">Batch Count ({idCount})</span>
+            <span className="muted-text">{t('tools:textSuite.batchCountLabel', { count: idCount })}</span>
             <input
               type="range"
               min={1}
@@ -345,7 +421,7 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
 
           {(idKind === 'nanoid' || idKind === 'token') && (
             <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem' }}>
-              <span className="muted-text">Character Length ({idLength})</span>
+              <span className="muted-text">{t('tools:textSuite.charLengthLabel', { length: idLength })}</span>
               <input
                 type="range"
                 min={8}
@@ -358,29 +434,29 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
 
           {idKind === 'token' && (
             <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem' }}>
-              <span className="muted-text">Alphabet</span>
+              <span className="muted-text">{t('tools:textSuite.alphabetLabel')}</span>
               <select
                 className="select-field"
                 value={tokenCharset}
                 onChange={(e) => setTokenCharset(e.target.value as 'alphanumeric' | 'hex' | 'base64url' | 'symbols')}
               >
-                <option value="alphanumeric">Alphanumeric (A-Z, a-z, 0-9)</option>
-                <option value="hex">Hexadecimal (0-9, a-f)</option>
-                <option value="base64url">Base64URL Safe</option>
-                <option value="symbols">High-Entropy with Symbols</option>
+                <option value="alphanumeric">{t('tools:textSuite.charsetAlpha')}</option>
+                <option value="hex">{t('tools:textSuite.charsetHex')}</option>
+                <option value="base64url">{t('tools:textSuite.charsetBase64url')}</option>
+                <option value="symbols">{t('tools:textSuite.charsetSymbols')}</option>
               </select>
             </label>
           )}
 
           <button type="button" className="btn btn-primary" onClick={regenerateIds}>
-            <RefreshCw size={15} /> Regenerate Batch
+            <RefreshCw size={15} /> {t('tools:textSuite.regenerateBtn')}
           </button>
         </BentoCard>
 
         <BentoCard span="7">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Generated Identifiers</h2>
-            <CopyButton value={generatedIds.join('\n')} label="Copy All" />
+            <h2 className="section-title">{t('tools:textSuite.generatedIdsTitle')}</h2>
+            <CopyButton value={generatedIds.join('\n')} label={t('tools:textSuite.copyAllBtn')} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
             {generatedIds.map((id, idx) => (
@@ -390,7 +466,7 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
                 style={{ padding: '0.55rem 0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}
               >
                 <code className="font-mono" style={{ fontSize: '0.84rem', wordBreak: 'break-all' }}>{id}</code>
-                <CopyButton value={id} label="Copy" />
+                <CopyButton value={id} label={t('actions.copy')} />
               </div>
             ))}
           </div>
@@ -404,7 +480,7 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
     <BentoGrid>
       <BentoCard span="6">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <h2 className="section-title">Source Text</h2>
+          <h2 className="section-title">{t('tools:textSuite.sourceTextTitle')}</h2>
           <div style={{ display: 'flex', gap: '0.4rem' }}>
             {(['base64', 'url', 'html'] as const).map((m) => (
               <button
@@ -422,7 +498,12 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
               className="btn btn-sm"
               onClick={() => setEncDir((d) => (d === 'encode' ? 'decode' : 'encode'))}
             >
-              Mode: {encDir === 'encode' ? 'Encode' : 'Decode'}
+              {t('tools:textSuite.modeToggle', {
+                mode:
+                  encDir === 'encode'
+                    ? t('tools:textSuite.modeEncode')
+                    : t('tools:textSuite.modeDecode'),
+              })}
             </button>
           </div>
         </div>
@@ -436,8 +517,16 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
 
       <BentoCard span="6">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 className="section-title">{encDir === 'encode' ? 'Encoded' : 'Decoded'} Output</h2>
-          <CopyButton value={encOutput.ok ? encOutput.value : ''} label="Copy Output" onCopied={onRun} />
+          <h2 className="section-title">
+            {encDir === 'encode'
+              ? t('tools:textSuite.encodedOutputTitle')
+              : t('tools:textSuite.decodedOutputTitle')}
+          </h2>
+          <CopyButton
+            value={encOutput.ok ? encOutput.value : ''}
+            label={t('tools:textSuite.copyOutputBtn')}
+            onCopied={onRun}
+          />
         </div>
         {!encOutput.ok ? (
           <div className="glass-panel badge-danger" style={{ padding: '1rem' }}>

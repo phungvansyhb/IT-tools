@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { useI18n } from '@/i18n/client';
 
 interface CopyButtonProps {
   value: string;
@@ -10,8 +11,10 @@ interface CopyButtonProps {
   onCopied?: () => void;
 }
 
-export function CopyButton({ value, label = 'Copy', size = 'sm', onCopied }: CopyButtonProps) {
+export function CopyButton({ value, label, size = 'sm', onCopied }: CopyButtonProps) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
+  const displayLabel = label ?? t('actions.copy');
 
   const handleCopy = async () => {
     if (!value) return;
@@ -31,10 +34,10 @@ export function CopyButton({ value, label = 'Copy', size = 'sm', onCopied }: Cop
       className={`btn ${size === 'sm' ? 'btn-sm' : ''} ${copied ? 'glass-pill-active' : ''}`.trim()}
       onClick={handleCopy}
       disabled={!value}
-      aria-label={label}
+      aria-label={displayLabel}
     >
       {copied ? <Check size={14} /> : <Copy size={14} />}
-      <span>{copied ? 'Copied' : label}</span>
+      <span>{copied ? t('actions.copied') : displayLabel}</span>
     </button>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -15,17 +15,25 @@ import {
   Cloud,
   HardDrive,
 } from 'lucide-react';
-import { CATEGORIES, TOOLS } from '@/lib/tools/registry';
+import { getLocalizedCategories, getLocalizedTools } from '@/lib/tools/registry';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
+import { useI18n } from '@/i18n/client';
+import { localePath, stripLocalePrefix } from '@/i18n/config';
 import { ToolIcon } from '@/components/common/ToolIcon';
 import { CommandPalette } from '@/components/layout/CommandPalette';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { locale, t } = useI18n();
   const { theme, toggleTheme, favorites, toggleFavorite, syncMode, hydrated } = useUserWorkspace();
   const [cmdOpen, setCmdOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
+
+  const { pathname: normalizedPathname } = stripLocalePrefix(pathname || '/');
+  const categories = useMemo(() => getLocalizedCategories(locale), [locale]);
+  const tools = useMemo(() => getLocalizedTools(locale), [locale]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -38,16 +46,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  const favoriteTools = TOOLS.filter((t) => favorites.includes(t.id));
+  const favoriteTools = useMemo(
+    () => tools.filter((tool) => favorites.includes(tool.id)),
+    [tools, favorites]
+  );
 
   return (
     <div className="app-layout">
       {/* Sidebar */}
-      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`} aria-label="Primary Navigation">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.25rem 0.25rem 0.5rem' }}>
+      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`} aria-label={t('nav.primaryAria')}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0.25rem 0.25rem 0.5rem',
+          }}
+        >
           <Link
-            href="/"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 700, letterSpacing: '-0.02em' }}
+            href={localePath(locale, '/')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+            }}
           >
             <span
               style={{
@@ -65,9 +89,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Command size={17} />
             </span>
             <div>
-              <div style={{ fontSize: '0.96rem', lineHeight: 1.1 }}>OmniDev</div>
+              <div style={{ fontSize: '0.96rem', lineHeight: 1.1 }}>{t('brand.name')}</div>
               <div className="subtle-text" style={{ fontSize: '0.7rem' }}>
-                IT-Tools Hub
+                {t('brand.subtitle')}
               </div>
             </div>
           </Link>
@@ -75,7 +99,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             type="button"
             className="btn btn-ghost btn-icon mobile-menu-btn"
             onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar"
+            aria-label={t('nav.closeSidebar')}
           >
             <X size={18} />
           </button>
@@ -95,7 +119,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
             <Search size={14} />
-            <span>Search tools...</span>
+            <span>{t('nav.searchTools')}</span>
           </span>
           <kbd className="kbd">⌘K</kbd>
         </button>
@@ -112,17 +136,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               letterSpacing: '0.07em',
             }}
           >
-            Categories (6)
+            {t('nav.categoriesHeading', { count: categories.length })}
           </div>
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const active =
-              pathname === `/categories/${cat.slug}` ||
-              pathname.startsWith(`/tools/${cat.slug}/`);
-            const count = TOOLS.filter((t) => t.category === cat.slug).length;
+              normalizedPathname === `/categories/${cat.slug}` ||
+              normalizedPathname.startsWith(`/tools/${cat.slug}/`);
+            const count = tools.filter((tool) => tool.category === cat.slug).length;
             return (
               <Link
                 key={cat.slug}
-                href={`/categories/${cat.slug}`}
+                href={localePath(locale, `/categories/${cat.slug}`)}
                 onClick={() => setSidebarOpen(false)}
                 style={{
                   display: 'flex',
@@ -164,21 +188,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               justifyContent: 'space-between',
             }}
           >
-            <span>Pinned Tools</span>
+            <span>{t('nav.pinnedTools')}</span>
             <span>{hydrated ? favoriteTools.length : 0}</span>
           </div>
           {hydrated && favoriteTools.length === 0 && (
             <div className="subtle-text" style={{ padding: '0.35rem 0.5rem', fontSize: '0.78rem' }}>
-              Star any tool to pin it here.
+              {t('nav.pinnedEmptyHint')}
             </div>
           )}
           {hydrated &&
-            favoriteTools.slice(0, 6).map((t) => {
-              const active = pathname === `/tools/${t.category}/${t.slug}`;
+            favoriteTools.slice(0, 6).map((tool) => {
+              const active = normalizedPathname === `/tools/${tool.category}/${tool.slug}`;
               return (
                 <Link
-                  key={t.id}
-                  href={`/tools/${t.category}/${t.slug}`}
+                  key={tool.id}
+                  href={localePath(locale, `/tools/${tool.category}/${tool.slug}`)}
                   onClick={() => setSidebarOpen(false)}
                   style={{
                     display: 'flex',
@@ -195,7 +219,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   }}
                 >
                   <Star size={12} style={{ color: 'var(--accent)', flexShrink: 0 }} fill="currentColor" />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{tool.name}</span>
                 </Link>
               );
             })}
@@ -214,10 +238,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.78rem', fontWeight: 600 }}>
             <ShieldCheck size={14} style={{ color: 'var(--accent)' }} />
-            <span>100% Client-Side Privacy</span>
+            <span>{t('nav.privacyTitle')}</span>
           </div>
           <p className="subtle-text" style={{ margin: 0, fontSize: '0.73rem', lineHeight: 1.4 }}>
-            All payloads stay inside your browser memory. Zero tracking or server uploads.
+            {t('nav.privacyDesc')}
           </p>
           <div
             className="subtle-text"
@@ -231,7 +255,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             }}
           >
             {syncMode === 'supabase' ? <Cloud size={12} style={{ color: 'var(--accent)' }} /> : <HardDrive size={12} />}
-            <span>{syncMode === 'supabase' ? 'Supabase Cloud Sync' : 'Local Storage Mode'}</span>
+            <span>{syncMode === 'supabase' ? t('nav.syncSupabase') : t('nav.syncLocal')}</span>
           </div>
         </div>
       </aside>
@@ -239,47 +263,45 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className="app-main-wrap">
         <header className="app-topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 auto', minWidth: 0 }}>
             <button
               type="button"
               className="btn btn-icon mobile-menu-btn"
               onClick={() => setSidebarOpen(true)}
-              aria-label="Open navigation menu"
+              aria-label={t('nav.openMenu')}
+              style={{ flexShrink: 0 }}
             >
               <Menu size={18} />
             </button>
             <button
               type="button"
               onClick={() => setCmdOpen(true)}
-              className="btn"
-              style={{
-                minWidth: 'min(360px, 52vw)',
-                justifyContent: 'space-between',
-                color: 'var(--text-secondary)',
-              }}
-              aria-label="Open global command palette"
+              className="btn topbar-search-btn"
+              aria-label={t('nav.openPaletteAria')}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Search size={15} />
-                <span>Jump to any tool or command...</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', minWidth: 0 }}>
+                <Search size={15} style={{ flexShrink: 0 }} />
+                <span className="topbar-search-text">{t('nav.jumpToCommand')}</span>
               </span>
               <kbd className="kbd">Ctrl K</kbd>
             </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+            <LanguageSwitcher />
+
             <button
               type="button"
               className="btn"
               onClick={() => setFavoritesOpen((v) => !v)}
-              aria-label="Toggle Favorites Drawer"
+              aria-label={t('nav.toggleFavoritesAria')}
             >
               <Star
                 size={15}
                 style={{ color: favorites.length > 0 ? 'var(--accent)' : 'var(--text-secondary)' }}
                 fill={favorites.length > 0 ? 'currentColor' : 'none'}
               />
-              <span>Favorites</span>
+              <span className="topbar-fav-label">{t('nav.favorites')}</span>
               <span className="glass-pill" style={{ padding: '0.05rem 0.45rem' }}>
                 {hydrated ? favoriteTools.length : 0}
               </span>
@@ -289,8 +311,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               type="button"
               className="btn btn-icon"
               onClick={toggleTheme}
-              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label={theme === 'dark' ? t('nav.switchToLightAria') : t('nav.switchToDarkAria')}
+              title={theme === 'dark' ? t('nav.switchToLightTitle') : t('nav.switchToDarkTitle')}
             >
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
@@ -328,26 +350,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Star size={17} style={{ color: 'var(--accent)' }} fill="currentColor" />
-                  Pinned Tools ({favoriteTools.length})
+                  {t('nav.pinnedToolsCount', { count: favoriteTools.length })}
                 </h2>
                 <button
                   type="button"
                   className="btn btn-ghost btn-icon"
                   onClick={() => setFavoritesOpen(false)}
-                  aria-label="Close favorites drawer"
+                  aria-label={t('nav.closeFavoritesAria')}
                 >
                   <X size={17} />
                 </button>
               </div>
               {favoriteTools.length === 0 ? (
                 <p className="muted-text" style={{ fontSize: '0.88rem' }}>
-                  You have no pinned tools yet. Click the star icon on any Bento card or tool page to pin it.
+                  {t('nav.noPinnedTools')}
                 </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {favoriteTools.map((t) => (
+                  {favoriteTools.map((tool) => (
                     <div
-                      key={t.id}
+                      key={tool.id}
                       className="glass-panel"
                       style={{
                         padding: '0.75rem',
@@ -358,20 +380,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       }}
                     >
                       <Link
-                        href={`/tools/${t.category}/${t.slug}`}
+                        href={localePath(locale, `/tools/${tool.category}/${tool.slug}`)}
                         onClick={() => setFavoritesOpen(false)}
                         style={{ minWidth: 0, flex: 1 }}
                       >
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t.name}</div>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{tool.name}</div>
                         <div className="subtle-text" style={{ fontSize: '0.76rem' }}>
-                          {t.shortDescription}
+                          {tool.shortDescription}
                         </div>
                       </Link>
                       <button
                         type="button"
                         className="btn btn-ghost btn-icon"
-                        onClick={() => toggleFavorite(t.id)}
-                        aria-label={`Unpin ${t.name}`}
+                        onClick={() => toggleFavorite(tool.id)}
+                        aria-label={t('nav.unpinToolAria', { name: tool.name })}
                       >
                         <X size={15} />
                       </button>

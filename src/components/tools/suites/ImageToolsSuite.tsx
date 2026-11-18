@@ -6,6 +6,7 @@ import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard } from '@/components/bento/BentoCard';
 import { CopyButton } from '@/components/common/CopyButton';
 import { formatBytes, optimizeSvgMarkup } from '@/lib/tools/engines/image';
+import { useI18n } from '@/i18n/client';
 import type { ToolSuiteProps } from '@/components/tools/suites/types';
 
 interface LoadedImage {
@@ -17,20 +18,20 @@ interface LoadedImage {
   dataUrl: string;
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
+function readFileAsDataUrl(file: File, errMsg: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.onerror = () => reject(new Error(errMsg));
     reader.readAsDataURL(file);
   });
 }
 
-function loadImageElement(src: string): Promise<HTMLImageElement> {
+function loadImageElement(src: string, errMsg: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Invalid image format'));
+    img.onerror = () => reject(new Error(errMsg));
     img.src = src;
   });
 }
@@ -43,10 +44,33 @@ const SAMPLE_SVG = `<?xml version="1.0" encoding="UTF-8"?>
   <path d="M52 82L72 102L110 60" stroke="#10B981" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
+const MAX_PERSISTED_DATA_URL_LEN = 1_500_000;
+
+function getInitialLoadedImage(initialState?: Record<string, unknown> | null): LoadedImage | null {
+  const raw = initialState?.sourceImg;
+  if (!raw || typeof raw !== 'object') return null;
+  const candidate = raw as Partial<LoadedImage>;
+  if (
+    typeof candidate.name === 'string' &&
+    typeof candidate.type === 'string' &&
+    typeof candidate.size === 'number' &&
+    typeof candidate.width === 'number' &&
+    typeof candidate.height === 'number' &&
+    typeof candidate.dataUrl === 'string' &&
+    candidate.dataUrl.length <= MAX_PERSISTED_DATA_URL_LEN
+  ) {
+    return candidate as LoadedImage;
+  }
+  return null;
+}
+
 export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: ToolSuiteProps) {
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
-  const [sourceImg, setSourceImg] = useState<LoadedImage | null>(null);
+  const [sourceImg, setSourceImg] = useState<LoadedImage | null>(() =>
+    getInitialLoadedImage(initialState)
+  );
   const [error, setError] = useState('');
 
   // Converter & Compressor controls
@@ -56,9 +80,15 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
   const [quality, setQuality] = useState<number>(
     typeof initialState?.quality === 'number' ? initialState.quality : 0.82
   );
-  const [targetWidth, setTargetWidth] = useState<number>(0);
-  const [targetHeight, setTargetHeight] = useState<number>(0);
-  const [lockAspect, setLockAspect] = useState<boolean>(true);
+  const [targetWidth, setTargetWidth] = useState<number>(
+    typeof initialState?.targetWidth === 'number' ? initialState.targetWidth : 0
+  );
+  const [targetHeight, setTargetHeight] = useState<number>(
+    typeof initialState?.targetHeight === 'number' ? initialState.targetHeight : 0
+  );
+  const [lockAspect, setLockAspect] = useState<boolean>(
+    typeof initialState?.lockAspect === 'boolean' ? initialState.lockAspect : true
+  );
   const [outputUrl, setOutputUrl] = useState<string>('');
   const [outputBytes, setOutputBytes] = useState<number>(0);
 
@@ -68,8 +98,18 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
   );
 
   useEffect(() => {
-    onStateChange?.({ targetFormat, quality, svgInput });
-  }, [targetFormat, quality, svgInput, onStateChange]);
+    const persistedSourceImg =
+      sourceImg && sourceImg.dataUrl.length <= MAX_PERSISTED_DATA_URL_LEN ? sourceImg : null;
+    onStateChange?.({
+      targetFormat,
+      quality,
+      targetWidth,
+      targetHeight,
+      lockAspect,
+      svgInput,
+      ...(persistedSourceImg ? { sourceImg: persistedSourceImg } : {}),
+    });
+  }, [targetFormat, quality, targetWidth, targetHeight, lockAspect, svgInput, sourceImg, onStateChange]);
 
   const handleFiles = async (files: FileList | null) => {
     const file = files?.[0];
@@ -82,8 +122,8 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
         onRun?.();
         return;
       }
-      const dataUrl = await readFileAsDataUrl(file);
-      const el = await loadImageElement(dataUrl);
+      const dataUrl = await readFileAsDataUrl(file, t('tools:imageSuite.readFileError'));
+      const el = await loadImageElement(dataUrl, t('tools:imageSuite.invalidImageError'));
       setSourceImg({
         name: file.name,
         type: file.type || 'image/png',
@@ -96,7 +136,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
       setTargetHeight(el.naturalHeight);
       onRun?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load image');
+      setError(err instanceof Error ? err.message : t('tools:imageSuite.unableToLoadError'));
     }
   };
 
@@ -108,7 +148,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
     let cancelled = false;
     void (async () => {
       try {
-        const el = await loadImageElement(sourceImg.dataUrl);
+        const el = await loadImageElement(sourceImg.dataUrl, 'Invalid image format');
         const w = toolId === 'image-compressor' && targetWidth > 0 ? targetWidth : el.naturalWidth;
         const h = toolId === 'image-compressor' && targetHeight > 0 ? targetHeight : el.naturalHeight;
         const canvas = document.createElement('canvas');
@@ -156,13 +196,13 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
       <BentoGrid>
         <BentoCard span="6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Raw SVG Markup</h2>
+            <h2 className="section-title">{t('tools:imageSuite.rawSvgTitle')}</h2>
             <button
               type="button"
               className="btn btn-sm"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload size={14} /> Load .svg
+              <Upload size={14} /> {t('tools:imageSuite.loadSvgBtn')}
             </button>
             <input
               ref={fileInputRef}
@@ -176,20 +216,30 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
             className="textarea-field font-mono"
             value={svgInput}
             onChange={(e) => setSvgInput(e.target.value)}
-            aria-label="Raw SVG Input"
+            aria-label={t('tools:imageSuite.rawSvgAria')}
             style={{ minHeight: '260px', fontSize: '0.8rem' }}
           />
           <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
-            <span className="glass-pill">Original: {formatBytes(svgResult.originalBytes)}</span>
-            <span className="glass-pill">Minified: {formatBytes(svgResult.optimizedBytes)}</span>
-            <span className="glass-pill glass-pill-active">Saved {svgResult.savedPercent}%</span>
+            <span className="glass-pill">
+              {t('tools:imageSuite.originalPill', { size: formatBytes(svgResult.originalBytes) })}
+            </span>
+            <span className="glass-pill">
+              {t('tools:imageSuite.minifiedPill', { size: formatBytes(svgResult.optimizedBytes) })}
+            </span>
+            <span className="glass-pill glass-pill-active">
+              {t('tools:imageSuite.savedPill', { percent: svgResult.savedPercent })}
+            </span>
           </div>
         </BentoCard>
 
         <BentoCard span="6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Live Vector Preview &amp; Minified Output</h2>
-            <CopyButton value={svgResult.optimized} label="Copy SVG" onCopied={onRun} />
+            <h2 className="section-title">{t('tools:imageSuite.previewOutputTitle')}</h2>
+            <CopyButton
+              value={svgResult.optimized}
+              label={t('tools:imageSuite.copySvgBtn')}
+              onCopied={onRun}
+            />
           </div>
           <div
             className="checkerboard glass-panel"
@@ -208,14 +258,14 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
                 dangerouslySetInnerHTML={{ __html: safeSvgPreview }}
               />
             ) : (
-              <span className="subtle-text">Paste valid &lt;svg&gt; markup to preview</span>
+              <span className="subtle-text">{t('tools:imageSuite.pasteValidSvg')}</span>
             )}
           </div>
           <textarea
             className="textarea-field font-mono"
             readOnly
             value={svgResult.optimized}
-            aria-label="Optimized SVG Output"
+            aria-label={t('tools:imageSuite.optimizedSvgAria')}
             style={{ minHeight: '110px', fontSize: '0.78rem' }}
           />
         </BentoCard>
@@ -245,9 +295,9 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
     >
       <Upload size={22} style={{ color: 'var(--accent)', marginBottom: '0.45rem' }} />
       <div style={{ fontWeight: 600, fontSize: '0.94rem' }}>
-        Drop an image here or click to select
+        {t('tools:imageSuite.dropTitle')}
       </div>
-      <div className="subtle-text">PNG, JPEG, WebP, GIF, SVG · Processed locally via Canvas</div>
+      <div className="subtle-text">{t('tools:imageSuite.dropSubtitle')}</div>
       <input
         ref={fileInputRef}
         type="file"
@@ -266,7 +316,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
     return (
       <BentoGrid>
         <BentoCard span="6">
-          <h2 className="section-title">Select Image</h2>
+          <h2 className="section-title">{t('tools:imageSuite.selectImageTitle')}</h2>
           {dropzone}
           {error && <p style={{ color: 'var(--danger)', margin: 0 }}>{error}</p>}
           {sourceImg && (
@@ -290,22 +340,22 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
 
         <BentoCard span="6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Data URL &amp; Code Snippets</h2>
+            <h2 className="section-title">{t('tools:imageSuite.dataUrlTitle')}</h2>
             <div style={{ display: 'flex', gap: '0.4rem' }}>
-              <CopyButton value={sourceImg?.dataUrl ?? ''} label="Data URL" />
-              <CopyButton value={rawBase64} label="Raw Base64" />
+              <CopyButton value={sourceImg?.dataUrl ?? ''} label={t('tools:imageSuite.copyDataUrl')} />
+              <CopyButton value={rawBase64} label={t('tools:imageSuite.copyRawBase64')} />
             </div>
           </div>
           <textarea
             className="textarea-field font-mono"
             readOnly
             value={sourceImg?.dataUrl ?? ''}
-            placeholder="Select an image to generate its Base64 Data URL..."
+            placeholder={t('tools:imageSuite.dataUrlPlaceholder')}
             style={{ minHeight: '140px', fontSize: '0.76rem' }}
           />
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <CopyButton value={cssSnippet} label="Copy CSS url()" />
-            <CopyButton value={htmlSnippet} label="Copy HTML <img>" />
+            <CopyButton value={cssSnippet} label={t('tools:imageSuite.copyCssUrl')} />
+            <CopyButton value={htmlSnippet} label={t('tools:imageSuite.copyHtmlImg')} />
           </div>
         </BentoCard>
       </BentoGrid>
@@ -322,26 +372,28 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
   return (
     <BentoGrid>
       <BentoCard span="6">
-        <h2 className="section-title">Source Image &amp; Settings</h2>
+        <h2 className="section-title">{t('tools:imageSuite.sourceSettingsTitle')}</h2>
         {dropzone}
         {error && <p style={{ color: 'var(--danger)', margin: 0 }}>{error}</p>}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.82rem' }}>
-            <span className="muted-text">Target Format</span>
+            <span className="muted-text">{t('tools:imageSuite.targetFormatLabel')}</span>
             <select
               className="select-field"
               value={targetFormat}
               onChange={(e) => setTargetFormat(e.target.value as 'image/png' | 'image/jpeg' | 'image/webp')}
             >
-              <option value="image/webp">WebP (Modern Web)</option>
-              <option value="image/jpeg">JPEG (Photos)</option>
-              <option value="image/png">PNG (Lossless Alpha)</option>
+              <option value="image/webp">{t('tools:imageSuite.formatWebp')}</option>
+              <option value="image/jpeg">{t('tools:imageSuite.formatJpeg')}</option>
+              <option value="image/png">{t('tools:imageSuite.formatPng')}</option>
             </select>
           </label>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.82rem' }}>
-            <span className="muted-text">Quality ({Math.round(quality * 100)}%)</span>
+            <span className="muted-text">
+              {t('tools:imageSuite.qualityLabel', { percent: Math.round(quality * 100) })}
+            </span>
             <input
               type="range"
               min={0.1}
@@ -357,14 +409,16 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
         {toolId === 'image-compressor' && sourceImg && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="muted-text" style={{ fontSize: '0.82rem' }}>Resize Dimensions (px)</span>
+              <span className="muted-text" style={{ fontSize: '0.82rem' }}>
+                {t('tools:imageSuite.resizeDimensionsLabel')}
+              </span>
               <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem' }}>
                 <input
                   type="checkbox"
                   checked={lockAspect}
                   onChange={(e) => setLockAspect(e.target.checked)}
                 />
-                Lock aspect ratio
+                {t('tools:imageSuite.lockAspectLabel')}
               </label>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
@@ -381,7 +435,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
                     setTargetHeight(Math.round((w / sourceImg.width) * sourceImg.height));
                   }
                 }}
-                aria-label="Target width"
+                aria-label={t('tools:imageSuite.targetWidthAria')}
               />
               <input
                 type="number"
@@ -396,7 +450,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
                     setTargetWidth(Math.round((h / sourceImg.height) * sourceImg.width));
                   }
                 }}
-                aria-label="Target height"
+                aria-label={t('tools:imageSuite.targetHeightAria')}
               />
             </div>
           </div>
@@ -405,7 +459,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
 
       <BentoCard span="6">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <h2 className="section-title">Converted Preview</h2>
+          <h2 className="section-title">{t('tools:imageSuite.convertedPreviewTitle')}</h2>
           {outputUrl && sourceImg && (
             <a
               href={outputUrl}
@@ -413,7 +467,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
               className="btn btn-primary btn-sm"
               onClick={() => onRun?.()}
             >
-              <Download size={14} /> Download .{ext}
+              <Download size={14} /> {t('tools:imageSuite.downloadBtn', { ext })}
             </a>
           )}
         </div>
@@ -421,17 +475,23 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
         {sourceImg && outputUrl ? (
           <>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span className="glass-pill">Before: {formatBytes(sourceImg.size)}</span>
-              <span className="glass-pill">After: {formatBytes(outputBytes)}</span>
+              <span className="glass-pill">
+                {t('tools:imageSuite.beforePill', { size: formatBytes(sourceImg.size) })}
+              </span>
+              <span className="glass-pill">
+                {t('tools:imageSuite.afterPill', { size: formatBytes(outputBytes) })}
+              </span>
               <span className={`glass-pill ${savings >= 0 ? 'glass-pill-active' : ''}`}>
-                {savings >= 0 ? `-${savings}% smaller` : `+${Math.abs(savings)}% larger`}
+                {savings >= 0
+                  ? t('tools:imageSuite.smallerPill', { percent: savings })
+                  : t('tools:imageSuite.largerPill', { percent: Math.abs(savings) })}
               </span>
             </div>
             <div className="checkerboard glass-panel" style={{ padding: '0.85rem', textAlign: 'center' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={outputUrl}
-                alt="Converted output preview"
+                alt={t('tools:imageSuite.convertedAlt')}
                 style={{ maxHeight: '240px', maxWidth: '100%', objectFit: 'contain' }}
               />
             </div>
@@ -439,7 +499,7 @@ export function ImageToolsSuite({ toolId, initialState, onStateChange, onRun }: 
         ) : (
           <div className="glass-panel" style={{ padding: '2.5rem 1rem', textAlign: 'center' }}>
             <p className="muted-text" style={{ margin: 0 }}>
-              Upload an image on the left to inspect converted size and download locally.
+              {t('tools:imageSuite.emptyHint')}
             </p>
           </div>
         )}

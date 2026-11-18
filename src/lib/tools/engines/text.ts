@@ -1,4 +1,6 @@
 // Pure client-side text transformation, inspection, encoding, and ID generation engines
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/config';
+import { getFixedT } from '@/i18n/translator';
 
 export interface CaseConversions {
   camelCase: string;
@@ -82,7 +84,12 @@ export interface RegexTestResult {
   matches: RegexMatchDetail[];
 }
 
-export function runRegexTest(pattern: string, flags: string, text: string): RegexTestResult {
+export function runRegexTest(
+  pattern: string,
+  flags: string,
+  text: string,
+  locale: Locale = DEFAULT_LOCALE
+): RegexTestResult {
   if (!pattern) {
     return { valid: true, matches: [] };
   }
@@ -123,7 +130,7 @@ export function runRegexTest(pattern: string, flags: string, text: string): Rege
   } catch (err) {
     return {
       valid: false,
-      error: err instanceof Error ? err.message : 'Invalid regular expression',
+      error: err instanceof Error ? err.message : getFixedT(locale)('tools:engines.text.invalidRegex'),
       matches: [],
     };
   }
@@ -147,12 +154,20 @@ function base64UrlToUtf8(b64url: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-export function decodeJwt(token: string, nowMs: number = Date.now()): DecodedJwt {
+export function decodeJwt(
+  token: string,
+  nowMs: number = Date.now(),
+  locale: Locale = DEFAULT_LOCALE
+): DecodedJwt {
+  const t = getFixedT(locale);
   const trimmed = token.trim();
-  if (!trimmed) return { valid: false, error: 'Paste a JWT token to decode.' };
+  if (!trimmed) return { valid: false, error: t('tools:engines.text.pasteJwt') };
   const parts = trimmed.split('.');
   if (parts.length !== 3) {
-    return { valid: false, error: `Expected 3 dot-separated segments, found ${parts.length}.` };
+    return {
+      valid: false,
+      error: t('tools:engines.text.jwtSegmentsError', { count: parts.length }),
+    };
   }
 
   try {
@@ -180,7 +195,7 @@ export function decodeJwt(token: string, nowMs: number = Date.now()): DecodedJwt
   } catch (err) {
     return {
       valid: false,
-      error: err instanceof Error ? err.message : 'Unable to parse JWT segments.',
+      error: err instanceof Error ? err.message : t('tools:engines.text.jwtParseError'),
     };
   }
 }

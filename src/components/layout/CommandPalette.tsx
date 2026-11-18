@@ -3,8 +3,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Terminal, ArrowRight, X } from 'lucide-react';
-import { CATEGORIES, TOOLS } from '@/lib/tools/registry';
-import { CHEATSHEET_ENTRIES } from '@/lib/tools/data/cheatsheets';
+import { getLocalizedCategories, getLocalizedTools } from '@/lib/tools/registry';
+import { getLocalizedCheatsheetEntries } from '@/lib/tools/data/cheatsheets';
+import { useI18n } from '@/i18n/client';
+import { localePath } from '@/i18n/config';
 import { ToolIcon } from '@/components/common/ToolIcon';
 
 interface CommandPaletteProps {
@@ -39,6 +41,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
 function CommandPaletteInner({ onClose }: { onClose: () => void }) {
   const router = useRouter();
+  const { locale, t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
@@ -50,38 +53,44 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
 
   const results = useMemo<SearchResultItem[]>(() => {
     const q = query.trim().toLowerCase();
-    const categoryMap = new Map(CATEGORIES.map((c) => [c.slug, c]));
+    const categories = getLocalizedCategories(locale);
+    const tools = getLocalizedTools(locale);
+    const entries = getLocalizedCheatsheetEntries(locale);
+    const categoryMap = new Map(categories.map((c) => [c.slug, c]));
 
-    const toolItems: SearchResultItem[] = TOOLS.filter((t) => {
-      if (!q) return Boolean(t.featured);
-      const catName = categoryMap.get(t.category)?.name.toLowerCase() ?? '';
-      return (
-        t.name.toLowerCase().includes(q) ||
-        t.shortDescription.toLowerCase().includes(q) ||
-        catName.includes(q) ||
-        t.keywords.some((k) => k.toLowerCase().includes(q))
-      );
-    }).map((t) => {
-      const cat = categoryMap.get(t.category);
-      return {
-        kind: 'tool',
-        id: `tool-${t.id}`,
-        title: t.name,
-        subtitle: t.shortDescription,
-        badge: cat?.name ?? t.category,
-        iconName: cat?.iconName ?? 'Wrench',
-        href: `/tools/${t.category}/${t.slug}`,
-      };
-    });
+    const toolItems: SearchResultItem[] = tools
+      .filter((tool) => {
+        if (!q) return Boolean(tool.featured);
+        const catName = categoryMap.get(tool.category)?.name.toLowerCase() ?? '';
+        return (
+          tool.name.toLowerCase().includes(q) ||
+          tool.shortDescription.toLowerCase().includes(q) ||
+          catName.includes(q) ||
+          tool.keywords.some((k) => k.toLowerCase().includes(q))
+        );
+      })
+      .map((tool) => {
+        const cat = categoryMap.get(tool.category);
+        return {
+          kind: 'tool',
+          id: `tool-${tool.id}`,
+          title: tool.name,
+          subtitle: tool.shortDescription,
+          badge: cat?.name ?? tool.category,
+          iconName: cat?.iconName ?? 'Wrench',
+          href: localePath(locale, `/tools/${tool.category}/${tool.slug}`),
+        };
+      });
 
     const snippetItems: SearchResultItem[] = q
-      ? CHEATSHEET_ENTRIES.filter(
-          (entry) =>
-            entry.title.toLowerCase().includes(q) ||
-            entry.command.toLowerCase().includes(q) ||
-            entry.description.toLowerCase().includes(q) ||
-            entry.tags.some((tag) => tag.toLowerCase().includes(q))
-        )
+      ? entries
+          .filter(
+            (entry) =>
+              entry.title.toLowerCase().includes(q) ||
+              entry.command.toLowerCase().includes(q) ||
+              entry.description.toLowerCase().includes(q) ||
+              entry.tags.some((tag) => tag.toLowerCase().includes(q))
+          )
           .slice(0, 5)
           .map((entry) => ({
             kind: 'snippet',
@@ -90,12 +99,15 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
             subtitle: entry.command,
             command: entry.command,
             badge: entry.group,
-            href: `/tools/cheatsheets/${entry.sheet}?q=${encodeURIComponent(entry.title)}`,
+            href: localePath(
+              locale,
+              `/tools/cheatsheets/${entry.sheet}?q=${encodeURIComponent(entry.title)}`
+            ),
           }))
       : [];
 
     return [...toolItems, ...snippetItems].slice(0, 12);
-  }, [query]);
+  }, [query, locale]);
 
   const safeActiveIndex = results.length > 0 ? Math.min(activeIndex, results.length - 1) : 0;
 
@@ -127,7 +139,7 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
       className="glass-modal-backdrop"
       role="dialog"
       aria-modal="true"
-      aria-label="Global Tool Command Palette"
+      aria-label={t('commandPalette.dialogAria')}
       onClick={onClose}
     >
       <div className="glass-modal" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
@@ -146,8 +158,8 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search 24 tools, keywords, or Git/HTTP/Docker commands..."
-            aria-label="Search tools and commands"
+            placeholder={t('commandPalette.placeholder')}
+            aria-label={t('commandPalette.searchAria')}
             style={{
               flex: 1,
               background: 'transparent',
@@ -161,7 +173,7 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
             type="button"
             className="btn btn-ghost btn-icon"
             onClick={onClose}
-            aria-label="Close command palette"
+            aria-label={t('commandPalette.closeAria')}
           >
             <X size={16} />
           </button>
@@ -171,7 +183,7 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
           {results.length === 0 ? (
             <div style={{ padding: '2rem 1rem', textAlign: 'center' }}>
               <p className="muted-text" style={{ margin: 0, fontSize: '0.9rem' }}>
-                No matching tools or cheatsheet commands for &ldquo;{query}&rdquo;.
+                {t('commandPalette.emptyState', { query })}
               </p>
             </div>
           ) : (
@@ -256,10 +268,11 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
           }}
         >
           <span>
-            <kbd className="kbd">↑↓</kbd> Navigate &nbsp; <kbd className="kbd">Enter</kbd> Open
+            <kbd className="kbd">↑↓</kbd> {t('commandPalette.navigateHint')} &nbsp;{' '}
+            <kbd className="kbd">Enter</kbd> {t('commandPalette.openHint')}
           </span>
           <span>
-            <kbd className="kbd">Esc</kbd> Close
+            <kbd className="kbd">Esc</kbd> {t('commandPalette.closeHint')}
           </span>
         </div>
       </div>

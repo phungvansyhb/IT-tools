@@ -3,29 +3,35 @@
 ## Project Metadata
 - **Project Name**: OmniDev / IT-Tools Hub — Privacy-First Developer & Utility Tools Hub
 - **Project Type**: Brownfield (`Next.js 16.4.6 App Router + TypeScript 5 + React 19.3 + Vanilla CSS Monochrome Zinc Glass / Bento Grid + Optional Supabase`)
-- **Active Phase**: `OPERATIONS` (Baseline v0.1.0 Implemented; Ready for Operations Verification or New Feature Inception)
-- **Active Stage**: `Stage 1.1: Workspace Detection & Governance Standardization` (Completed) → Next: `Stage 3.1: Production Build & Packaging Verification` (or `Stage 1.2` for new feature work)
-- **Last Updated**: `2026-11-18T09:15:00Z`
+- **Active Phase**: `CONSTRUCTION` (Multilingual `i18n` Feature Cycle — `UNIT-05`–`UNIT-09` Complete & Polished)
+- **Active Stage**: `Phase 2 Construction Complete — Ready for Phase 3 Operations Verification`
+- **Last Updated**: `2026-11-18T10:30:00Z`
 
 ---
 
-## Phase 1: INCEPTION Progress (Baseline v0.1.0 Migrated)
+## Phase 1: INCEPTION Progress (Baseline v0.1.0 + i18n Expansion)
 - [x] **Stage 1.1: Workspace Detection** — Classified workspace (`Brownfield`) and verified baseline stack (`Next.js 16.4.6`, `React 19.3.0`, `TypeScript 5`, `js-yaml`, `lucide-react`, `@supabase/supabase-js`).
-- [x] **Stage 1.2: Requirements Analysis** — Migrated & standardized `FR-01`..`FR-12`, `NFR-01`..`NFR-04`, `CON-*`, `PRE-*`, `EX-*`, and `SC-*` in [`requirements.md`](inception/requirements/requirements.md).
-- [x] **Stage 1.3: User Stories** — Migrated `US-01`..`US-06` with Given/When/Then acceptance criteria in [`user-stories.md`](inception/user-stories/user-stories.md).
-- [x] **Stage 1.4: Application & UI Design** — Documented architecture in [`architecture.md`](inception/application-design/architecture.md) and Monochrome Zinc Glass + Bento Grid design tokens in [`ui-design.md`](inception/application-design/ui-design.md).
-- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`..`UNIT-04` decomposition in [`units.md`](inception/units/units.md).
-- [x] **Stage 1.6: Workflow Planning** — Standardized [`execution-plan.md`](inception/plans/execution-plan.md) and [`construction-plan.md`](construction/plans/construction-plan.md).
-- [x] **Gate 1 Sign-Off**: Baseline v0.1.0 approved & implemented prior to AI-DLC governance standardization. *(Any new feature cycle requires a fresh Inception & Gate 1 sign-off before coding.)*
+- [x] **Stage 1.2: Requirements Analysis** — Validated `FR-01`–`FR-12` (baseline) and `FR-13`–`FR-17`, `NFR-05`–`NFR-07`, `CON-03`–`CON-06`, `EX-02`, `SC-02` (i18n 4 locales) in [`requirements.md`](inception/requirements/requirements.md).
+- [x] **Stage 1.3: User Stories** — Validated `US-01`–`US-06` and i18n stories `US-07`–`US-11` in [`user-stories.md`](inception/user-stories/user-stories.md).
+- [x] **Stage 1.4: Application & UI Design** — Documented stateless `i18next`, `[locale]` SSG + `src/proxy.ts`, `hreflang` SEO, `sessionStorage` draft sync, Topbar Switcher, and Vietnamese/CJK typography in [`architecture.md`](inception/application-design/architecture.md) and [`ui-design.md`](inception/application-design/ui-design.md).
+- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`–`UNIT-04` (baseline) and `UNIT-05`–`UNIT-09` (i18n) in [`units.md`](inception/units/units.md).
+- [x] **Stage 1.6: Workflow Planning** — Updated [`execution-plan.md`](inception/plans/execution-plan.md) and [`construction-plan.md`](construction/plans/construction-plan.md).
+- [x] **Gate 1 Sign-Off (Baseline v0.1.0)**: Completed prior to governance standardization.
+- [x] **Gate 1 Sign-Off (i18n Expansion `UNIT-05`–`UNIT-09`)**: Approved by user; Construction unlocked.
 
 ---
 
-## Phase 2: CONSTRUCTION Progress (Baseline v0.1.0)
+## Phase 2: CONSTRUCTION Progress
 - [x] **`UNIT-01`**: Design System, Theme Engine & Layout Primitives (`src/app/globals.css`, `src/styles/glass.css`, `src/styles/bento.css`, `src/components/bento/*`, `src/components/layout/*`)
 - [x] **`UNIT-02`**: Tool Registry & Programmatic SEO Engine (`src/lib/tools/registry.ts`, `src/lib/seo.ts`, `src/app/sitemap.ts`, `src/app/robots.ts`, `src/app/manifest.ts`)
 - [x] **`UNIT-03`**: Supabase Client, SQL Schema & Hybrid LocalStorage Store (`supabase/schema.sql`, `src/lib/supabase/client.ts`, `src/hooks/useUserWorkspace.tsx`)
 - [x] **`UNIT-04`**: 24 Browser-Native Tools, Engines & App Router Pages (`src/lib/tools/engines/*`, `src/lib/tools/data/cheatsheets.ts`, `src/components/tools/*`, `src/app/page.tsx`, `src/app/categories/[category]/page.tsx`, `src/app/tools/[category]/[slug]/page.tsx`, `scripts/verify-aidlc.ts`)
-- [ ] **Full Build & Verification (Current Environment)**: `npm install && npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+- [x] **`UNIT-05`**: i18n Core Runtime, Locale Detection & Package Setup (`npm install && npm install i18next`, `src/i18n/*`, `src/i18n/locales/en/*`)
+- [x] **`UNIT-06`**: Full 4-Language Dictionaries (`vi`, `ja`, `zh`) & Registry / Engine / Cheatsheet Localization (`src/i18n/locales/{vi,ja,zh}/*`, `src/lib/tools/*`)
+- [x] **`UNIT-07`**: App Router `[locale]` Routing, Proxy Redirect, SSG & Multi-Language SEO (`src/proxy.ts`, `src/app/[locale]/*`, `src/lib/seo.ts`, `src/app/sitemap.ts`)
+- [x] **`UNIT-08`**: Topbar Language Switcher, App Shell, Command Palette & Common UI Localization (`src/components/layout/*`, `src/components/home/*`, `src/components/bento/*`, `src/components/common/*`)
+- [x] **`UNIT-09`**: Tool Workspace, All 6 Tool Suites Localization & `sessionStorage` State Preservation (`src/components/tools/*`)
+- [x] **Full Build & Verification (i18n Expansion)**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
 
 ---
 

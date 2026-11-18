@@ -11,9 +11,12 @@ import {
   getContrastRatio,
   normalizeHex,
 } from '@/lib/tools/engines/color';
+import { useI18n } from '@/i18n/client';
 import type { ToolSuiteProps } from '@/components/tools/suites/types';
 
 export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: ToolSuiteProps) {
+  const { t } = useI18n();
+
   // 1 & 3. Color Converter & Palette Generator
   const [hexInput, setHexInput] = useState<string>(
     typeof initialState?.hexInput === 'string' ? initialState.hexInput : '#10B981'
@@ -83,13 +86,13 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
     return (
       <BentoGrid>
         <BentoCard span="5">
-          <h2 className="section-title">Color Picker &amp; HEX Input</h2>
+          <h2 className="section-title">{t('tools:colorSuite.pickerTitle')}</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <input
               type="color"
               value={validHex}
               onChange={(e) => setHexInput(e.target.value.toUpperCase())}
-              aria-label="Color picker"
+              aria-label={t('tools:colorSuite.pickerAria')}
               style={{
                 width: '56px',
                 height: '46px',
@@ -106,7 +109,7 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
               value={hexInput}
               onChange={(e) => setHexInput(e.target.value)}
               placeholder="#10B981"
-              aria-label="HEX color code"
+              aria-label={t('tools:colorSuite.hexInputAria')}
             />
           </div>
           <div
@@ -130,7 +133,7 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
         </BentoCard>
 
         <BentoCard span="7">
-          <h2 className="section-title">Perceptual &amp; CSS Color Spaces</h2>
+          <h2 className="section-title">{t('tools:colorSuite.spacesTitle')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {entries.map((item) => (
               <div
@@ -150,7 +153,7 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
                     {item.value}
                   </code>
                 </div>
-                <CopyButton value={item.value} label="Copy" onCopied={onRun} />
+                <CopyButton value={item.value} label={t('actions.copy')} onCopied={onRun} />
               </div>
             ))}
           </div>
@@ -165,10 +168,10 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
 
     const badges = contrast
       ? [
-          { label: 'AA Normal (≥4.5:1)', pass: contrast.aaNormal },
-          { label: 'AA Large (≥3.0:1)', pass: contrast.aaLarge },
-          { label: 'AAA Normal (≥7.0:1)', pass: contrast.aaaNormal },
-          { label: 'AAA Large (≥4.5:1)', pass: contrast.aaaLarge },
+          { label: t('tools:colorSuite.aaNormal'), pass: contrast.aaNormal },
+          { label: t('tools:colorSuite.aaLarge'), pass: contrast.aaLarge },
+          { label: t('tools:colorSuite.aaaNormal'), pass: contrast.aaaNormal },
+          { label: t('tools:colorSuite.aaaLarge'), pass: contrast.aaaLarge },
         ]
       : [];
 
@@ -176,7 +179,7 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
       <BentoGrid>
         <BentoCard span="5">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Color Pair</h2>
+            <h2 className="section-title">{t('tools:colorSuite.colorPairTitle')}</h2>
             <button
               type="button"
               className="btn btn-sm"
@@ -186,12 +189,12 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
                 onRun?.();
               }}
             >
-              <ArrowLeftRight size={14} /> Swap
+              <ArrowLeftRight size={14} /> {t('actions.swap')}
             </button>
           </div>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem' }}>
-            <span className="muted-text">Foreground (Text)</span>
+            <span className="muted-text">{t('tools:colorSuite.foregroundLabel')}</span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <input
                 type="color"
@@ -209,7 +212,7 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
           </label>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.84rem' }}>
-            <span className="muted-text">Background (Surface)</span>
+            <span className="muted-text">{t('tools:colorSuite.backgroundLabel')}</span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <input
                 type="color"
@@ -229,9 +232,9 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
 
         <BentoCard span="7">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">WCAG 2.1 Compliance</h2>
+            <h2 className="section-title">{t('tools:colorSuite.wcagTitle')}</h2>
             <span className="glass-pill glass-pill-active" style={{ fontSize: '0.92rem', fontWeight: 700 }}>
-              {contrast ? `${contrast.ratio}:1` : 'Invalid'}
+              {contrast ? `${contrast.ratio}:1` : t('tools:colorSuite.invalidColor')}
             </span>
           </div>
 
@@ -245,10 +248,10 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
             }}
           >
             <div style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-              Large Heading Specimen (20px Bold)
+              {t('tools:colorSuite.specimenHeading')}
             </div>
             <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.55 }}>
-              Body copy legibility preview: Privacy-first developer utilities built with crisp monochrome typography and measurable WCAG contrast.
+              {t('tools:colorSuite.specimenBody')}
             </p>
           </div>
 
@@ -297,8 +300,8 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
               />
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <CopyButton value={cssExport} label="Copy CSS Variables" onCopied={onRun} />
-              <CopyButton value={jsonExport} label="Copy JSON" onCopied={onRun} />
+              <CopyButton value={cssExport} label={t('tools:colorSuite.copyCssVarsBtn')} onCopied={onRun} />
+              <CopyButton value={jsonExport} label={t('tools:colorSuite.copyJsonBtn')} onCopied={onRun} />
             </div>
           </div>
 
@@ -335,9 +338,11 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
   return (
     <BentoGrid>
       <BentoCard span="5">
-        <h2 className="section-title">Glass Surface Controls</h2>
+        <h2 className="section-title">{t('tools:colorSuite.glassControlsTitle')}</h2>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.83rem' }}>
-          <span className="muted-text">Background Opacity ({glassBgAlpha})</span>
+          <span className="muted-text">
+            {t('tools:colorSuite.bgOpacityLabel', { value: glassBgAlpha })}
+          </span>
           <input
             type="range"
             min={0.1}
@@ -348,7 +353,9 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
           />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.83rem' }}>
-          <span className="muted-text">Backdrop Blur ({glassBlur}px)</span>
+          <span className="muted-text">
+            {t('tools:colorSuite.backdropBlurLabel', { value: glassBlur })}
+          </span>
           <input
             type="range"
             min={0}
@@ -358,7 +365,9 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
           />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.83rem' }}>
-          <span className="muted-text">Saturation ({glassSaturation}%)</span>
+          <span className="muted-text">
+            {t('tools:colorSuite.saturationLabel', { value: glassSaturation })}
+          </span>
           <input
             type="range"
             min={100}
@@ -369,7 +378,9 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
           />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.83rem' }}>
-          <span className="muted-text">Specular Border Alpha ({glassBorderAlpha})</span>
+          <span className="muted-text">
+            {t('tools:colorSuite.borderAlphaLabel', { value: glassBorderAlpha })}
+          </span>
           <input
             type="range"
             min={0.02}
@@ -380,7 +391,9 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
           />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.83rem' }}>
-          <span className="muted-text">Border Radius ({glassRadius}px)</span>
+          <span className="muted-text">
+            {t('tools:colorSuite.borderRadiusLabel', { value: glassRadius })}
+          </span>
           <input
             type="range"
             min={0}
@@ -393,8 +406,8 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
 
       <BentoCard span="7">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 className="section-title">Live Stage &amp; Generated CSS</h2>
-          <CopyButton value={cssCode} label="Copy CSS" onCopied={onRun} />
+          <h2 className="section-title">{t('tools:colorSuite.liveStageTitle')}</h2>
+          <CopyButton value={cssCode} label={t('tools:colorSuite.copyCssBtn')} onCopied={onRun} />
         </div>
         <div
           style={{
@@ -421,9 +434,11 @@ export function ColorToolsSuite({ toolId, initialState, onStateChange, onRun }: 
               boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.45)',
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Bento Glass Surface</div>
+            <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
+              {t('tools:colorSuite.previewCardTitle')}
+            </div>
             <div style={{ fontSize: '0.84rem', color: '#a1a1aa' }}>
-              Monochrome frosted surface with crisp specular border highlight.
+              {t('tools:colorSuite.previewCardSubtitle')}
             </div>
           </div>
         </div>

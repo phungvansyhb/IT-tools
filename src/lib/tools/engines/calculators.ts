@@ -1,4 +1,6 @@
 // Pure client-side calculator engines: Chmod, Cron, Timestamp, Bytes & Number Bases
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/config';
+import { getBundle, getFixedT } from '@/i18n/translator';
 
 export interface ChmodState {
   owner: { read: boolean; write: boolean; execute: boolean };
@@ -71,15 +73,22 @@ function parseCronField(field: string, min: number, max: number): Set<number> | 
   return result.size > 0 ? result : null;
 }
 
-const MONTH_NAMES = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DOW_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export function analyzeCronExpression(
+  expr: string,
+  count: number = 5,
+  baseDate: Date = new Date(),
+  locale: Locale = DEFAULT_LOCALE
+): CronAnalysis {
+  const t = getFixedT(locale);
+  const calcStrings = getBundle(locale).tools.engines.calculators;
+  const monthNames = ['', ...calcStrings.months];
+  const dowNames = calcStrings.dows;
 
-export function analyzeCronExpression(expr: string, count: number = 5, baseDate: Date = new Date()): CronAnalysis {
   const parts = expr.trim().split(/\s+/);
   if (parts.length !== 5) {
     return {
       valid: false,
-      error: `Expected 5 fields (minute hour day-of-month month day-of-week), got ${parts.length}.`,
+      error: t('tools:engines.calculators.cronFieldsError', { count: parts.length }),
       humanReadable: '',
       nextRuns: [],
     };
@@ -95,7 +104,7 @@ export function analyzeCronExpression(expr: string, count: number = 5, baseDate:
   if (!mins || !hours || !doms || !months || !dows) {
     return {
       valid: false,
-      error: 'One or more cron fields contain invalid ranges or syntax.',
+      error: calcStrings.cronSyntaxError,
       humanReadable: '',
       nextRuns: [],
     };
@@ -103,26 +112,43 @@ export function analyzeCronExpression(expr: string, count: number = 5, baseDate:
 
   // Human readable summary
   const minDesc =
-    minF === '*' ? 'Every minute' : minF.startsWith('*/') ? `Every ${minF.slice(2)} minutes` : `At minute ${minF}`;
+    minF === '*'
+      ? calcStrings.cronEveryMinute
+      : minF.startsWith('*/')
+        ? t('tools:engines.calculators.cronEveryNMinutes', { step: minF.slice(2) })
+        : t('tools:engines.calculators.cronAtMinute', { minute: minF });
   const hourDesc =
-    hourF === '*' ? 'of every hour' : hourF.startsWith('*/') ? `every ${hourF.slice(2)} hours` : `past hour ${hourF}`;
-  const domDesc = domF === '*' ? '' : `, on day ${domF} of the month`;
+    hourF === '*'
+      ? calcStrings.cronOfEveryHour
+      : hourF.startsWith('*/')
+        ? t('tools:engines.calculators.cronEveryNHours', { step: hourF.slice(2) })
+        : t('tools:engines.calculators.cronPastHour', { hour: hourF });
+  const domDesc =
+    domF === '*' ? '' : t('tools:engines.calculators.cronOnDom', { dom: domF });
   const monDesc =
     monF === '*'
       ? ''
-      : `, in ${monF
-          .split(',')
-          .map((m) => MONTH_NAMES[Number(m)] || m)
-          .join(', ')}`;
+      : t('tools:engines.calculators.cronInMonths', {
+          months: monF
+            .split(',')
+            .map((m) => monthNames[Number(m)] || m)
+            .join(', '),
+        });
   const dowDesc =
     dowF === '*'
       ? ''
-      : `, only on ${dowF
-          .split(',')
-          .map((d) => DOW_NAMES[Number(d)] || d)
-          .join(', ')}`;
+      : t('tools:engines.calculators.cronOnlyOnDows', {
+          dows: dowF
+            .split(',')
+            .map((d) => dowNames[Number(d)] || d)
+            .join(', '),
+        });
 
-  const humanReadable = `${minDesc} ${hourDesc}${domDesc}${monDesc}${dowDesc}.`.replace(/\s+/g, ' ').trim();
+  const period = locale === 'ja' || locale === 'zh' ? '。' : '.';
+  const joiner = locale === 'ja' || locale === 'zh' ? '' : ' ';
+  const humanReadable = `${minDesc}${joiner}${hourDesc}${domDesc}${monDesc}${dowDesc}${period}`
+    .replace(/\s+/g, ' ')
+    .trim();
 
   // Compute next runs (minute scan capped at 1 year / 525,600 minutes)
   const nextRuns: string[] = [];
@@ -168,9 +194,15 @@ export interface TimestampAnalysis {
   relative?: string;
 }
 
-export function analyzeTimestamp(input: string, nowMs: number = Date.now()): TimestampAnalysis {
+export function analyzeTimestamp(
+  input: string,
+  nowMs: number = Date.now(),
+  locale: Locale = DEFAULT_LOCALE
+): TimestampAnalysis {
+  const t = getFixedT(locale);
+  const calcStrings = getBundle(locale).tools.engines.calculators;
   const trimmed = input.trim();
-  if (!trimmed) return { valid: false, error: 'Enter a Unix timestamp or ISO-8601 date string.' };
+  if (!trimmed) return { valid: false, error: calcStrings.timestampEmpty };
 
   let date: Date;
   if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
@@ -182,20 +214,25 @@ export function analyzeTimestamp(input: string, nowMs: number = Date.now()): Tim
   }
 
   if (Number.isNaN(date.getTime())) {
-    return { valid: false, error: 'Unrecognized timestamp or date format.' };
+    return { valid: false, error: calcStrings.timestampInvalid };
   }
 
   const diffSec = Math.round((date.getTime() - nowMs) / 1000);
   const abs = Math.abs(diffSec);
   const unit =
     abs < 60
-      ? `${abs}s`
+      ? `${abs}${calcStrings.unitSec}`
       : abs < 3600
-        ? `${Math.floor(abs / 60)}m`
+        ? `${Math.floor(abs / 60)}${calcStrings.unitMin}`
         : abs < 86400
-          ? `${Math.floor(abs / 3600)}h`
-          : `${Math.floor(abs / 86400)}d`;
-  const relative = diffSec === 0 ? 'just now' : diffSec > 0 ? `in ${unit}` : `${unit} ago`;
+          ? `${Math.floor(abs / 3600)}${calcStrings.unitHour}`
+          : `${Math.floor(abs / 86400)}${calcStrings.unitDay}`;
+  const relative =
+    diffSec === 0
+      ? calcStrings.justNow
+      : diffSec > 0
+        ? t('tools:engines.calculators.inFuture', { delta: unit })
+        : t('tools:engines.calculators.pastAgo', { delta: unit });
 
   return {
     valid: true,
@@ -240,9 +277,14 @@ export interface NumberBaseResult {
   hex?: string;
 }
 
-export function convertNumberBase(raw: string, base: 2 | 8 | 10 | 16): NumberBaseResult {
+export function convertNumberBase(
+  raw: string,
+  base: 2 | 8 | 10 | 16,
+  locale: Locale = DEFAULT_LOCALE
+): NumberBaseResult {
+  const t = getFixedT(locale);
   const clean = raw.trim().replace(/^0[bBoOxX]/, '').replace(/[\s_]/g, '');
-  if (!clean) return { valid: false, error: 'Enter a number to convert.' };
+  if (!clean) return { valid: false, error: t('tools:engines.calculators.baseEmpty') };
 
   const validators: Record<2 | 8 | 10 | 16, RegExp> = {
     2: /^[01]+$/,
@@ -252,7 +294,7 @@ export function convertNumberBase(raw: string, base: 2 | 8 | 10 | 16): NumberBas
   };
 
   if (!validators[base].test(clean)) {
-    return { valid: false, error: `Invalid base-${base} digits.` };
+    return { valid: false, error: t('tools:engines.calculators.baseInvalid', { base }) };
   }
 
   const prefix = base === 2 ? '0b' : base === 8 ? '0o' : base === 16 ? '0x' : '';

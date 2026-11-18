@@ -90,3 +90,66 @@
 - **When** Next.js renders the statically generated page,
 - **Then** the HTML includes a single `<h1>`, descriptive `<title>` and `<meta name="description">`, canonical link,
 - **And** valid `SoftwareApplication`, `BreadcrumbList`, and `FAQPage` JSON-LD scripts.
+
+---
+
+## `US-07`: Automatic Locale Detection & Legacy URL Redirection (`FR-14`)
+**As** an international developer visiting OmniDev for the first time or opening an old bookmark (`/tools/text/jwt-decoder`),
+**I want** `/` and unprefixed legacy links to redirect automatically based on my saved cookie or browser language,
+**So that** I land immediately in my preferred language without broken links.
+
+### Acceptance Criteria
+- **Given** a request arrives at `/`, `/categories/[category]`, or `/tools/[category]/[slug]`,
+- **When** `src/proxy.ts` evaluates `Cookie (omnidev_locale)`, then `Accept-Language`, then fallback `'en'`,
+- **Then** the server returns a `307` redirect to `/{resolvedLocale}{originalPath}{queryString}`,
+- **And** static/metadata endpoints (`/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest`, `/_next/*`) are never redirected.
+
+---
+
+## `US-08`: Topbar Language Switching & Cross-Session Persistence (`FR-13`, `FR-16`, `NFR-07`)
+**As** a developer using Desktop or Mobile,
+**I want** a compact Language Switcher dropdown in the Topbar next to the Theme Toggle,
+**So that** I can switch between English, Tiếng Việt, 日本語, and 简体中文 at any time and keep my choice across sessions.
+
+### Acceptance Criteria
+- **Given** the user is on any localized route on Desktop or Mobile (`375px`+),
+- **When** the user opens the Topbar Language Switcher and selects `vi` (`Tiếng Việt`),
+- **Then** `omnidev_locale=vi` is written to both `localStorage` and Cookie, and the app navigates to `/vi/...` (preserving query parameters),
+- **And** subsequent visits to `/` automatically resolve to `/vi`.
+
+---
+
+## `US-09`: Seamless Tool Input Preservation During Language Switch (`FR-17`)
+**As** a developer mid-way through testing a Regex, editing JSON/YAML, or inspecting a JWT,
+**I want** my entered tool inputs and settings to remain intact when I switch UI language,
+**So that** I never lose my work when toggling locales.
+
+### Acceptance Criteria
+- **Given** the user has modified inputs inside any of the 24 tools on `/en/tools/[category]/[slug]`,
+- **When** the user selects another locale from the Topbar Language Switcher,
+- **Then** `ToolWorkspace` synchronously saves the active suite state to `sessionStorage` (`omnidev_locale_draft_{toolId}`) before navigation,
+- **And** upon mounting `/vi/tools/[category]/[slug]`, the tool suite hydrates with the saved inputs/settings and deletes the temporary `sessionStorage` entry.
+
+---
+
+## `US-10`: Full 4-Tier Localized UI & Bilingual Search (`FR-15`, `NFR-06`)
+**As** a Vietnamese, Japanese, or Chinese developer,
+**I want** navigation, Bento cards, tool controls, validation errors, cron descriptions, and cheatsheets in my language while still being able to search technical English keywords like `"jwt"` or `"oklch"`,
+**So that** the hub feels native without hiding familiar developer terminology.
+
+### Acceptance Criteria
+- **Given** the active route is `/vi`, `/ja`, or `/zh`,
+- **When** the user opens `Cmd+K` Command Palette or Home Hub search and types either a localized phrase or an English keyword (`"jwt"`, `"chmod"`),
+- **Then** matching tools and cheatsheet snippets appear immediately with localized titles/descriptions while preserving technical acronyms and CLI commands verbatim.
+
+---
+
+## `US-11`: Multi-Locale Static SEO, `hreflang`, Sitemap & JSON-LD (`NFR-05`)
+**As** a search engine crawler indexing localized developer queries,
+**I want** statically pre-rendered pages per locale with proper `<html lang>`, `hreflang` alternates, `inLanguage` JSON-LD, and a complete 124-URL sitemap,
+**So that** every language version is accurately indexed and served to regional users.
+
+### Acceptance Criteria
+- **Given** `npm run build` completes,
+- **When** inspecting `/en/...`, `/vi/...`, `/ja/...`, `/zh/...`, and `/sitemap.xml`,
+- **Then** all 124 routes are statically generated with matching `<html lang>` (`en`, `vi`, `ja`, `zh-Hans`), canonical + 5 `hreflang` tags (including `x-default`), localized `BreadcrumbList`/`FAQPage`/`SoftwareApplication` JSON-LD, and 124 sitemap entries with `alternates.languages`.

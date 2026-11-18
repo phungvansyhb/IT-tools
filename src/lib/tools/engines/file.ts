@@ -1,5 +1,8 @@
 // Pure client-side file & structured-data engines: JSON/YAML/CSV, Magic Bytes, Line Diff, Web Crypto Hash
 import { dump as dumpYaml, load as loadYaml } from 'js-yaml';
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/config';
+import { getBundle } from '@/i18n/translator';
+import type { ToolsDictionary } from '@/i18n/types';
 
 export type DataFormat = 'json' | 'yaml' | 'csv';
 
@@ -96,7 +99,8 @@ export function convertStructuredData(
   input: string,
   from: DataFormat,
   to: DataFormat,
-  pretty: boolean = true
+  pretty: boolean = true,
+  locale: Locale = DEFAULT_LOCALE
 ): { ok: true; output: string } | { ok: false; error: string } {
   const trimmed = input.trim();
   if (!trimmed) return { ok: true, output: '' };
@@ -124,7 +128,7 @@ export function convertStructuredData(
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : 'Conversion failed.',
+      error: err instanceof Error ? err.message : getBundle(locale).tools.engines.file.conversionFailed,
     };
   }
 }
@@ -139,30 +143,36 @@ export interface MagicSignatureResult {
   byteLength: number;
 }
 
+type FileFormatKey = keyof ToolsDictionary['engines']['file']['formats'];
+
 interface SignatureRule {
   offset?: number;
   bytes: number[];
   mime: string;
-  name: string;
+  formatKey: FileFormatKey;
   ext: string;
 }
 
 const SIGNATURES: SignatureRule[] = [
-  { bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], mime: 'image/png', name: 'PNG Image', ext: 'png' },
-  { bytes: [0xff, 0xd8, 0xff], mime: 'image/jpeg', name: 'JPEG Image', ext: 'jpg' },
-  { bytes: [0x47, 0x49, 0x46, 0x38], mime: 'image/gif', name: 'GIF Image', ext: 'gif' },
-  { bytes: [0x25, 0x50, 0x44, 0x46, 0x2d], mime: 'application/pdf', name: 'PDF Document', ext: 'pdf' },
-  { bytes: [0x50, 0x4b, 0x03, 0x04], mime: 'application/zip', name: 'ZIP / OOXML Archive', ext: 'zip' },
-  { bytes: [0x1f, 0x8b, 0x08], mime: 'application/gzip', name: 'GZIP Compressed Archive', ext: 'gz' },
-  { bytes: [0x00, 0x61, 0x73, 0x6d], mime: 'application/wasm', name: 'WebAssembly Binary', ext: 'wasm' },
-  { bytes: [0x7f, 0x45, 0x4c, 0x46], mime: 'application/x-elf', name: 'ELF Executable / Shared Lib', ext: 'elf' },
-  { bytes: [0x53, 0x51, 0x4c, 0x69, 0x74, 0x65], mime: 'application/vnd.sqlite3', name: 'SQLite 3 Database', ext: 'sqlite' },
-  { bytes: [0x49, 0x44, 0x33], mime: 'audio/mpeg', name: 'MP3 Audio (ID3v2)', ext: 'mp3' },
-  { bytes: [0x4f, 0x67, 0x67, 0x53], mime: 'audio/ogg', name: 'OGG Container', ext: 'ogg' },
-  { bytes: [0x66, 0x4c, 0x61, 0x43], mime: 'audio/flac', name: 'FLAC Lossless Audio', ext: 'flac' },
+  { bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], mime: 'image/png', formatKey: 'png', ext: 'png' },
+  { bytes: [0xff, 0xd8, 0xff], mime: 'image/jpeg', formatKey: 'jpeg', ext: 'jpg' },
+  { bytes: [0x47, 0x49, 0x46, 0x38], mime: 'image/gif', formatKey: 'gif', ext: 'gif' },
+  { bytes: [0x25, 0x50, 0x44, 0x46, 0x2d], mime: 'application/pdf', formatKey: 'pdf', ext: 'pdf' },
+  { bytes: [0x50, 0x4b, 0x03, 0x04], mime: 'application/zip', formatKey: 'zip', ext: 'zip' },
+  { bytes: [0x1f, 0x8b, 0x08], mime: 'application/gzip', formatKey: 'gzip', ext: 'gz' },
+  { bytes: [0x00, 0x61, 0x73, 0x6d], mime: 'application/wasm', formatKey: 'wasm', ext: 'wasm' },
+  { bytes: [0x7f, 0x45, 0x4c, 0x46], mime: 'application/x-elf', formatKey: 'elf', ext: 'elf' },
+  { bytes: [0x53, 0x51, 0x4c, 0x69, 0x74, 0x65], mime: 'application/vnd.sqlite3', formatKey: 'sqlite', ext: 'sqlite' },
+  { bytes: [0x49, 0x44, 0x33], mime: 'audio/mpeg', formatKey: 'mp3', ext: 'mp3' },
+  { bytes: [0x4f, 0x67, 0x67, 0x53], mime: 'audio/ogg', formatKey: 'ogg', ext: 'ogg' },
+  { bytes: [0x66, 0x4c, 0x61, 0x43], mime: 'audio/flac', formatKey: 'flac', ext: 'flac' },
 ];
 
-export function inspectMagicBytes(bytes: Uint8Array): MagicSignatureResult {
+export function inspectMagicBytes(
+  bytes: Uint8Array,
+  locale: Locale = DEFAULT_LOCALE
+): MagicSignatureResult {
+  const formats = getBundle(locale).tools.engines.file.formats;
   const previewSlice = bytes.slice(0, 32);
   const hexHeader = Array.from(previewSlice, (b) => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
   const asciiPreview = Array.from(previewSlice, (b) => (b >= 32 && b <= 126 ? String.fromCharCode(b) : '.')).join('');
@@ -179,7 +189,7 @@ export function inspectMagicBytes(bytes: Uint8Array): MagicSignatureResult {
     if (tag === 'WEBP') {
       return {
         detectedMime: 'image/webp',
-        formatName: 'WebP Image',
+        formatName: formats.webp,
         extension: 'webp',
         confidence: 'exact',
         hexHeader,
@@ -190,7 +200,7 @@ export function inspectMagicBytes(bytes: Uint8Array): MagicSignatureResult {
     if (tag === 'WAVE') {
       return {
         detectedMime: 'audio/wav',
-        formatName: 'WAV Audio',
+        formatName: formats.wav,
         extension: 'wav',
         confidence: 'exact',
         hexHeader,
@@ -207,7 +217,7 @@ export function inspectMagicBytes(bytes: Uint8Array): MagicSignatureResult {
       if (matched) {
         return {
           detectedMime: sig.mime,
-          formatName: sig.name,
+          formatName: formats[sig.formatKey],
           extension: sig.ext,
           confidence: 'exact',
           hexHeader,
@@ -223,7 +233,7 @@ export function inspectMagicBytes(bytes: Uint8Array): MagicSignatureResult {
   if (sampleText.startsWith('<svg') || (sampleText.startsWith('<?xml') && sampleText.includes('<svg'))) {
     return {
       detectedMime: 'image/svg+xml',
-      formatName: 'SVG Vector Graphic',
+      formatName: formats.svg,
       extension: 'svg',
       confidence: 'heuristic',
       hexHeader,
@@ -234,7 +244,7 @@ export function inspectMagicBytes(bytes: Uint8Array): MagicSignatureResult {
   if (sampleText.startsWith('{') || sampleText.startsWith('[')) {
     return {
       detectedMime: 'application/json',
-      formatName: 'JSON / Text Data',
+      formatName: formats.json,
       extension: 'json',
       confidence: 'heuristic',
       hexHeader,
@@ -250,7 +260,7 @@ export function inspectMagicBytes(bytes: Uint8Array): MagicSignatureResult {
 
   return {
     detectedMime: printableRatio > 0.85 ? 'text/plain' : 'application/octet-stream',
-    formatName: printableRatio > 0.85 ? 'Plain Text / Source File' : 'Binary Octet Stream',
+    formatName: printableRatio > 0.85 ? formats.plainText : formats.octetStream,
     extension: printableRatio > 0.85 ? 'txt' : 'bin',
     confidence: 'heuristic',
     hexHeader,

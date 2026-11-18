@@ -1,4 +1,12 @@
 import type { Metadata } from 'next';
+import {
+  DEFAULT_LOCALE,
+  LOCALE_META,
+  SUPPORTED_LOCALES,
+  localePath,
+  type Locale,
+} from '@/i18n/config';
+import { getBundle, getFixedT } from '@/i18n/translator';
 import { CategoryDefinition, ToolDefinition } from '@/lib/tools/registry';
 
 export const SITE_NAME = 'OmniDev IT-Tools';
@@ -8,76 +16,127 @@ export function getSiteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
 }
 
-export function buildHomeMetadata(): Metadata {
-  const url = getSiteUrl();
-  const title = `${SITE_NAME} — 24+ Privacy-First Browser Developer Tools`;
-  const description =
-    'High-performance, 100% client-side developer utilities: Image converter & compressor, JSON/YAML/CSV, SHA-256, JWT decoder, Regex tester, OKLCH & WCAG contrast, Chmod, Cron, and DevOps cheatsheets.';
+function buildLanguageAlternates(path: string = '/'): Record<string, string> {
+  const base = getSiteUrl();
+  const languages: Record<string, string> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    languages[LOCALE_META[locale].htmlLang] = `${base}${localePath(locale, path)}`;
+  }
+  languages['x-default'] = `${base}${localePath(DEFAULT_LOCALE, path)}`;
+  return languages;
+}
+
+export function buildHomeMetadata(locale: Locale = DEFAULT_LOCALE): Metadata {
+  const base = getSiteUrl();
+  const url = `${base}${localePath(locale, '/')}`;
+  const seo = getBundle(locale).common.seo;
+  const brand = getBundle(locale).common.brand;
 
   return {
-    title,
-    description,
-    keywords: [
-      'developer tools',
-      'it tools',
-      'jwt decoder',
-      'json yaml converter',
-      'regex tester',
-      'oklch converter',
-      'wcag contrast checker',
-      'chmod calculator',
-      'cron parser',
-    ],
-    alternates: { canonical: url },
+    title: seo.homeTitle,
+    description: seo.homeDescription,
+    keywords: seo.homeKeywords,
+    alternates: {
+      canonical: url,
+      languages: buildLanguageAlternates('/'),
+    },
     openGraph: {
-      title,
-      description,
+      title: seo.homeTitle,
+      description: seo.homeDescription,
       url,
-      siteName: SITE_NAME,
+      siteName: brand.siteName,
+      locale: LOCALE_META[locale].ogLocale,
+      alternateLocale: SUPPORTED_LOCALES.filter((l) => l !== locale).map(
+        (l) => LOCALE_META[l].ogLocale
+      ),
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
-      description,
+      title: seo.homeTitle,
+      description: seo.homeDescription,
     },
   };
 }
 
-export function buildCategoryMetadata(category: CategoryDefinition): Metadata {
-  const url = `${getSiteUrl()}/categories/${category.slug}`;
+export function buildCategoryMetadata(
+  category: CategoryDefinition,
+  locale: Locale = DEFAULT_LOCALE
+): Metadata {
+  const base = getSiteUrl();
+  const path = `/categories/${category.slug}`;
+  const url = `${base}${localePath(locale, path)}`;
+  const t = getFixedT(locale);
+  const brand = getBundle(locale).common.brand;
+
   return {
-    title: `${category.seoTitle} | ${SITE_NAME}`,
+    title: t('seo.categoryTitleTemplate', {
+      seoTitle: category.seoTitle,
+      siteName: brand.siteName,
+    }),
     description: category.seoDescription,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: buildLanguageAlternates(path),
+    },
     openGraph: {
-      title: `${category.name} — ${SITE_NAME}`,
+      title: t('seo.categoryOgTitleTemplate', {
+        name: category.name,
+        siteName: brand.siteName,
+      }),
       description: category.seoDescription,
       url,
-      siteName: SITE_NAME,
+      siteName: brand.siteName,
+      locale: LOCALE_META[locale].ogLocale,
+      alternateLocale: SUPPORTED_LOCALES.filter((l) => l !== locale).map(
+        (l) => LOCALE_META[l].ogLocale
+      ),
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${category.name} | ${SITE_NAME}`,
+      title: t('seo.categoryTwitterTitleTemplate', {
+        name: category.name,
+        siteName: brand.siteName,
+      }),
       description: category.seoDescription,
     },
   };
 }
 
-export function buildToolMetadata(tool: ToolDefinition, category: CategoryDefinition): Metadata {
-  const url = `${getSiteUrl()}/tools/${tool.category}/${tool.slug}`;
-  const title = `${tool.name} — Free Online ${category.name} Tool | ${SITE_NAME}`;
+export function buildToolMetadata(
+  tool: ToolDefinition,
+  category: CategoryDefinition,
+  locale: Locale = DEFAULT_LOCALE
+): Metadata {
+  const base = getSiteUrl();
+  const path = `/tools/${tool.category}/${tool.slug}`;
+  const url = `${base}${localePath(locale, path)}`;
+  const t = getFixedT(locale);
+  const brand = getBundle(locale).common.brand;
+  const title = t('seo.toolTitleTemplate', {
+    toolName: tool.name,
+    categoryName: category.name,
+    siteName: brand.siteName,
+  });
+
   return {
     title,
     description: tool.longDescription,
     keywords: tool.keywords,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: buildLanguageAlternates(path),
+    },
     openGraph: {
       title,
       description: tool.longDescription,
       url,
-      siteName: SITE_NAME,
+      siteName: brand.siteName,
+      locale: LOCALE_META[locale].ogLocale,
+      alternateLocale: SUPPORTED_LOCALES.filter((l) => l !== locale).map(
+        (l) => LOCALE_META[l].ogLocale
+      ),
       type: 'website',
     },
     twitter: {
@@ -88,44 +147,60 @@ export function buildToolMetadata(tool: ToolDefinition, category: CategoryDefini
   };
 }
 
-export function buildWebSiteJsonLd() {
-  const url = getSiteUrl();
+export function buildWebSiteJsonLd(locale: Locale = DEFAULT_LOCALE) {
+  const base = getSiteUrl();
+  const url = `${base}${localePath(locale, '/')}`;
+  const brand = getBundle(locale).common.brand;
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: SITE_NAME,
-    description: SITE_TAGLINE,
+    name: brand.siteName,
+    description: brand.siteTagline,
+    inLanguage: LOCALE_META[locale].htmlLang,
     url,
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${url}/?q={search_term_string}`,
+      target: `${url}?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
 }
 
-export function buildCollectionPageJsonLd(category: CategoryDefinition, tools: ToolDefinition[]) {
-  const url = getSiteUrl();
+export function buildCollectionPageJsonLd(
+  category: CategoryDefinition,
+  tools: ToolDefinition[],
+  locale: Locale = DEFAULT_LOCALE
+) {
+  const base = getSiteUrl();
+  const brand = getBundle(locale).common.brand;
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${category.name} — ${SITE_NAME}`,
+    name: `${category.name} — ${brand.siteName}`,
     description: category.seoDescription,
-    url: `${url}/categories/${category.slug}`,
+    inLanguage: LOCALE_META[locale].htmlLang,
+    url: `${base}${localePath(locale, `/categories/${category.slug}`)}`,
     hasPart: tools.map((t) => ({
       '@type': 'SoftwareApplication',
       name: t.name,
       description: t.shortDescription,
-      url: `${url}/tools/${t.category}/${t.slug}`,
+      url: `${base}${localePath(locale, `/tools/${t.category}/${t.slug}`)}`,
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Web Browser',
     })),
   };
 }
 
-export function buildToolJsonLd(tool: ToolDefinition, category: CategoryDefinition) {
-  const url = getSiteUrl();
-  const toolUrl = `${url}/tools/${tool.category}/${tool.slug}`;
+export function buildToolJsonLd(
+  tool: ToolDefinition,
+  category: CategoryDefinition,
+  locale: Locale = DEFAULT_LOCALE
+) {
+  const base = getSiteUrl();
+  const homeUrl = `${base}${localePath(locale, '/')}`;
+  const catUrl = `${base}${localePath(locale, `/categories/${category.slug}`)}`;
+  const toolUrl = `${base}${localePath(locale, `/tools/${tool.category}/${tool.slug}`)}`;
+  const homeLabel = getBundle(locale).common.actions.home;
 
   return [
     {
@@ -133,6 +208,7 @@ export function buildToolJsonLd(tool: ToolDefinition, category: CategoryDefiniti
       '@type': 'SoftwareApplication',
       name: tool.name,
       description: tool.longDescription,
+      inLanguage: LOCALE_META[locale].htmlLang,
       url: toolUrl,
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any (Web Browser)',
@@ -147,8 +223,8 @@ export function buildToolJsonLd(tool: ToolDefinition, category: CategoryDefiniti
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: url },
-        { '@type': 'ListItem', position: 2, name: category.name, item: `${url}/categories/${category.slug}` },
+        { '@type': 'ListItem', position: 1, name: homeLabel, item: homeUrl },
+        { '@type': 'ListItem', position: 2, name: category.name, item: catUrl },
         { '@type': 'ListItem', position: 3, name: tool.name, item: toolUrl },
       ],
     },

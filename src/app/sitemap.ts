@@ -1,33 +1,55 @@
 import type { MetadataRoute } from 'next';
 import { CATEGORIES, TOOLS } from '@/lib/tools/registry';
 import { getSiteUrl } from '@/lib/seo';
+import { DEFAULT_LOCALE, LOCALE_META, SUPPORTED_LOCALES, localePath } from '@/i18n/config';
+
+function buildAlternates(path: string) {
+  const base = getSiteUrl();
+  const languages: Record<string, string> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    languages[LOCALE_META[locale].htmlLang] = `${base}${localePath(locale, path)}`;
+  }
+  languages['x-default'] = `${base}${localePath(DEFAULT_LOCALE, path)}`;
+  return { languages };
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();
   const now = new Date();
 
-  const homeEntry: MetadataRoute.Sitemap = [
-    {
-      url: base,
+  const entries: MetadataRoute.Sitemap = [];
+
+  for (const locale of SUPPORTED_LOCALES) {
+    entries.push({
+      url: `${base}${localePath(locale, '/')}`,
       lastModified: now,
       changeFrequency: 'weekly',
-      priority: 1,
-    },
-  ];
+      priority: locale === DEFAULT_LOCALE ? 1 : 0.95,
+      alternates: buildAlternates('/'),
+    });
 
-  const categoryEntries: MetadataRoute.Sitemap = CATEGORIES.map((cat) => ({
-    url: `${base}/categories/${cat.slug}`,
-    lastModified: now,
-    changeFrequency: 'weekly',
-    priority: 0.85,
-  }));
+    for (const cat of CATEGORIES) {
+      const catPath = `/categories/${cat.slug}`;
+      entries.push({
+        url: `${base}${localePath(locale, catPath)}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.85,
+        alternates: buildAlternates(catPath),
+      });
+    }
 
-  const toolEntries: MetadataRoute.Sitemap = TOOLS.map((tool) => ({
-    url: `${base}/tools/${tool.category}/${tool.slug}`,
-    lastModified: now,
-    changeFrequency: 'monthly',
-    priority: tool.featured ? 0.9 : 0.8,
-  }));
+    for (const tool of TOOLS) {
+      const toolPath = `/tools/${tool.category}/${tool.slug}`;
+      entries.push({
+        url: `${base}${localePath(locale, toolPath)}`,
+        lastModified: now,
+        changeFrequency: 'monthly',
+        priority: tool.featured ? 0.9 : 0.8,
+        alternates: buildAlternates(toolPath),
+      });
+    }
+  }
 
-  return [...homeEntry, ...categoryEntries, ...toolEntries];
+  return entries;
 }

@@ -14,6 +14,7 @@ import {
   type MagicSignatureResult,
 } from '@/lib/tools/engines/file';
 import { formatBytes } from '@/lib/tools/engines/image';
+import { useI18n } from '@/i18n/client';
 import type { ToolSuiteProps } from '@/components/tools/suites/types';
 
 const SAMPLE_JSON = `[
@@ -22,6 +23,7 @@ const SAMPLE_JSON = `[
 ]`;
 
 export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: ToolSuiteProps) {
+  const { locale, t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 1. JSON <-> YAML <-> CSV
@@ -40,12 +42,15 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
     typeof initialState?.hashText === 'string' ? initialState.hashText : 'omnidev-integrity-check'
   );
   const [hashFileName, setHashFileName] = useState<string>('');
-  const [expectedHash, setExpectedHash] = useState<string>('');
+  const [expectedHash, setExpectedHash] = useState<string>(
+    typeof initialState?.expectedHash === 'string' ? initialState.expectedHash : ''
+  );
   const [hashes, setHashes] = useState<Record<string, string>>({});
 
   // 3. Magic Bytes Inspector
-  const [magicResult, setMagicResult] = useState<MagicSignatureResult | null>(null);
+  const [magicBytes, setMagicBytes] = useState<Uint8Array | null>(null);
   const [magicFileName, setMagicFileName] = useState<string>('');
+  const [magicSampleMode, setMagicSampleMode] = useState<boolean>(false);
 
   // 4. Side-by-Side Diff
   const [leftText, setLeftText] = useState<string>(
@@ -60,8 +65,8 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   );
 
   useEffect(() => {
-    onStateChange?.({ fromFmt, toFmt, dataInput, hashText, leftText, rightText });
-  }, [fromFmt, toFmt, dataInput, hashText, leftText, rightText, onStateChange]);
+    onStateChange?.({ fromFmt, toFmt, dataInput, hashText, expectedHash, leftText, rightText });
+  }, [fromFmt, toFmt, dataInput, hashText, expectedHash, leftText, rightText, onStateChange]);
 
   // Auto-hash text changes
   useEffect(() => {
@@ -78,8 +83,13 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   }, [hashText, hashFileName, toolId]);
 
   const dataConversion = useMemo(
-    () => convertStructuredData(dataInput, fromFmt, toFmt, true),
-    [dataInput, fromFmt, toFmt]
+    () => convertStructuredData(dataInput, fromFmt, toFmt, true, locale),
+    [dataInput, fromFmt, toFmt, locale]
+  );
+
+  const magicResult: MagicSignatureResult | null = useMemo(
+    () => (magicBytes ? inspectMagicBytes(magicBytes, locale) : null),
+    [magicBytes, locale]
   );
 
   const diffLines = useMemo(
@@ -98,9 +108,10 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
 
   const handleMagicFile = async (file: File | undefined) => {
     if (!file) return;
+    setMagicSampleMode(false);
     setMagicFileName(`${file.name} (${formatBytes(file.size)})`);
     const slice = await file.slice(0, 512).arrayBuffer();
-    setMagicResult(inspectMagicBytes(new Uint8Array(slice)));
+    setMagicBytes(new Uint8Array(slice));
     onRun?.();
   };
 
@@ -109,14 +120,16 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
       <BentoGrid>
         <BentoCard span="6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <h2 className="section-title">Input ({fromFmt.toUpperCase()})</h2>
+            <h2 className="section-title">
+              {t('tools:fileSuite.inputHeading', { format: fromFmt.toUpperCase() })}
+            </h2>
             <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
               <select
                 className="select-field"
                 style={{ width: 'auto', padding: '0.35rem 0.65rem' }}
                 value={fromFmt}
                 onChange={(e) => setFromFmt(e.target.value as DataFormat)}
-                aria-label="Source format"
+                aria-label={t('tools:fileSuite.sourceFormatAria')}
               >
                 <option value="json">JSON</option>
                 <option value="yaml">YAML</option>
@@ -133,16 +146,16 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
                     onRun?.();
                   }
                 }}
-                aria-label="Swap formats"
+                aria-label={t('tools:fileSuite.swapFormatsAria')}
               >
-                <ArrowLeftRight size={14} /> Swap
+                <ArrowLeftRight size={14} /> {t('actions.swap')}
               </button>
               <select
                 className="select-field"
                 style={{ width: 'auto', padding: '0.35rem 0.65rem' }}
                 value={toFmt}
                 onChange={(e) => setToFmt(e.target.value as DataFormat)}
-                aria-label="Target format"
+                aria-label={t('tools:fileSuite.targetFormatAria')}
               >
                 <option value="yaml">YAML</option>
                 <option value="json">JSON</option>
@@ -156,22 +169,24 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
             value={dataInput}
             onChange={(e) => setDataInput(e.target.value)}
             style={{ minHeight: '280px', fontSize: '0.82rem' }}
-            aria-label="Structured data input"
+            aria-label={t('tools:fileSuite.structuredInputAria')}
           />
         </BentoCard>
 
         <BentoCard span="6">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 className="section-title">Output ({toFmt.toUpperCase()})</h2>
+            <h2 className="section-title">
+              {t('tools:fileSuite.outputHeading', { format: toFmt.toUpperCase() })}
+            </h2>
             <CopyButton
               value={dataConversion.ok ? dataConversion.output : ''}
-              label={`Copy ${toFmt.toUpperCase()}`}
+              label={t('tools:fileSuite.copyFormatBtn', { format: toFmt.toUpperCase() })}
               onCopied={onRun}
             />
           </div>
           {!dataConversion.ok ? (
             <div className="glass-panel badge-danger" style={{ padding: '1rem' }}>
-              <strong>Parse Error:</strong> {dataConversion.error}
+              <strong>{t('tools:fileSuite.parseError')}</strong> {dataConversion.error}
             </div>
           ) : (
             <textarea
@@ -179,7 +194,7 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
               readOnly
               value={dataConversion.output}
               style={{ minHeight: '280px', fontSize: '0.82rem' }}
-              aria-label="Structured data output"
+              aria-label={t('tools:fileSuite.structuredOutputAria')}
             />
           )}
         </BentoCard>
@@ -196,7 +211,7 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
     return (
       <BentoGrid>
         <BentoCard span="5">
-          <h2 className="section-title">File or Text Input</h2>
+          <h2 className="section-title">{t('tools:fileSuite.hashInputTitle')}</h2>
           <div
             className="dropzone"
             onClick={() => fileInputRef.current?.click()}
@@ -208,9 +223,9 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
           >
             <Upload size={20} style={{ color: 'var(--accent)', marginBottom: '0.35rem' }} />
             <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-              {hashFileName || 'Drop or select any file to hash'}
+              {hashFileName || t('tools:fileSuite.dropHashTitle')}
             </div>
-            <div className="subtle-text">Computed locally with Web Crypto API</div>
+            <div className="subtle-text">{t('tools:fileSuite.dropHashSub')}</div>
             <input
               ref={fileInputRef}
               type="file"
@@ -220,7 +235,7 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
           </div>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.82rem' }}>
-            <span className="muted-text">Or hash UTF-8 text string</span>
+            <span className="muted-text">{t('tools:fileSuite.hashTextLabel')}</span>
             <textarea
               className="textarea-field font-mono"
               value={hashText}
@@ -233,13 +248,13 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
           </label>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.82rem' }}>
-            <span className="muted-text">Compare Expected Checksum (Optional)</span>
+            <span className="muted-text">{t('tools:fileSuite.expectedHashLabel')}</span>
             <input
               type="text"
               className="input-field font-mono"
               value={expectedHash}
               onChange={(e) => setExpectedHash(e.target.value)}
-              placeholder="Paste expected SHA-256 / SHA-512 hex..."
+              placeholder={t('tools:fileSuite.expectedHashPlaceholder')}
             />
           </label>
           {normalizedExpected && (
@@ -250,24 +265,24 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
               {matchedAlgo ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
               <span>
                 {matchedAlgo
-                  ? `Checksum verified — matches ${matchedAlgo}`
-                  : 'Checksum mismatch across SHA-1/256/384/512'}
+                  ? t('tools:fileSuite.checksumMatch', { algo: matchedAlgo })
+                  : t('tools:fileSuite.checksumMismatch')}
               </span>
             </div>
           )}
         </BentoCard>
 
         <BentoCard span="7">
-          <h2 className="section-title">Cryptographic Digests</h2>
+          <h2 className="section-title">{t('tools:fileSuite.digestsTitle')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {(['SHA-256', 'SHA-512', 'SHA-384', 'SHA-1'] as const).map((algo) => (
               <div key={algo} className="glass-panel" style={{ padding: '0.75rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                   <span className="glass-pill">{algo}</span>
-                  <CopyButton value={hashes[algo] ?? ''} label="Copy" onCopied={onRun} />
+                  <CopyButton value={hashes[algo] ?? ''} label={t('actions.copy')} onCopied={onRun} />
                 </div>
                 <code className="font-mono" style={{ fontSize: '0.79rem', wordBreak: 'break-all' }}>
-                  {hashes[algo] || 'Computing...'}
+                  {hashes[algo] || t('tools:fileSuite.computing')}
                 </code>
               </div>
             ))}
@@ -278,10 +293,14 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   }
 
   if (toolId === 'file-inspector') {
+    const displayedName = magicSampleMode
+      ? t('tools:fileSuite.samplePngName')
+      : magicFileName || t('tools:fileSuite.dropMagicTitle');
+
     return (
       <BentoGrid>
         <BentoCard span="5">
-          <h2 className="section-title">Select Binary or Text File</h2>
+          <h2 className="section-title">{t('tools:fileSuite.selectMagicTitle')}</h2>
           <div
             className="dropzone"
             onClick={() => fileInputRef.current?.click()}
@@ -292,8 +311,8 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
             }}
           >
             <Upload size={22} style={{ color: 'var(--accent)', marginBottom: '0.4rem' }} />
-            <div style={{ fontWeight: 600 }}>{magicFileName || 'Drop any file to inspect header bytes'}</div>
-            <div className="subtle-text">Reads only the leading 512 bytes locally</div>
+            <div style={{ fontWeight: 600 }}>{displayedName}</div>
+            <div className="subtle-text">{t('tools:fileSuite.dropMagicSub')}</div>
             <input
               ref={fileInputRef}
               type="file"
@@ -306,40 +325,49 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
             className="btn"
             onClick={() => {
               const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52]);
-              setMagicFileName('sample-header.png (synthetic 16 B)');
-              setMagicResult(inspectMagicBytes(pngBytes));
+              setMagicSampleMode(true);
+              setMagicFileName('');
+              setMagicBytes(pngBytes);
               onRun?.();
             }}
           >
-            Inspect Sample PNG Signature
+            {t('tools:fileSuite.inspectSampleBtn')}
           </button>
         </BentoCard>
 
         <BentoCard span="7">
-          <h2 className="section-title">Magic Bytes &amp; MIME Report</h2>
+          <h2 className="section-title">{t('tools:fileSuite.magicReportTitle')}</h2>
           {magicResult ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span className="glass-pill glass-pill-active">{magicResult.detectedMime}</span>
                 <span className="glass-pill">{magicResult.formatName}</span>
                 <span className="glass-pill">.{magicResult.extension}</span>
-                <span className="glass-pill">{magicResult.confidence} match</span>
+                <span className="glass-pill">
+                  {magicResult.confidence === 'exact'
+                    ? t('tools:fileSuite.confidenceExact')
+                    : t('tools:fileSuite.confidenceHeuristic')}
+                </span>
               </div>
               <div className="glass-panel" style={{ padding: '0.8rem' }}>
-                <div className="subtle-text" style={{ marginBottom: '0.35rem' }}>Leading Hex Header (first 32 bytes)</div>
+                <div className="subtle-text" style={{ marginBottom: '0.35rem' }}>
+                  {t('tools:fileSuite.leadingHexLabel')}
+                </div>
                 <code className="font-mono" style={{ fontSize: '0.82rem', wordBreak: 'break-word' }}>
                   {magicResult.hexHeader}
                 </code>
               </div>
               <div className="glass-panel" style={{ padding: '0.8rem' }}>
-                <div className="subtle-text" style={{ marginBottom: '0.35rem' }}>ASCII Representation</div>
+                <div className="subtle-text" style={{ marginBottom: '0.35rem' }}>
+                  {t('tools:fileSuite.asciiPreviewLabel')}
+                </div>
                 <code className="font-mono" style={{ fontSize: '0.82rem' }}>
                   {magicResult.asciiPreview}
                 </code>
               </div>
             </div>
           ) : (
-            <p className="muted-text">Select a file or test the sample PNG signature to view hex headers.</p>
+            <p className="muted-text">{t('tools:fileSuite.magicEmpty')}</p>
           )}
         </BentoCard>
       </BentoGrid>
@@ -353,7 +381,7 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   return (
     <BentoGrid>
       <BentoCard span="6">
-        <h2 className="section-title">Original (Left)</h2>
+        <h2 className="section-title">{t('tools:fileSuite.diffOriginalTitle')}</h2>
         <textarea
           className="textarea-field font-mono"
           value={leftText}
@@ -362,7 +390,7 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
         />
       </BentoCard>
       <BentoCard span="6">
-        <h2 className="section-title">Modified (Right)</h2>
+        <h2 className="section-title">{t('tools:fileSuite.diffModifiedTitle')}</h2>
         <textarea
           className="textarea-field font-mono"
           value={rightText}
@@ -372,10 +400,14 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
       </BentoCard>
       <BentoCard span="12">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <h2 className="section-title">Line-by-Line Diff</h2>
+          <h2 className="section-title">{t('tools:fileSuite.diffOutputTitle')}</h2>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <span className="glass-pill badge-success">+{addedCount} added</span>
-            <span className="glass-pill badge-danger">-{removedCount} removed</span>
+            <span className="glass-pill badge-success">
+              {t('tools:fileSuite.diffAdded', { count: addedCount })}
+            </span>
+            <span className="glass-pill badge-danger">
+              {t('tools:fileSuite.diffRemoved', { count: removedCount })}
+            </span>
           </div>
         </div>
         <div

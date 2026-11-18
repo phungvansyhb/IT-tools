@@ -1,3 +1,7 @@
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/config';
+import { getBundle } from '@/i18n/translator';
+import type { CheatsheetEntryId } from '@/i18n/types';
+
 export interface CheatsheetEntry {
   id: string;
   sheet: 'git-cheatsheet' | 'http-cheatsheet' | 'devops-cheatsheet';
@@ -195,3 +199,22 @@ export const CHEATSHEET_ENTRIES: CheatsheetEntry[] = [
     tags: ['docker', 'compose', 'build'],
   },
 ];
+
+export function getLocalizedCheatsheetEntries(
+  locale: Locale = DEFAULT_LOCALE,
+  sheet?: CheatsheetEntry['sheet']
+): CheatsheetEntry[] {
+  const dict = getBundle(locale).cheatsheets.entries;
+  const list = sheet ? CHEATSHEET_ENTRIES.filter((e) => e.sheet === sheet) : CHEATSHEET_ENTRIES;
+  return list.map((entry) => {
+    const loc = dict[entry.id as CheatsheetEntryId];
+    if (!loc) return entry;
+    return {
+      ...entry,
+      group: loc.group,
+      title: loc.title,
+      description: loc.description,
+      tags: loc.tags,
+    };
+  });
+}
