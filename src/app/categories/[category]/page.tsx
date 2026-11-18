@@ -1,0 +1,96 @@
+import React from 'react';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { ChevronRight } from 'lucide-react';
+import {
+  CATEGORIES,
+  getCategoryBySlug,
+  getToolsByCategory,
+} from '@/lib/tools/registry';
+import { buildCategoryMetadata, buildCollectionPageJsonLd } from '@/lib/seo';
+import { BentoGrid } from '@/components/bento/BentoGrid';
+import { BentoCard, ToolBentoCard } from '@/components/bento/BentoCard';
+import { ToolIcon } from '@/components/common/ToolIcon';
+
+export function generateStaticParams() {
+  return CATEGORIES.map((cat) => ({ category: cat.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
+  const { category: slug } = await params;
+  const cat = getCategoryBySlug(slug);
+  if (!cat) return {};
+  return buildCategoryMetadata(cat);
+}
+
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
+  const { category: slug } = await params;
+  const category = getCategoryBySlug(slug);
+  if (!category) notFound();
+
+  const tools = getToolsByCategory(category.slug);
+  const jsonLd = buildCollectionPageJsonLd(category, tools);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.84rem' }}>
+        <Link href="/" className="muted-text">
+          Home
+        </Link>
+        <ChevronRight size={14} className="subtle-text" />
+        <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{category.name}</span>
+      </nav>
+
+      <BentoGrid>
+        <BentoCard span="12">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '12px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--accent-glow)',
+                border: '1px solid var(--accent-border)',
+                color: 'var(--accent)',
+              }}
+            >
+              <ToolIcon name={category.iconName} size={20} />
+            </span>
+            <div>
+              <span className="glass-pill">{tools.length} Browser Tools</span>
+            </div>
+          </div>
+          <h1 className="page-title" style={{ marginTop: '0.25rem' }}>
+            {category.name}
+          </h1>
+          <p className="muted-text" style={{ margin: 0, maxWidth: '70ch', fontSize: '0.96rem' }}>
+            {category.description}
+          </p>
+        </BentoCard>
+      </BentoGrid>
+
+      <BentoGrid>
+        {tools.map((tool) => (
+          <ToolBentoCard key={tool.id} tool={tool} category={category} />
+        ))}
+      </BentoGrid>
+    </div>
+  );
+}
