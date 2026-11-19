@@ -11,7 +11,7 @@ import { LocaleHtmlLangSync } from '@/i18n/LocaleHtmlLangSync';
 import { UserWorkspaceProvider } from '@/hooks/useUserWorkspace';
 import { FeedbackProvider } from '@/hooks/useFeedback';
 import { AppShell } from '@/components/layout/AppShell';
-import { buildHomeMetadata } from '@/lib/seo';
+import { buildHomeMetadata, getMetadataBase } from '@/lib/seo';
 
 const inter = Inter({
   variable: '--font-sans',
@@ -45,7 +45,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  if (!isValidLocale(locale)) return {};
+  if (!isValidLocale(locale)) {
+    return {
+      metadataBase: getMetadataBase(),
+    };
+  }
   return buildHomeMetadata(locale);
 }
 

@@ -46,6 +46,17 @@ export const zhCommon: CommonDictionary = {
     navigateHint: '导航',
     openHint: '打开',
     closeHint: '关闭',
+    pageBadge: '页面',
+  },
+  footer: {
+    navAria: '页脚导航',
+    tagline: '隐私优先的浏览器工作区，汇集 7 大套件共 28 款开发者与硬件网络诊断工具。',
+    linksHeading: '信息与条款',
+    openSourceLabel: 'GitHub 开源仓库',
+    githubLabel: 'GitHub',
+    feedbackBtn: '发送反馈',
+    copyrightLine: '© {{year}} OmniDev IT-Tools. 100% 客户端本地运行。',
+    backToHome: '返回首页',
   },
   actions: {
     copy: '复制',

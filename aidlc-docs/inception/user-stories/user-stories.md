@@ -268,3 +268,57 @@
 - **When** the user starts a `Quick` or `Standard` test,
 - **Then** the app runs Ping/Jitter, streaming Download, and XHR Upload against `/api/speedtest/{ping,download,upload}`, plots live throughput in SVG, evaluates Video Call / 4K Streaming / Gaming / Cloud Sync suitability, and saves up to 20 runs in `localStorage`;
 - **And** clicking Abort or leaving the page immediately cancels in-flight requests.
+
+---
+
+## `US-21`: Cohesive Brand Identity Across App Shell, Browser Tabs, PWA & Social Cards (`FR-32`, `FR-33`, `FR-34`)
+**As** a developer bookmarking, installing as a PWA, or sharing an OmniDev tool link on Slack/Discord/X,
+**I want** a consistent Zinc & Emerald `>_` terminal mark in the Sidebar, favicon, Apple touch icon, PWA manifest, and `1200×630` OpenGraph/Twitter social previews,
+**So that** the hub looks trustworthy and polished everywhere without broken starter icons or redirected metadata assets.
+
+### Acceptance Criteria
+- **Given** a user visits any localized route or installs OmniDev as a PWA,
+- **When** the browser or social crawler requests `/icon.svg`, `/favicon.ico`, `/apple-icon`, `/opengraph-image`, `/twitter-image`, `/manifest.webmanifest`, or `/icons/icon-192.png`,
+- **Then** `src/proxy.ts` bypasses locale redirection and returns the asset with HTTP `200`,
+- **And** `<BrandLogo />` renders the `>_` vector mark inside the `AppShell` Sidebar, while `openGraph.images` / `twitter.images` resolve cleanly against `metadataBase`.
+
+---
+
+## `US-22`: Discovering Help, About, Privacy, Terms & Contact via Footer, Sidebar & `Cmd+K` (`FR-36`, `FR-38`)
+**As** Alex or a security-conscious enterprise reviewer,
+**I want** clear links to `About`, `Help / FAQ`, `Privacy`, `Terms`, and `Contact` in the global footer, compact sidebar footer, and `Cmd+K` Command Palette,
+**So that** I can inspect OmniDev's privacy guarantees, hardware permissions, and troubleshooting docs from any screen in one click or keystroke.
+
+### Acceptance Criteria
+- **Given** the user is on any localized page (Desktop or `375px` Mobile),
+- **When** the user scrolls to `<SiteFooter />`, checks the Sidebar Footer compact links, or presses `Cmd/Ctrl+K` and searches `"privacy"`, `"faq"`, `"bảo mật"`, or `"contact"`,
+- **Then** all 5 info routes appear and navigate cleanly inside the active locale (`/{locale}/{slug}`),
+- **And** the Topbar at `375px` remains free of horizontal overflow, and `/[locale]/admin/feedback` remains hidden from public navigation.
+
+---
+
+## `US-23`: Truthful Privacy & Architecture Transparency with One-Click Feedback Contact (`FR-35`, `FR-37`, `NFR-21`)
+**As** Maya or Minh evaluating whether JWTs, microphone audio, or speed-test payloads ever leave my browser,
+**I want** accurate documentation of client-side execution, `localStorage`/`omnidev_locale` cookies, optional Supabase sync, hardware permissions, and self-hosted `/api/speedtest/*` limits alongside an immediate way to reach maintainers,
+**So that** I understand exact data boundaries and can send bug reports or contact maintainers seamlessly even when no support email is configured.
+
+### Acceptance Criteria
+- **Given** the user opens `/[locale]/privacy`, `/[locale]/help`, or `/[locale]/contact`,
+- **When** `NEXT_PUBLIC_SUPPORT_EMAIL` is unset,
+- **Then** `/[locale]/contact` renders a primary button that opens `FeedbackModal` (plus the configured GitHub link from `src/lib/site.ts`), with zero fake `mailto:` placeholders;
+- **When** `NEXT_PUBLIC_SUPPORT_EMAIL` is configured,
+- **Then** `/[locale]/contact` displays the verified `mailto:` link and Copy button alongside `FeedbackModal` and GitHub links.
+
+---
+
+## `US-24`: Multilingual SSG Indexing & Rich JSON-LD for Backlink & Info Pages (`FR-39`, `NFR-19`)
+**As** a search engine crawler indexing localized documentation and legal pages,
+**I want** all 5 info pages statically generated in `en`, `vi`, `ja`, and `zh` with `hreflang` alternates, `164` sitemap URLs, internal tool/category backlinks, and Schema.org JSON-LD (`AboutPage`, `FAQPage`, `ContactPage`, `WebPage`, `BreadcrumbList`),
+**So that** regional users discover authoritative documentation and internal link equity flows naturally across the hub.
+
+### Acceptance Criteria
+- **Given** `npm run build` and `sitemap()` execute,
+- **When** inspecting `/sitemap.xml` and built HTML for `/{locale}/{about,help,privacy,terms,contact}`,
+- **Then** `sitemap()` contains exactly `164` URLs with `en`, `vi`, `ja`, `zh-Hans`, and `x-default` alternates,
+- **And** each info page renders a single `<html lang>` attribute, `canonical` + `og:image`, internal links back to tools/categories, and valid JSON-LD matching the page's Schema.org type and `inLanguage`.
+

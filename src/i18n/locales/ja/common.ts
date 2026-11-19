@@ -48,6 +48,17 @@ export const jaCommon: CommonDictionary = {
     navigateHint: '移動',
     openHint: '開く',
     closeHint: '閉じる',
+    pageBadge: 'ページ',
+  },
+  footer: {
+    navAria: 'フッターナビゲーション',
+    tagline: '7カテゴリー・28種類の開発＆診断ユーティリティを備えたプライバシー優先のブラウザワークスペース。',
+    linksHeading: '情報・ポリシー',
+    openSourceLabel: 'GitHub でソースを公開',
+    githubLabel: 'GitHub',
+    feedbackBtn: 'フィードバック送信',
+    copyrightLine: '© {{year}} OmniDev IT-Tools. 100% クライアント側で実行。',
+    backToHome: 'ホームハブに戻る',
   },
   actions: {
     copy: 'コピー',

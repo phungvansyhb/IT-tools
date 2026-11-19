@@ -7,6 +7,12 @@ import {
   Palette,
   Calculator,
   BookOpen,
+  Info,
+  HelpCircle,
+  Shield,
+  FileText,
+  Mail,
+  ExternalLink,
   Wrench,
 } from 'lucide-react';
 
@@ -31,6 +37,18 @@ export function ToolIcon({ name, size = 16 }: ToolIconProps) {
       return <Calculator size={size} aria-hidden="true" />;
     case 'BookOpen':
       return <BookOpen size={size} aria-hidden="true" />;
+    case 'Info':
+      return <Info size={size} aria-hidden="true" />;
+    case 'HelpCircle':
+      return <HelpCircle size={size} aria-hidden="true" />;
+    case 'Shield':
+      return <Shield size={size} aria-hidden="true" />;
+    case 'FileText':
+      return <FileText size={size} aria-hidden="true" />;
+    case 'Mail':
+      return <Mail size={size} aria-hidden="true" />;
+    case 'ExternalLink':
+      return <ExternalLink size={size} aria-hidden="true" />;
     default:
       return <Wrench size={size} aria-hidden="true" />;
   }

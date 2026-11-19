@@ -6,23 +6,13 @@ import {
   localePath,
   type Locale,
 } from '@/i18n/config';
-import { detectBestLocale } from '@/i18n/detect';
-
-const PUBLIC_FILE_REGEX = /\.[a-zA-Z0-9]+$/;
+import { detectBestLocale, shouldBypassLocaleProxy } from '@/i18n/detect';
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   // Skip Next.js internals, API routes, metadata endpoints, and static public assets
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname === '/sitemap.xml' ||
-    pathname === '/robots.txt' ||
-    pathname === '/manifest.webmanifest' ||
-    pathname === '/favicon.ico' ||
-    PUBLIC_FILE_REGEX.test(pathname)
-  ) {
+  if (shouldBypassLocaleProxy(pathname)) {
     return NextResponse.next();
   }
 
@@ -61,7 +51,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|.*\\..*).*)',
+    '/((?!api|_next/static|_next/image|icons|favicon\\.ico|icon\\.svg|icon|apple-icon|opengraph-image|twitter-image|sitemap\\.xml|robots\\.txt|manifest\\.webmanifest|.*\\..*).*)',
   ],
 };
 

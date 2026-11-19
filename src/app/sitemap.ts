@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { CATEGORIES, TOOLS } from '@/lib/tools/registry';
+import { INFO_PAGES } from '@/lib/info/pages';
 import { getSiteUrl } from '@/lib/seo';
 import { DEFAULT_LOCALE, LOCALE_META, SUPPORTED_LOCALES, localePath } from '@/i18n/config';
 
@@ -47,6 +48,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: 'monthly',
         priority: tool.featured ? 0.9 : 0.8,
         alternates: buildAlternates(toolPath),
+      });
+    }
+
+    for (const infoPage of INFO_PAGES) {
+      const infoPath = `/${infoPage.slug}`;
+      entries.push({
+        url: `${base}${localePath(locale, infoPath)}`,
+        lastModified: now,
+        changeFrequency: 'monthly',
+        priority: infoPage.sitemapPriority,
+        alternates: buildAlternates(infoPath),
       });
     }
   }

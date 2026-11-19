@@ -148,3 +148,48 @@
 - [x] `npm run lint` passes with 0 errors
 - [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline, i18n 4-locale parity, Feedback, `7` categories, `28` tools, `144` sitemap URLs, `robots.ts` `/admin` + `/api/*` disallow, and pure `engines/diagnostics.ts` assertions
 - [x] `npm run build` statically generates all routes cleanly alongside dynamic `/api/speedtest/*` Route Handlers
+
+---
+
+### [x] `UNIT-18`: Brand Logo, Deterministic Asset Generator, Metadata Routes, Site Config & Proxy/SEO Pipeline
+- **Files**: `scripts/generate-brand-assets.ts`, `src/lib/site.ts`, `.env.example`, `src/lib/brand/og-template.tsx`, `src/components/common/BrandLogo.tsx`, `src/app/icon.svg`, `src/app/favicon.ico`, `src/app/{apple-icon,opengraph-image,twitter-image}.tsx`, `public/icons/{icon-192.png,icon-512.png,icon-maskable-512.png}`, `src/app/manifest.ts`, `src/i18n/detect.ts`, `src/proxy.ts`, `src/lib/seo.ts`, `scripts/verify-aidlc.ts` (delete `public/{next,vercel,globe,file,window}.svg`)
+- **Key Interfaces / Contracts**:
+  - `SiteConfig`: `{ siteUrl: string; githubUrl: string; supportEmail: string | null }` via `resolveSiteConfig(env)` and `getSiteConfig()`
+  - `shouldBypassLocaleProxy(pathname: string): boolean` wired in `src/proxy.ts`
+  - `BrandLogo({ size?: number; className?: string })` matching Zinc `#09090b` + Emerald `#10b981` `>_` mark
+  - `getMetadataBase(): URL` + `openGraph.images` / `twitter.images` across `src/lib/seo.ts`
+- **Verification Gate**: `npx tsx scripts/generate-brand-assets.ts && npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-19`: Info Pages Registry, 4-Locale Dictionaries (`pages.ts` + `footer`), Sitemap (`164` URLs) & Info SEO Builders
+- **Files**: `src/lib/info/pages.ts`, `src/i18n/types.ts`, `src/i18n/translator.ts`, `src/i18n/locales/{en,vi,ja,zh}/{common.ts,pages.ts,index.ts}`, `src/lib/seo.ts`, `src/app/sitemap.ts`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `InfoPageSlug = 'about' | 'help' | 'privacy' | 'terms' | 'contact'` + `INFO_PAGES`, `getLocalizedInfoPages(locale)`, `getLocalizedInfoPage(slug, locale)`
+  - `PagesDictionary` registered as `'pages'` namespace + `CommonDictionary['footer']` + `CommonDictionary['commandPalette']['pageBadge']` with 100% 4-locale parity
+  - `buildInfoPageMetadata(slug, locale)` & `buildInfoPageJsonLd(slug, locale)` (`BreadcrumbList` + `AboutPage` / `FAQPage` / `ContactPage` / `WebPage`)
+  - `sitemap()` length === `164` (`4 × (1 + 7 + 28 + 5)`)
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-20`: Global `<SiteFooter />`, `<BrandLogo />` Shell Integration, Sidebar Links & `CommandPalette` Quick-Jump
+- **Files**: `src/components/layout/SiteFooter.tsx`, `src/components/layout/AppShell.tsx`, `src/components/layout/CommandPalette.tsx`, `src/components/common/ToolIcon.tsx`, `src/app/globals.css`
+- **Key Interfaces / Contracts**:
+  - `<SiteFooter />` mounted inside `.app-main-wrap` below `<main className="app-content">` (`flex: 1`)
+  - `<BrandLogo size={32} />` in `AppShell.tsx` Sidebar header + `.sidebar-legal-links` in Sidebar Footer (Topbar untouched for `375px` parity)
+  - `CommandPalette` `SearchResultItem` extended with `kind: 'page'` matching localized & canonical English keywords
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-21`: 5 Static Localized Info Pages (`about`, `help`, `privacy`, `terms`, `contact`) & Full Verification Suite
+- **Files**: `src/components/info/InfoPageLayout.tsx`, `src/components/info/InfoFeedbackActions.tsx`, `src/app/[locale]/{about,help,privacy,terms,contact}/page.tsx`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `generateStaticParams()` × 4 locales across all 5 info routes (`20` new static routes)
+  - `InfoFeedbackActions` (`variant: 'help' | 'contact'`, `supportEmail`, `githubUrl`) integrating `FeedbackModal` and conditional `mailto:` + Copy
+  - `scripts/verify-aidlc.ts` verifying `<html lang>`, canonical URL, and `og:image` in built HTML across all 5 info routes × 4 locales
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+---
+
+## Pending / Active Verification Checklist (Brand Assets & Backlink Pages Cycle)
+- [x] `npx tsx scripts/generate-brand-assets.ts` generates deterministic `favicon.ico` and `public/icons/*.png`
+- [x] `npm run lint` passes with 0 errors
+- [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline, i18n, Feedback, Diagnostics, Brand Asset, `resolveSiteConfig()`, `shouldBypassLocaleProxy()`, `164`-URL sitemap, `pages` 4-locale parity, and Info Page HTML/JSON-LD assertions
+- [x] `npm run build` statically generates all routes cleanly (`178` static routes + 3 dynamic speedtest routes)
+

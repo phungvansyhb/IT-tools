@@ -7,13 +7,20 @@ import {
   type Locale,
 } from '@/i18n/config';
 import { getBundle, getFixedT } from '@/i18n/translator';
+import { getSiteConfig } from '@/lib/site';
 import { CategoryDefinition, ToolDefinition } from '@/lib/tools/registry';
+import { getInfoPageBySlug, getLocalizedInfoPage, type InfoPageSlug } from '@/lib/info/pages';
 
 export const SITE_NAME = 'OmniDev IT-Tools';
 export const SITE_TAGLINE = 'Privacy-First Developer & Utility Tools Hub';
+const SOCIAL_IMAGE_ALT = 'OmniDev / IT-Tools Hub — Privacy-First Developer & Diagnostic Tools';
 
 export function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
+  return getSiteConfig().siteUrl;
+}
+
+export function getMetadataBase(): URL {
+  return new URL(getSiteUrl());
 }
 
 function buildLanguageAlternates(path: string = '/'): Record<string, string> {
@@ -33,6 +40,7 @@ export function buildHomeMetadata(locale: Locale = DEFAULT_LOCALE): Metadata {
   const brand = getBundle(locale).common.brand;
 
   return {
+    metadataBase: getMetadataBase(),
     title: seo.homeTitle,
     description: seo.homeDescription,
     keywords: seo.homeKeywords,
@@ -50,11 +58,20 @@ export function buildHomeMetadata(locale: Locale = DEFAULT_LOCALE): Metadata {
         (l) => LOCALE_META[l].ogLocale
       ),
       type: 'website',
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: SOCIAL_IMAGE_ALT,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: seo.homeTitle,
       description: seo.homeDescription,
+      images: ['/twitter-image'],
     },
   };
 }
@@ -70,6 +87,7 @@ export function buildCategoryMetadata(
   const brand = getBundle(locale).common.brand;
 
   return {
+    metadataBase: getMetadataBase(),
     title: t('seo.categoryTitleTemplate', {
       seoTitle: category.seoTitle,
       siteName: brand.siteName,
@@ -92,6 +110,14 @@ export function buildCategoryMetadata(
         (l) => LOCALE_META[l].ogLocale
       ),
       type: 'website',
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: SOCIAL_IMAGE_ALT,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
@@ -100,6 +126,7 @@ export function buildCategoryMetadata(
         siteName: brand.siteName,
       }),
       description: category.seoDescription,
+      images: ['/twitter-image'],
     },
   };
 }
@@ -121,6 +148,7 @@ export function buildToolMetadata(
   });
 
   return {
+    metadataBase: getMetadataBase(),
     title,
     description: tool.longDescription,
     keywords: tool.keywords,
@@ -138,11 +166,20 @@ export function buildToolMetadata(
         (l) => LOCALE_META[l].ogLocale
       ),
       type: 'website',
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: SOCIAL_IMAGE_ALT,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description: tool.shortDescription,
+      images: ['/twitter-image'],
     },
   };
 }
@@ -239,6 +276,109 @@ export function buildToolJsonLd(
           text: f.answer,
         },
       })),
+    },
+  ];
+}
+
+export function buildInfoPageMetadata(
+  slug: InfoPageSlug,
+  locale: Locale = DEFAULT_LOCALE
+): Metadata {
+  const base = getSiteUrl();
+  const path = `/${slug}`;
+  const url = `${base}${localePath(locale, path)}`;
+  const info = getLocalizedInfoPage(slug, locale);
+  const brand = getBundle(locale).common.brand;
+
+  return {
+    metadataBase: getMetadataBase(),
+    title: info.metaTitle,
+    description: info.metaDescription,
+    keywords: info.keywords,
+    alternates: {
+      canonical: url,
+      languages: buildLanguageAlternates(path),
+    },
+    openGraph: {
+      title: info.metaTitle,
+      description: info.metaDescription,
+      url,
+      siteName: brand.siteName,
+      locale: LOCALE_META[locale].ogLocale,
+      alternateLocale: SUPPORTED_LOCALES.filter((l) => l !== locale).map(
+        (l) => LOCALE_META[l].ogLocale
+      ),
+      type: 'website',
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: SOCIAL_IMAGE_ALT,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: info.metaTitle,
+      description: info.metaDescription,
+      images: ['/twitter-image'],
+    },
+  };
+}
+
+export function buildInfoPageJsonLd(slug: InfoPageSlug, locale: Locale = DEFAULT_LOCALE) {
+  const base = getSiteUrl();
+  const homeUrl = `${base}${localePath(locale, '/')}`;
+  const pageUrl = `${base}${localePath(locale, `/${slug}`)}`;
+  const bundle = getBundle(locale);
+  const homeLabel = bundle.common.actions.home;
+  const infoDef = getInfoPageBySlug(slug);
+  const info = getLocalizedInfoPage(slug, locale);
+  const schemaType = infoDef?.schemaType ?? info.schemaType;
+  const inLanguage = LOCALE_META[locale].htmlLang;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: homeLabel, item: homeUrl },
+      { '@type': 'ListItem', position: 2, name: info.navLabel, item: pageUrl },
+    ],
+  };
+
+  if (schemaType === 'FAQPage') {
+    const faqs = bundle.pages.help.faqs;
+    return [
+      breadcrumbSchema,
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        name: info.title,
+        description: info.metaDescription,
+        inLanguage,
+        url: pageUrl,
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: f.answer,
+          },
+        })),
+      },
+    ];
+  }
+
+  return [
+    breadcrumbSchema,
+    {
+      '@context': 'https://schema.org',
+      '@type': schemaType,
+      name: info.title,
+      description: info.metaDescription,
+      inLanguage,
+      url: pageUrl,
     },
   ];
 }

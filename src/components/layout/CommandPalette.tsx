@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, Terminal, ArrowRight, X } from 'lucide-react';
 import { getLocalizedCategories, getLocalizedTools } from '@/lib/tools/registry';
 import { getLocalizedCheatsheetEntries } from '@/lib/tools/data/cheatsheets';
+import { getLocalizedInfoPages } from '@/lib/info/pages';
 import { useI18n } from '@/i18n/client';
 import { localePath } from '@/i18n/config';
 import { ToolIcon } from '@/components/common/ToolIcon';
@@ -32,6 +33,15 @@ type SearchResultItem =
       command: string;
       badge: string;
       href: string;
+    }
+  | {
+      kind: 'page';
+      id: string;
+      title: string;
+      subtitle: string;
+      badge: string;
+      iconName: string;
+      href: string;
     };
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
@@ -56,6 +66,9 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
     const categories = getLocalizedCategories(locale);
     const tools = getLocalizedTools(locale);
     const entries = getLocalizedCheatsheetEntries(locale);
+    const infoPages = getLocalizedInfoPages(locale);
+    const enInfoPages = locale === 'en' ? infoPages : getLocalizedInfoPages('en');
+    const enInfoPageMap = new Map(enInfoPages.map((p) => [p.slug, p]));
     const categoryMap = new Map(categories.map((c) => [c.slug, c]));
 
     const toolItems: SearchResultItem[] = tools
@@ -106,8 +119,36 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
           }))
       : [];
 
-    return [...toolItems, ...snippetItems].slice(0, 12);
-  }, [query, locale]);
+    const pageItems: SearchResultItem[] = q
+      ? infoPages
+          .filter((page) => {
+            const enPage = enInfoPageMap.get(page.slug);
+            return (
+              page.slug.toLowerCase().includes(q) ||
+              page.navLabel.toLowerCase().includes(q) ||
+              page.title.toLowerCase().includes(q) ||
+              page.subtitle.toLowerCase().includes(q) ||
+              page.keywords.some((k) => k.toLowerCase().includes(q)) ||
+              (enPage
+                ? enPage.navLabel.toLowerCase().includes(q) ||
+                  enPage.title.toLowerCase().includes(q) ||
+                  enPage.keywords.some((k) => k.toLowerCase().includes(q))
+                : false)
+            );
+          })
+          .map((page) => ({
+            kind: 'page',
+            id: `page-${page.slug}`,
+            title: page.title,
+            subtitle: page.subtitle,
+            badge: t('commandPalette.pageBadge'),
+            iconName: page.iconName,
+            href: localePath(locale, `/${page.slug}`),
+          }))
+      : [];
+
+    return [...toolItems, ...snippetItems, ...pageItems].slice(0, 12);
+  }, [query, locale, t]);
 
   const safeActiveIndex = results.length > 0 ? Math.min(activeIndex, results.length - 1) : 0;
 
@@ -226,7 +267,7 @@ function CommandPaletteInner({ onClose }: { onClose: () => void }) {
                         flexShrink: 0,
                       }}
                     >
-                      {item.kind === 'tool' ? (
+                      {item.kind === 'tool' || item.kind === 'page' ? (
                         <ToolIcon name={item.iconName} size={15} />
                       ) : (
                         <Terminal size={15} />

@@ -249,3 +249,67 @@ The implementation of **OmniDev / IT-Tools Hub** is decomposed into 4 cohesive, 
   - `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/app/globals.css`, `scripts/verify-aidlc.ts`
 - **Dependencies**: `UNIT-14`, `UNIT-15`, `UNIT-16`.
 - **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly across all routes.
+
+---
+
+## Brand Assets & Backlink Pages Units (`UNIT-18` – `UNIT-21`)
+
+## `UNIT-18`: Brand Logo, Deterministic Asset Generator, Metadata Routes, Site Config & Proxy/SEO Pipeline
+- **Scope**:
+  - Implement pure Node deterministic asset generator `scripts/generate-brand-assets.ts` (`node:zlib`) producing `src/app/favicon.ico` (`16/32/48`) and `public/icons/{icon-192.png, icon-512.png, icon-maskable-512.png}` matching the Zinc `#09090b` + Emerald `#10b981` `>_` mark.
+  - Remove the 5 Next.js starter SVGs (`public/{next,vercel,globe,file,window}.svg`).
+  - Create `src/app/icon.svg`, `src/lib/brand/og-template.tsx`, `src/app/apple-icon.tsx` (`180×180`), `src/app/opengraph-image.tsx` (`1200×630`), `src/app/twitter-image.tsx` (`1200×630`), and `src/components/common/BrandLogo.tsx`.
+  - Create `src/lib/site.ts` (`resolveSiteConfig`, `getSiteConfig`), update `.env.example`, update `src/app/manifest.ts`, add pure `shouldBypassLocaleProxy()` in `src/i18n/detect.ts` + wire into `src/proxy.ts`, and update `src/lib/seo.ts` (`getMetadataBase()`, `metadataBase`, `openGraph.images`, `twitter.images`).
+  - Extend `scripts/verify-aidlc.ts` with Brand Asset, `resolveSiteConfig()`, `shouldBypassLocaleProxy()`, `manifest()`, and `metadataBase`/social image assertions.
+- **Target Files**:
+  - `scripts/generate-brand-assets.ts` *(new)*, `src/lib/site.ts` *(new)*, `.env.example`
+  - `src/lib/brand/og-template.tsx` *(new)*, `src/components/common/BrandLogo.tsx` *(new)*
+  - `src/app/icon.svg` *(new)*, `src/app/favicon.ico` *(replaced)*, `src/app/{apple-icon,opengraph-image,twitter-image}.tsx` *(new)*
+  - `public/icons/{icon-192.png,icon-512.png,icon-maskable-512.png}` *(new)*, `public/{next,vercel,globe,file,window}.svg` *(deleted)*
+  - `src/app/manifest.ts`, `src/i18n/detect.ts`, `src/proxy.ts`, `src/lib/seo.ts`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-02`, `UNIT-07`.
+- **Verification Criteria**: `npx tsx scripts/generate-brand-assets.ts && npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly.
+
+---
+
+## `UNIT-19`: Info Pages Registry, 4-Locale Dictionaries (`pages.ts` + `footer`), Sitemap (`164` URLs) & Info SEO Builders
+- **Scope**:
+  - Create `src/lib/info/pages.ts` defining `InfoPageSlug = 'about' | 'help' | 'privacy' | 'terms' | 'contact'`, `INFO_PAGES`, `getInfoPageBySlug()`, `getLocalizedInfoPages()`, and `getLocalizedInfoPage()`.
+  - Extend `src/i18n/types.ts` (`CommonDictionary['footer']`, `CommonDictionary['commandPalette']['pageBadge']`, `PagesDictionary`) and register `'pages'` namespace in `src/i18n/translator.ts`.
+  - Author complete, truthful 4-locale dictionaries across `src/i18n/locales/{en,vi,ja,zh}/{common.ts,pages.ts,index.ts}` with 100% recursive key and `{{placeholder}}` parity.
+  - Extend `src/lib/seo.ts` with `buildInfoPageMetadata(slug, locale)` and `buildInfoPageJsonLd(slug, locale)` (`BreadcrumbList` + `AboutPage` / `FAQPage` / `ContactPage` / `WebPage`).
+  - Expand `src/app/sitemap.ts` to `164` URLs (`4 × (1 + 7 + 28 + 5)`) with `hreflang` alternates and extend `scripts/verify-aidlc.ts`.
+- **Target Files**:
+  - `src/lib/info/pages.ts` *(new)*
+  - `src/i18n/types.ts`, `src/i18n/translator.ts`, `src/i18n/locales/{en,vi,ja,zh}/{common.ts,pages.ts,index.ts}`
+  - `src/lib/seo.ts`, `src/app/sitemap.ts`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-18`, `UNIT-05`, `UNIT-06`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes with 164 sitemap URLs and 100% 4-locale parity.
+
+---
+
+## `UNIT-20`: Global `<SiteFooter />`, `<BrandLogo />` Shell Integration, Sidebar Links & `CommandPalette` Quick-Jump
+- **Scope**:
+  - Build `src/components/layout/SiteFooter.tsx` (`'use client'`) with `<BrandLogo size={24} />`, localized internal links to all 5 info pages, GitHub external link (`rel="noopener noreferrer"`), and Feedback trigger.
+  - Update `src/components/layout/AppShell.tsx`: replace `<Command />` with `<BrandLogo size={32} />`, add compact `.sidebar-legal-links` in Sidebar Footer, and mount `<SiteFooter />` below `<main className="app-content">` inside `.app-main-wrap`.
+  - Update `src/components/common/ToolIcon.tsx` and `src/components/layout/CommandPalette.tsx` (`kind: 'page'`) to search and jump to all 5 localized info pages, and add footer/info styles to `src/app/globals.css`.
+- **Target Files**:
+  - `src/components/layout/SiteFooter.tsx` *(new)*
+  - `src/components/layout/AppShell.tsx`, `src/components/layout/CommandPalette.tsx`, `src/components/common/ToolIcon.tsx`, `src/app/globals.css`
+- **Dependencies**: `UNIT-18`, `UNIT-19`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly.
+
+---
+
+## `UNIT-21`: 5 Static Localized Info Pages (`about`, `help`, `privacy`, `terms`, `contact`) & Full Verification Suite
+- **Scope**:
+  - Build `src/components/info/InfoPageLayout.tsx` and `src/components/info/InfoFeedbackActions.tsx` (`'use client'` island for `FeedbackModal` & optional `supportEmail` `mailto:` + Copy).
+  - Create all 5 localized App Router SSG routes (`src/app/[locale]/{about,help,privacy,terms,contact}/page.tsx`) with `generateStaticParams()`, `generateMetadata()`, and JSON-LD.
+  - Extend Section 6 of `scripts/verify-aidlc.ts` to verify single `<html lang>`, canonical URL, and `og:image` in built HTML across all 5 info routes × 4 locales.
+- **Target Files**:
+  - `src/components/info/{InfoPageLayout.tsx,InfoFeedbackActions.tsx}` *(new)*
+  - `src/app/[locale]/{about,help,privacy,terms,contact}/page.tsx` *(new)*
+  - `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-18`, `UNIT-19`, `UNIT-20`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly across all 174+ static routes.
+

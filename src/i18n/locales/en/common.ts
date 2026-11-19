@@ -47,6 +47,17 @@ export const enCommon: CommonDictionary = {
     navigateHint: 'Navigate',
     openHint: 'Open',
     closeHint: 'Close',
+    pageBadge: 'Page',
+  },
+  footer: {
+    navAria: 'Footer Navigation',
+    tagline: 'Privacy-first browser workspace with 28 developer & diagnostic utilities across 7 suites.',
+    linksHeading: 'Resources & Legal',
+    openSourceLabel: 'Open Source on GitHub',
+    githubLabel: 'GitHub',
+    feedbackBtn: 'Send Feedback',
+    copyrightLine: '© {{year}} OmniDev IT-Tools. 100% Client-Side Execution.',
+    backToHome: 'Back to Home Hub',
   },
   actions: {
     copy: 'Copy',

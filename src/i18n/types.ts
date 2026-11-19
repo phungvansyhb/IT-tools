@@ -105,6 +105,17 @@ export interface CommonDictionary {
     navigateHint: string;
     openHint: string;
     closeHint: string;
+    pageBadge: string;
+  };
+  footer: {
+    navAria: string;
+    tagline: string;
+    linksHeading: string;
+    openSourceLabel: string;
+    githubLabel: string;
+    feedbackBtn: string;
+    copyrightLine: string;
+    backToHome: string;
   };
   actions: {
     copy: string;
@@ -776,9 +787,63 @@ export interface CheatsheetsDictionary {
   entries: Record<CheatsheetEntryId, LocalizedCheatsheetContent>;
 }
 
+export interface InfoPageSection {
+  heading: string;
+  body: string;
+  bullets?: string[];
+}
+
+export interface InfoPageContent {
+  navLabel: string;
+  title: string;
+  metaTitle: string;
+  metaDescription: string;
+  subtitle: string;
+  keywords: string[];
+  sections: InfoPageSection[];
+}
+
+export interface HelpInfoPageContent extends InfoPageContent {
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+export interface ContactInfoPageContent extends InfoPageContent {
+  channelsHeading: string;
+  feedbackCardTitle: string;
+  feedbackCardDesc: string;
+  githubCardTitle: string;
+  githubCardDesc: string;
+  emailCardTitle: string;
+  emailCardDesc: string;
+}
+
+export interface PagesDictionary {
+  shared: {
+    breadcrumbHome: string;
+    lastUpdatedLabel: string;
+    lastUpdatedDate: string;
+    exploreToolsHeading: string;
+    relatedPagesHeading: string;
+    openFeedbackBtn: string;
+    viewMyFeedbackBtn: string;
+    openGithubBtn: string;
+    emailLabel: string;
+    copyEmailBtn: string;
+    copiedEmailBtn: string;
+    noEmailNotice: string;
+    privacyFirstBadge: string;
+  };
+  about: InfoPageContent;
+  help: HelpInfoPageContent;
+  privacy: InfoPageContent;
+  terms: InfoPageContent;
+  contact: ContactInfoPageContent;
+}
+
 export interface LocaleBundle {
   common: CommonDictionary;
   catalog: CatalogDictionary;
   tools: ToolsDictionary;
   cheatsheets: CheatsheetsDictionary;
+  pages: PagesDictionary;
 }

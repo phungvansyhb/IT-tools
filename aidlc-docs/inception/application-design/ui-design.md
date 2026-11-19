@@ -125,3 +125,21 @@ All 4 panels strictly reuse Monochrome Zinc Glass tokens (`#09090B`, `#10B981` /
    - Top Action Bento (`span="12"`): `Quick` / `Standard` preset toggle, `Start Speed Test` / `Abort Test` button, phase progress bar (`Idle → Ping → Download → Upload → Complete`), and `Self-Hosted Same-Origin` badge.
    - 4 KPI Bento Cards (`span="3"`): **Ping (ms)**, **Jitter (ms)**, **Download (Mbps)**, **Upload (Mbps)** in tabular monospace.
    - Bottom Bento Split (`span="7"` + `span="5"`): Real-time SVG throughput chart (`Download` `--accent`, `Upload` secondary dashed) and Suitability Matrix (Video Call, 4K Streaming, Gaming, Cloud Sync) + Local History list (max 20 runs + Clear).
+
+---
+
+## 7. Brand Identity, Global Footer & Info Pages UI Specs (`UNIT-18`–`UNIT-21`)
+
+1. **Terminal Brand Mark (`<BrandLogo />`)**:
+   - Rounded squircle canvas (`#09090b`), subtle specular glass rim (`#27272a`), monochrome terminal chevron `>` (`#f4f4f5`) and emerald prompt cursor `_` (`#10b981`) with crisp stroke geometry scaling cleanly from `16px` favicon to `512px` PWA / `1200×630` OG card.
+   - Replaces `<Command />` in `AppShell.tsx` Sidebar header (`size={32}`) and anchors `<SiteFooter />` (`size={24}`).
+2. **Global `<SiteFooter />` & Sidebar Compact Links**:
+   - Mounted inside `.app-main-wrap` below `<main className="app-content">` (`flex: 1`) with Monochrome Zinc Glass border-top, 3 responsive zones: Brand + Privacy tagline, localized `<nav>` for `About`, `Help`, `Privacy`, `Terms`, `Contact`, and GitHub (`rel="noopener noreferrer"`) + Feedback actions.
+   - Sidebar Footer adds compact `.sidebar-legal-links` below the Privacy & Sync badge; Topbar remains untouched for `375px` mobile zero-overflow parity.
+3. **5 Static Localized Info Pages (`InfoPageLayout.tsx` + `InfoFeedbackActions.tsx`)**:
+   - Bento header with breadcrumb, single `<h1>`, subtitle, and last-updated badge.
+   - Structured glass cards reflecting truthful architecture (28 tools / 7 categories, local-first storage, `omnidev_locale` cookie, optional Supabase, Mic/Speaker/Speedtest API).
+   - `Help / FAQ`: interactive `<details>` FAQ accordion + troubleshooting cards + `FeedbackModal` CTAs.
+   - `Contact`: conditional `supportEmail` card (`mailto:` + Copy button) when configured, or direct `FeedbackModal` primary CTA when unset, alongside configured GitHub link.
+   - Internal backlink strip linking back to Home Hub, featured categories/tools, and sibling info pages.
+

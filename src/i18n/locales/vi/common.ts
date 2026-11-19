@@ -48,6 +48,17 @@ export const viCommon: CommonDictionary = {
     navigateHint: 'Di chuyển',
     openHint: 'Mở',
     closeHint: 'Đóng',
+    pageBadge: 'Trang',
+  },
+  footer: {
+    navAria: 'Điều hướng chân trang',
+    tagline: 'Không gian làm việc trình duyệt ưu tiên quyền riêng tư với 28 công cụ lập trình & chẩn đoán trong 7 bộ chuyên biệt.',
+    linksHeading: 'Thông tin & Pháp lý',
+    openSourceLabel: 'Mã nguồn mở trên GitHub',
+    githubLabel: 'GitHub',
+    feedbackBtn: 'Gửi góp ý',
+    copyrightLine: '© {{year}} OmniDev IT-Tools. Xử lý 100% phía Client.',
+    backToHome: 'Quay về Trang chủ',
   },
   actions: {
     copy: 'Sao chép',

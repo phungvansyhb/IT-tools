@@ -159,3 +159,34 @@ Browser Client ('use client')
 1. **Shortcut Coexistence (`NFR-13`)**: `AppShell.tsx` checks `if (e.defaultPrevented) return;` before opening `CommandPalette` on `Cmd/Ctrl+K`, allowing `KeyboardTesterPanel` in Capture Mode (`capture: true`) to intercept browser shortcuts while guaranteeing escape via `Esc × 2` (`<= 600ms`) or Unlock button.
 2. **Audio Lifecycle & Hearing Safety (`NFR-12`, `NFR-14`)**: `MicTesterPanel` and `SpeakerTesterPanel` centralize teardown in `useEffect` cleanup + Stop handlers (`track.stop()`, `AudioContext.close()`, `URL.revokeObjectURL()`, `cancelAnimationFrame`). `SpeakerTesterPanel` defaults to `35%` volume behind a `DynamicsCompressorNode` limiter (`-3 dBFS`, `12:1`).
 3. **Crawler & Abuse Protection (`NFR-15`, `NFR-16`)**: `src/app/robots.ts` adds `'/api/*'` to `disallow` so bots do not crawl `/api/speedtest/download`. `src/app/sitemap.ts` expands to `144` URLs (`4 × (1 + 7 + 28)`). `/api/speedtest/upload` enforces same-origin `Origin` vs `Host` validation and `<= 4 MiB` streaming cap.
+
+---
+
+## 6. Brand Assets & Backlink Pages Architecture (`UNIT-18`–`UNIT-21`)
+
+### 6.1 Brand Assets & Metadata Routing Pipeline
+```text
+scripts/generate-brand-assets.ts (pure Node + node:zlib, 4x MSAA Zinc #09090b + Emerald #10b981 ">_")
+  ├──▶ src/app/favicon.ico                   (16×16 + 32×32 + 48×48 multi-size ICO)
+  └──▶ public/icons/
+         ├── icon-192.png                    (192×192 RGBA PNG)
+         ├── icon-512.png                    (512×512 RGBA PNG)
+         └── icon-maskable-512.png           (512×512 adaptive safe-zone maskable PNG)
+
+Next.js App Router Metadata & Vector Brand Assets:
+  ├── src/components/common/BrandLogo.tsx    (Inline React SVG used in AppShell, SiteFooter, About)
+  ├── src/app/icon.svg                       (Vector favicon, crisp 16px..512px)
+  ├── src/app/apple-icon.tsx                 (180×180 ImageResponse PNG, offline-safe vector JSX)
+  ├── src/app/opengraph-image.tsx            (1200×630 ImageResponse PNG via src/lib/brand/og-template.tsx)
+  ├── src/app/twitter-image.tsx              (1200×630 ImageResponse PNG via src/lib/brand/og-template.tsx)
+  ├── src/app/manifest.ts                    (SVG + 192 + 512 + maskable + ICO, #09090b / #10b981)
+  └── src/proxy.ts + shouldBypassLocaleProxy() (skips /apple-icon, /opengraph-image, /twitter-image, /icon.svg, /icon, /favicon.ico, /icons/*, /manifest.webmanifest, /sitemap.xml, /robots.txt)
+```
+- Delete Next.js starter SVGs in `public/{next,vercel,globe,file,window}.svg`.
+- `src/lib/seo.ts` attaches `metadataBase` (`getMetadataBase()`), `openGraph.images` (`/opengraph-image`, `1200×630`), and `twitter.images` (`['/twitter-image']`) to Home, Category, Tool, and Info Page metadata builders.
+
+### 6.2 Site Config, Info Pages Registry & 4-Locale Discovery
+- **Centralized Config (`src/lib/site.ts`)**: `resolveSiteConfig(env)` (pure, Node/tsx-testable) & `getSiteConfig()` reading static `process.env.NEXT_PUBLIC_SITE_URL`, `process.env.NEXT_PUBLIC_GITHUB_URL` (default `https://github.com/phungvansyhb/IT-tools`), and optional `process.env.NEXT_PUBLIC_SUPPORT_EMAIL` (validated or `null`).
+- **Info Pages (`src/lib/info/pages.ts`)**: `INFO_PAGE_SLUGS = ['about', 'help', 'privacy', 'terms', 'contact']` with Schema.org mapping (`AboutPage`, `FAQPage`, `WebPage`, `ContactPage`), 4-locale `'pages'` namespace (`src/i18n/locales/{en,vi,ja,zh}/pages.ts`), and `164`-URL `sitemap.ts` (`4 × (1 + 7 + 28 + 5)`).
+- **UI & Discovery**: Global `<SiteFooter />` mounted inside `.app-main-wrap` below `<main className="app-content">` (`flex: 1`), compact `.sidebar-legal-links` in Sidebar Footer, and `kind: 'page'` entries in `CommandPalette.tsx` (`Cmd/Ctrl+K`). `/[locale]/admin/feedback` remains strictly excluded from public navigation and sitemap.
+

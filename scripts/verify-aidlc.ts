@@ -31,9 +31,25 @@ import {
   octalToChmod,
 } from '../src/lib/tools/engines/calculators';
 import { optimizeSvgMarkup } from '../src/lib/tools/engines/image';
-import { buildCollectionPageJsonLd, buildToolJsonLd, buildWebSiteJsonLd } from '../src/lib/seo';
+import {
+  buildCollectionPageJsonLd,
+  buildHomeMetadata,
+  buildInfoPageJsonLd,
+  buildInfoPageMetadata,
+  buildToolJsonLd,
+  buildWebSiteJsonLd,
+} from '../src/lib/seo';
+import {
+  INFO_PAGES,
+  INFO_PAGE_SLUGS,
+  getInfoPageBySlug,
+  getLocalizedInfoPages,
+  isInfoPageSlug,
+} from '../src/lib/info/pages';
 import sitemap from '../src/app/sitemap';
 import robots from '../src/app/robots';
+import manifest from '../src/app/manifest';
+import { DEFAULT_GITHUB_URL, DEFAULT_SITE_URL, resolveSiteConfig } from '../src/lib/site';
 import {
   DEFAULT_LOCALE,
   LOCALE_META,
@@ -42,7 +58,11 @@ import {
   localePath,
   stripLocalePrefix,
 } from '../src/i18n/config';
-import { detectBestLocale, parseAcceptLanguage } from '../src/i18n/detect';
+import {
+  detectBestLocale,
+  parseAcceptLanguage,
+  shouldBypassLocaleProxy,
+} from '../src/i18n/detect';
 import { getBundle, getFixedT } from '../src/i18n/translator';
 import { CHEATSHEET_ENTRIES, getLocalizedCheatsheetEntries } from '../src/lib/tools/data/cheatsheets';
 import {
@@ -186,9 +206,65 @@ async function runVerification() {
 
   console.log('3. Verifying SEO Sitemap & Schema.org JSON-LD...');
   const map = sitemap();
-  assert.equal(map.length, 144, `Expected 144 sitemap URLs (4 locales × 36 routes), got ${map.length}`);
+  assert.equal(map.length, 164, `Expected 164 sitemap URLs (4 locales × 41 routes), got ${map.length}`);
   assert.ok(map[0].alternates?.languages?.['zh-Hans'], 'Expected zh-Hans hreflang alternate');
   assert.ok(map[0].alternates?.languages?.['x-default'], 'Expected x-default hreflang alternate');
+  assert.equal(
+    map.some((entry) => entry.url.includes('/admin')),
+    false,
+    'Admin routes must never appear in sitemap()'
+  );
+  for (const loc of SUPPORTED_LOCALES) {
+    for (const slug of INFO_PAGE_SLUGS) {
+      const expectedPath = localePath(loc, `/${slug}`);
+      assert.ok(
+        map.some((entry) => entry.url.endsWith(expectedPath)),
+        `Expected sitemap() to include info route ${expectedPath}`
+      );
+    }
+  }
+
+  assert.equal(INFO_PAGES.length, 5, 'Expected 5 info pages in INFO_PAGES');
+  assert.equal(isInfoPageSlug('about'), true);
+  assert.equal(isInfoPageSlug('unknown'), false);
+  assert.equal(getInfoPageBySlug('help')?.schemaType, 'FAQPage');
+
+  for (const loc of SUPPORTED_LOCALES) {
+    const localizedInfo = getLocalizedInfoPages(loc);
+    assert.equal(localizedInfo.length, 5, `Expected 5 localized info pages for ${loc}`);
+    for (const page of localizedInfo) {
+      assert.ok(page.navLabel.length > 0, `Expected navLabel for ${loc}/${page.slug}`);
+      assert.ok(page.title.length > 0, `Expected title for ${loc}/${page.slug}`);
+
+      const meta = buildInfoPageMetadata(page.slug, loc);
+      assert.ok(meta.metadataBase instanceof URL, `Expected metadataBase URL for ${loc}/${page.slug}`);
+      assert.ok(
+        typeof meta.alternates?.canonical === 'string' &&
+          meta.alternates.canonical.endsWith(localePath(loc, `/${page.slug}`)),
+        `Expected canonical URL for ${loc}/${page.slug}`
+      );
+      const ogImgs = Array.isArray(meta.openGraph?.images)
+        ? meta.openGraph.images
+        : meta.openGraph?.images
+          ? [meta.openGraph.images]
+          : [];
+      assert.ok(ogImgs.length > 0, `Expected openGraph.images for ${loc}/${page.slug}`);
+
+      const jsonLd = buildInfoPageJsonLd(page.slug, loc);
+      assert.equal(jsonLd.length, 2, `Expected 2 JSON-LD schemas for ${loc}/${page.slug}`);
+      assert.equal(jsonLd[0]['@type'], 'BreadcrumbList');
+      const pageNode = jsonLd[1] as { '@type': string; inLanguage?: string; mainEntity?: unknown[] };
+      assert.equal(pageNode['@type'], page.schemaType);
+      assert.equal(pageNode.inLanguage, LOCALE_META[loc].htmlLang);
+      if (page.slug === 'help') {
+        assert.ok(
+          Array.isArray(pageNode.mainEntity) && pageNode.mainEntity.length >= 5,
+          `Expected FAQPage.mainEntity.length >= 5 for ${loc}/help`
+        );
+      }
+    }
+  }
+
   const homeSchema = buildWebSiteJsonLd('vi');
   assert.equal(homeSchema['@type'], 'WebSite');
   assert.equal(homeSchema.inLanguage, 'vi');
@@ -208,7 +284,7 @@ async function runVerification() {
   for (const requiredDisallow of ['/*/admin', '/*/admin/*', '/admin', '/admin/*', '/api/*']) {
     assert.ok(disallowList.includes(requiredDisallow), `Expected robots.ts disallow to include ${requiredDisallow}`);
   }
-  console.log('   ✓ SEO sitemap (144 routes across 4 locales), robots.ts admin & /api/* guard, and Schema.org JSON-LD validated.');
+  console.log('   ✓ SEO sitemap (164 routes across 4 locales), Info Pages SEO builders, robots.ts admin & /api/* guard, and Schema.org JSON-LD validated.');
 
   console.log('4. Verifying i18n Core Runtime, Locale Detection & Canonical English Bundle...');
   assert.deepEqual([...SUPPORTED_LOCALES], ['en', 'vi', 'ja', 'zh']);
@@ -347,9 +423,17 @@ async function runVerification() {
       tLoc('tools:diagnosticsSuite.speed.selfHostedBadge').length > 0,
       `Expected diagnosticsSuite.speed.selfHostedBadge in ${loc}`
     );
+    assert.ok(tLoc('commandPalette.pageBadge').length > 0, `Expected commandPalette.pageBadge in ${loc}`);
+    assert.ok(
+      tLoc('footer.copyrightLine', { year: 2026 }).includes('2026'),
+      `Expected footer.copyrightLine interpolation in ${loc}`
+    );
+    assert.ok(tLoc('pages:about.title').length > 0, `Expected pages:about.title in ${loc}`);
+    assert.ok(tLoc('pages:help.faqs.0.question').length > 0, `Expected pages:help.faqs in ${loc}`);
   }
   assert.equal(tEn('feedback.navButton'), 'Send Feedback');
   assert.equal(tEn('adminFeedback.heading'), 'Feedback Moderation Console');
+  assert.equal(tEn('pages:about.navLabel'), 'About');
   console.log(`   ✓ i18n runtime, detection, URL helpers, and 4-locale parity (${enLeaves.size} keys × 4) validated.`);
 
   console.log('5. Verifying Locale-Aware Registry, Cheatsheets & Engines...');
@@ -415,8 +499,36 @@ async function runVerification() {
         /<meta[^>]+name="robots"[^>]+content="[^"]*noindex[^"]*nofollow[^"]*"/i.test(adminHtml),
         `Expected noindex, nofollow robots meta tag in ${loc}/admin/feedback.html`
       );
+
+      for (const slug of INFO_PAGE_SLUGS) {
+        const infoHtmlPath = path.join(nextAppDir, loc, `${slug}.html`);
+        assert.ok(fs.existsSync(infoHtmlPath), `Missing built info HTML file: ${infoHtmlPath}`);
+        const infoHtml = fs.readFileSync(infoHtmlPath, 'utf8');
+        const infoHtmlTags = infoHtml.match(/<html\b[^>]*>/g) ?? [];
+        assert.equal(
+          infoHtmlTags.length,
+          1,
+          `Expected single <html> tag in ${loc}/${slug}.html, got ${infoHtmlTags.length}`
+        );
+        assert.ok(
+          infoHtmlTags[0].includes(`lang="${expectedLang}"`),
+          `Expected lang="${expectedLang}" in ${loc}/${slug}.html, got: ${infoHtmlTags[0]}`
+        );
+        assert.ok(
+          new RegExp(`<link[^>]+rel="canonical"[^>]+href="[^"]*/${loc}/${slug}"`, 'i').test(infoHtml),
+          `Expected canonical link containing /${loc}/${slug} in ${loc}/${slug}.html`
+        );
+        assert.ok(
+          /<meta[^>]+property="og:image"[^>]+content="[^"]*\/opengraph-image[^"]*"/i.test(infoHtml),
+          `Expected og:image containing /opengraph-image in ${loc}/${slug}.html`
+        );
+        assert.ok(
+          infoHtml.includes('application/ld+json'),
+          `Expected application/ld+json script in ${loc}/${slug}.html`
+        );
+      }
     }
-    console.log('   ✓ Built HTML <html lang="..."> and admin noindex meta validated for en, vi, ja, zh-Hans.');
+    console.log('   ✓ Built HTML <html lang="...">, admin noindex meta, and 20 static info pages (canonical, og:image, JSON-LD) validated for en, vi, ja, zh-Hans.');
   }
 
   console.log('7. Verifying Pure Feedback Core (Validation, Debug Context, Aggregation & Filtering)...');
@@ -753,6 +865,126 @@ async function runVerification() {
   assert.equal(randomBuf.byteLength, 1025);
   assert.ok(new Set(randomBuf).size > 100);
   console.log('   ✓ Pure diagnostics engine (keyboard, audio, speed test math & origin checks) validated.');
+
+  console.log('9. Verifying Brand Assets, Starter SVG Cleanup, Site Config, Proxy Bypass & SEO Social Images...');
+  // favicon.ico header (00 00 01 00) and count === 3
+  const faviconPath = path.join(process.cwd(), 'src', 'app', 'favicon.ico');
+  assert.ok(fs.existsSync(faviconPath), 'Missing src/app/favicon.ico');
+  const icoBuf = fs.readFileSync(faviconPath);
+  assert.ok(icoBuf.length >= 22, 'favicon.ico too small');
+  assert.equal(icoBuf.readUInt16LE(0), 0, 'Invalid ICO reserved header');
+  assert.equal(icoBuf.readUInt16LE(2), 1, 'Invalid ICO type header');
+  assert.equal(icoBuf.readUInt16LE(4), 3, 'Expected 3 icon entries (16/32/48) in favicon.ico');
+
+  // PNG icons signature & IHDR dimensions
+  const pngExpectations = [
+    { file: 'public/icons/icon-192.png', width: 192, height: 192 },
+    { file: 'public/icons/icon-512.png', width: 512, height: 512 },
+    { file: 'public/icons/icon-maskable-512.png', width: 512, height: 512 },
+  ] as const;
+  const pngSig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  for (const expected of pngExpectations) {
+    const abs = path.join(process.cwd(), expected.file);
+    assert.ok(fs.existsSync(abs), `Missing PNG asset: ${expected.file}`);
+    const buf = fs.readFileSync(abs);
+    assert.ok(buf.subarray(0, 8).equals(pngSig), `Invalid PNG signature in ${expected.file}`);
+    assert.equal(buf.subarray(12, 16).toString('ascii'), 'IHDR', `Missing IHDR chunk in ${expected.file}`);
+    assert.equal(buf.readUInt32BE(16), expected.width, `Unexpected PNG width in ${expected.file}`);
+    assert.equal(buf.readUInt32BE(20), expected.height, `Unexpected PNG height in ${expected.file}`);
+  }
+
+  // icon.svg colors
+  const iconSvgPath = path.join(process.cwd(), 'src', 'app', 'icon.svg');
+  assert.ok(fs.existsSync(iconSvgPath), 'Missing src/app/icon.svg');
+  const iconSvg = fs.readFileSync(iconSvgPath, 'utf8');
+  assert.ok(iconSvg.includes('#09090b'), 'icon.svg must include #09090b');
+  assert.ok(iconSvg.includes('#10b981'), 'icon.svg must include #10b981');
+
+  // 5 starter SVGs deleted
+  for (const starter of ['next.svg', 'vercel.svg', 'globe.svg', 'file.svg', 'window.svg']) {
+    const starterPath = path.join(process.cwd(), 'public', starter);
+    assert.equal(fs.existsSync(starterPath), false, `Starter SVG should be removed: public/${starter}`);
+  }
+
+  // resolveSiteConfig()
+  assert.deepEqual(resolveSiteConfig({}), {
+    siteUrl: DEFAULT_SITE_URL,
+    githubUrl: DEFAULT_GITHUB_URL,
+    supportEmail: null,
+  });
+  assert.deepEqual(
+    resolveSiteConfig({
+      NEXT_PUBLIC_SITE_URL: 'https://omnidev.example.com///',
+      NEXT_PUBLIC_GITHUB_URL: 'https://github.com/custom/repo/',
+      NEXT_PUBLIC_SUPPORT_EMAIL: '  support@omnidev.dev  ',
+    }),
+    {
+      siteUrl: 'https://omnidev.example.com',
+      githubUrl: 'https://github.com/custom/repo',
+      supportEmail: 'support@omnidev.dev',
+    }
+  );
+  assert.deepEqual(
+    resolveSiteConfig({
+      NEXT_PUBLIC_SITE_URL: 'ftp://invalid.example.com',
+      NEXT_PUBLIC_GITHUB_URL: 'not-a-url',
+      NEXT_PUBLIC_SUPPORT_EMAIL: 'invalid-email',
+    }),
+    {
+      siteUrl: DEFAULT_SITE_URL,
+      githubUrl: DEFAULT_GITHUB_URL,
+      supportEmail: null,
+    }
+  );
+
+  // shouldBypassLocaleProxy()
+  for (const bypassPath of [
+    '/apple-icon',
+    '/opengraph-image',
+    '/twitter-image',
+    '/icon.svg',
+    '/icon',
+    '/favicon.ico',
+    '/icons/icon-192.png',
+    '/manifest.webmanifest',
+    '/sitemap.xml',
+    '/robots.txt',
+    '/api/speedtest/ping',
+    '/_next/static/chunk.js',
+  ]) {
+    assert.equal(shouldBypassLocaleProxy(bypassPath), true, `Expected proxy bypass for ${bypassPath}`);
+  }
+  for (const routedPath of ['/', '/tools/text/jwt-decoder', '/en/about']) {
+    assert.equal(shouldBypassLocaleProxy(routedPath), false, `Expected proxy routing for ${routedPath}`);
+  }
+
+  // manifest()
+  const webManifest = manifest();
+  assert.equal(webManifest.background_color, '#09090b');
+  assert.equal(webManifest.theme_color, '#10b981');
+  assert.equal(webManifest.icons?.length, 5, 'Expected 5 icon entries in manifest()');
+  assert.ok(
+    webManifest.icons?.some((ic) => ic.purpose === 'maskable'),
+    'Expected maskable icon entry in manifest()'
+  );
+
+  // buildHomeMetadata('en')
+  const homeMeta = buildHomeMetadata('en');
+  assert.ok(homeMeta.metadataBase instanceof URL, 'Expected metadataBase to be URL');
+  const ogImages = Array.isArray(homeMeta.openGraph?.images)
+    ? homeMeta.openGraph.images
+    : homeMeta.openGraph?.images
+      ? [homeMeta.openGraph.images]
+      : [];
+  assert.ok(ogImages.length > 0, 'Expected openGraph.images on home metadata');
+  const twImages = Array.isArray(homeMeta.twitter?.images)
+    ? homeMeta.twitter.images
+    : homeMeta.twitter?.images
+      ? [homeMeta.twitter.images]
+      : [];
+  assert.ok(twImages.length > 0, 'Expected twitter.images on home metadata');
+
+  console.log('   ✓ Brand assets, starter SVG cleanup, site config, proxy bypass, manifest & SEO social images validated.');
 
   console.log('\nALL AIDLC VERIFICATION CHECKS PASSED!');
 }

@@ -106,3 +106,22 @@
 - **Artifacts & Code Updated**:
   - `src/lib/tools/engines/diagnostics.ts`, `src/components/tools/suites/diagnostics/KeyboardTesterPanel.tsx`, `scripts/verify-aidlc.ts`, `aidlc-docs/audit.md`.
 - **Verification & Gate Status**: `npm run lint`, `npm run build` (154 static pages + 3 dynamic `/api/speedtest/*` routes), and `npx tsx scripts/verify-aidlc.ts` (all 8 suites including `shouldPreventDefaultBrowserKey()` assertions) passed with exit code 0.
+
+## [2026-11-19T09:20:00Z] — Prompt 7: Brand Assets Suite & 5 Localized Info/Backlink Pages (`UNIT-18`–`UNIT-21`)
+- **Phase / Stage**: `INCEPTION → CONSTRUCTION (Brand Assets & Backlink Pages Cycle Complete)`
+- **User Input**: `"/do_task hãy tinh chỉnh lại ảnh con của app, và làm các trang backlink như help , term , ..."`
+- **Clarifications / Decisions (Pro Grill-Me + Gate 1 Sign-Off)**:
+  - **App Icon / Brand Mark (`A1`)**: Stylized Terminal / Developer Mark (`>_`) on Zinc `#09090b` with Emerald `#10b981` accent & `#27272a` specular rim, vector-crisp from `16px` to `512px`.
+  - **Brand Asset Scope (`A2`)**: Full Brand Asset Suite — `<BrandLogo />`, `src/app/icon.svg`, pure Node deterministic `scripts/generate-brand-assets.ts` (`node:zlib`) producing multi-size `src/app/favicon.ico` (`16/32/48`) and `public/icons/icon-{192,512,maskable-512}.png`, offline-safe `apple-icon.tsx` (`180×180`), `opengraph-image.tsx` & `twitter-image.tsx` (`1200×630`), updated `manifest.ts`, `shouldBypassLocaleProxy()` in `src/proxy.ts`, `metadataBase` + `openGraph.images`/`twitter.images` in `src/lib/seo.ts`, and deleted 5 Next.js starter SVGs (`public/{next,vercel,globe,file,window}.svg`).
+  - **Backlink / Info & Legal Pages (`A3`)**: 5 statically generated localized pages (`/[locale]/{about,help,privacy,terms,contact}`) truthfully documenting 28 tools / 7 categories, 100% client-side execution, `localStorage`/`sessionStorage`/`omnidev_locale` cookie, optional Supabase sync, Mic/Speaker hardware permissions, and self-hosted `/api/speedtest/*`, with interactive `FeedbackModal` integration on `Help`/`Contact`.
+  - **Placement, SEO & Quick Discovery (`A4`)**: Global `<SiteFooter />` below `<main>` in `AppShell`, compact `.sidebar-legal-links` in Sidebar Footer (Topbar untouched for `375px` mobile), 4-locale dictionaries (`en`, `vi`, `ja`, `zh`), `164`-URL `sitemap.ts` with `hreflang`, Schema.org JSON-LD (`BreadcrumbList` + `AboutPage`/`FAQPage`/`ContactPage`/`WebPage`), and `CommandPalette` (`Cmd/Ctrl+K`) quick-jump (`kind: 'page'`).
+  - **External Links & Config (`A5`)**: Centralized `src/lib/site.ts` (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GITHUB_URL` default `https://github.com/phungvansyhb/IT-tools`, optional `NEXT_PUBLIC_SUPPORT_EMAIL` falling back to `FeedbackModal` when unset).
+  - **Gate 1 Sign-Off**: Approved by user prior to `UNIT-18`–`UNIT-21` implementation.
+- **Artifacts & Code Updated**:
+  - `aidlc-docs/` (`requirements.md`, `user-stories.md`, `architecture.md`, `ui-design.md`, `units.md`, `execution-plan.md`, `construction-plan.md`, `aidlc-state.md`, `audit.md`).
+  - `scripts/generate-brand-assets.ts`, `src/lib/site.ts`, `.env.example`, `src/lib/brand/og-template.tsx`, `src/components/common/BrandLogo.tsx`, `src/app/{icon.svg,favicon.ico,apple-icon.tsx,opengraph-image.tsx,twitter-image.tsx,manifest.ts}`, `public/icons/{icon-192,icon-512,icon-maskable-512}.png`, deleted `public/{next,vercel,globe,file,window}.svg`.
+  - `src/i18n/detect.ts`, `src/proxy.ts`, `src/lib/seo.ts`, `src/app/[locale]/layout.tsx`, `src/app/sitemap.ts`.
+  - `src/lib/info/pages.ts`, `src/i18n/types.ts`, `src/i18n/translator.ts`, `src/i18n/locales/{en,vi,ja,zh}/{common,pages,index}.ts`.
+  - `src/components/layout/{SiteFooter,AppShell,CommandPalette}.tsx`, `src/components/common/ToolIcon.tsx`, `src/app/globals.css`.
+  - `src/components/info/{InfoPageLayout,InfoFeedbackActions}.tsx`, `src/app/[locale]/{about,help,privacy,terms,contact}/page.tsx`, `scripts/verify-aidlc.ts`.
+- **Verification & Gate Status**: `npx tsx scripts/generate-brand-assets.ts`, `npm run lint`, `npm run build` (`178/178` static pages including 20 localized info routes + 3 dynamic `/api/speedtest/*` routes), and `npx tsx scripts/verify-aidlc.ts` (all 9 suites: 164 sitemap URLs, 1,402 keys × 4 locales parity, Brand Asset binary checks, proxy bypass, site config, Info Page JSON-LD & 20 built HTML checks) passed with exit code 0.

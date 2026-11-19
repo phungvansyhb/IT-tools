@@ -78,3 +78,37 @@ export function detectBestLocale({
 
   return DEFAULT_LOCALE;
 }
+
+const PUBLIC_FILE_REGEX = /\.[a-zA-Z0-9]+$/;
+
+const BYPASS_EXACT_PATHS = new Set([
+  '/favicon.ico',
+  '/icon.svg',
+  '/icon',
+  '/apple-icon',
+  '/opengraph-image',
+  '/twitter-image',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/manifest.webmanifest',
+]);
+
+/**
+ * Returns true when a request pathname corresponds to Next.js internals, API routes,
+ * metadata/icon endpoints, or static public files that must not receive a locale 307 redirect.
+ */
+export function shouldBypassLocaleProxy(pathname: string): boolean {
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/icons/')
+  ) {
+    return true;
+  }
+
+  if (BYPASS_EXACT_PATHS.has(pathname)) {
+    return true;
+  }
+
+  return PUBLIC_FILE_REGEX.test(pathname);
+}

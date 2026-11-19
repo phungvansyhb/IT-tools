@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Command,
   Menu,
   Moon,
   Search,
@@ -17,13 +16,16 @@ import {
   MessageSquarePlus,
 } from 'lucide-react';
 import { getLocalizedCategories, getLocalizedTools } from '@/lib/tools/registry';
+import { getLocalizedInfoPages } from '@/lib/info/pages';
 import { useUserWorkspace } from '@/hooks/useUserWorkspace';
 import { useFeedback } from '@/hooks/useFeedback';
 import { useI18n } from '@/i18n/client';
 import { localePath, stripLocalePrefix } from '@/i18n/config';
+import { BrandLogo } from '@/components/common/BrandLogo';
 import { ToolIcon } from '@/components/common/ToolIcon';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { SiteFooter } from '@/components/layout/SiteFooter';
 import { FeedbackModal } from '@/components/feedback/FeedbackModal';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -38,6 +40,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { pathname: normalizedPathname } = stripLocalePrefix(pathname || '/');
   const categories = useMemo(() => getLocalizedCategories(locale), [locale]);
   const tools = useMemo(() => getLocalizedTools(locale), [locale]);
+  const infoPages = useMemo(() => getLocalizedInfoPages(locale), [locale]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -70,6 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         >
           <Link
             href={localePath(locale, '/')}
+            onClick={() => setSidebarOpen(false)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -78,21 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               letterSpacing: '-0.02em',
             }}
           >
-            <span
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '9px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'var(--accent-glow)',
-                border: '1px solid var(--accent-border)',
-                color: 'var(--accent)',
-              }}
-            >
-              <Command size={17} />
-            </span>
+            <BrandLogo size={32} />
             <div>
               <div style={{ fontSize: '0.96rem', lineHeight: 1.1 }}>{t('brand.name')}</div>
               <div className="subtle-text" style={{ fontSize: '0.7rem' }}>
@@ -290,6 +280,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span>{syncMode === 'supabase' ? t('nav.syncSupabase') : t('nav.syncLocal')}</span>
           </div>
           </div>
+
+          <nav className="sidebar-legal-links" aria-label={t('footer.linksHeading')}>
+            {infoPages.map((page) => {
+              const active = normalizedPathname === `/${page.slug}`;
+              return (
+                <Link
+                  key={page.slug}
+                  href={localePath(locale, `/${page.slug}`)}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`sidebar-legal-link${active ? ' active' : ''}`}
+                >
+                  {page.navLabel}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </aside>
 
@@ -439,6 +445,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
 
         <main className="app-content">{children}</main>
+        <SiteFooter />
       </div>
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
