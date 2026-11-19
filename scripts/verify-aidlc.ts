@@ -57,11 +57,31 @@ import {
   type FeedbackSubmission,
   type ToolRatingEntry,
 } from '../src/lib/feedback';
+import {
+  SPEED_TEST_DEFAULT_DOWNLOAD_BYTES,
+  SPEED_TEST_MAX_DOWNLOAD_BYTES,
+  SPEED_TEST_MAX_UPLOAD_BYTES,
+  SPEED_TEST_MIN_DOWNLOAD_BYTES,
+  assessNetworkSuitability,
+  calculateAudioLevels,
+  clampDownloadBytes,
+  clampSafeMasterVolume,
+  classifyMicNoiseFloor,
+  computeBandwidthMbps,
+  computeKeyboardStats,
+  computePingStats,
+  computeSweepFrequencyAtProgress,
+  detectKeyChatter,
+  generateIncompressibleBytes,
+  getKeyboardLayout,
+  getKeyboardLayoutKeyCodes,
+  validateSameOriginHeaders,
+} from '../src/lib/tools/engines/diagnostics';
 
 async function runVerification() {
   console.log('1. Verifying Registry Integrity...');
-  assert.equal(CATEGORIES.length, 6, 'Expected 6 categories');
-  assert.equal(TOOLS.length, 24, 'Expected 24 tools');
+  assert.equal(CATEGORIES.length, 7, 'Expected 7 categories');
+  assert.equal(TOOLS.length, 28, 'Expected 28 tools');
 
   const ids = new Set<string>();
   const slugKeys = new Set<string>();
@@ -78,7 +98,7 @@ async function runVerification() {
     assert.ok(tool.howItWorks.length >= 2, `Missing howItWorks for ${tool.id}`);
     assert.ok(tool.faqs.length >= 2, `Missing FAQs for ${tool.id}`);
   }
-  console.log('   ✓ All 6 categories and 24 tools validated.');
+  console.log('   ✓ All 7 categories and 28 tools validated.');
 
   console.log('2. Verifying Deterministic Tool Engines...');
   // Case converter
@@ -165,7 +185,7 @@ async function runVerification() {
 
   console.log('3. Verifying SEO Sitemap & Schema.org JSON-LD...');
   const map = sitemap();
-  assert.equal(map.length, 124, `Expected 124 sitemap URLs (4 locales × 31 routes), got ${map.length}`);
+  assert.equal(map.length, 144, `Expected 144 sitemap URLs (4 locales × 36 routes), got ${map.length}`);
   assert.ok(map[0].alternates?.languages?.['zh-Hans'], 'Expected zh-Hans hreflang alternate');
   assert.ok(map[0].alternates?.languages?.['x-default'], 'Expected x-default hreflang alternate');
   const homeSchema = buildWebSiteJsonLd('vi');
@@ -184,10 +204,10 @@ async function runVerification() {
   const robotsConfig = robots();
   const rules = Array.isArray(robotsConfig.rules) ? robotsConfig.rules : [robotsConfig.rules];
   const disallowList = rules.flatMap((r) => (Array.isArray(r.disallow) ? r.disallow : r.disallow ? [r.disallow] : []));
-  for (const requiredDisallow of ['/*/admin', '/*/admin/*', '/admin', '/admin/*']) {
+  for (const requiredDisallow of ['/*/admin', '/*/admin/*', '/admin', '/admin/*', '/api/*']) {
     assert.ok(disallowList.includes(requiredDisallow), `Expected robots.ts disallow to include ${requiredDisallow}`);
   }
-  console.log('   ✓ SEO sitemap (124 routes across 4 locales), robots.ts admin guard, and Schema.org JSON-LD validated.');
+  console.log('   ✓ SEO sitemap (144 routes across 4 locales), robots.ts admin & /api/* guard, and Schema.org JSON-LD validated.');
 
   console.log('4. Verifying i18n Core Runtime, Locale Detection & Canonical English Bundle...');
   assert.deepEqual([...SUPPORTED_LOCALES], ['en', 'vi', 'ja', 'zh']);
@@ -225,8 +245,8 @@ async function runVerification() {
   assert.equal(detectBestLocale({ cookieLocale: null, acceptLanguage: 'fr-FR' }), 'en');
 
   const enBundle = getBundle('en');
-  assert.equal(Object.keys(enBundle.catalog.categories).length, 6, 'Expected 6 categories in en catalog');
-  assert.equal(Object.keys(enBundle.catalog.tools).length, 24, 'Expected 24 tools in en catalog');
+  assert.equal(Object.keys(enBundle.catalog.categories).length, 7, 'Expected 7 categories in en catalog');
+  assert.equal(Object.keys(enBundle.catalog.tools).length, 28, 'Expected 28 tools in en catalog');
   assert.equal(
     Object.keys(enBundle.cheatsheets.entries).length,
     CHEATSHEET_ENTRIES.length,
@@ -318,6 +338,14 @@ async function runVerification() {
       tLoc('adminFeedback.kpiRatingsAvg', { avg: '4.8', count: 12 }).includes('4.8'),
       `Expected adminFeedback.kpiRatingsAvg interpolation in ${loc}`
     );
+    assert.ok(
+      tLoc('tools:diagnosticsSuite.keyboard.kpiTested', { tested: 50, total: 104, percent: 48.1 }).includes('50'),
+      `Expected diagnosticsSuite.keyboard.kpiTested interpolation in ${loc}`
+    );
+    assert.ok(
+      tLoc('tools:diagnosticsSuite.speed.selfHostedBadge').length > 0,
+      `Expected diagnosticsSuite.speed.selfHostedBadge in ${loc}`
+    );
   }
   assert.equal(tEn('feedback.navButton'), 'Send Feedback');
   assert.equal(tEn('adminFeedback.heading'), 'Feedback Moderation Console');
@@ -325,13 +353,17 @@ async function runVerification() {
 
   console.log('5. Verifying Locale-Aware Registry, Cheatsheets & Engines...');
   const viCats = getLocalizedCategories('vi');
-  assert.equal(viCats.length, 6);
+  assert.equal(viCats.length, 7);
   assert.equal(viCats[0].name, 'Xử lý Ảnh');
+  assert.equal(viCats[6].name, 'Thiết bị & Mạng');
   const jaTools = getLocalizedTools('ja');
-  assert.equal(jaTools.length, 24);
+  assert.equal(jaTools.length, 28);
   const zhJwt = getLocalizedToolBySlug('text', 'jwt-decoder', 'zh');
   assert.ok(zhJwt);
   assert.equal(zhJwt.name, 'JWT 解码器与载荷检查器');
+  const zhSpeed = getLocalizedToolBySlug('diagnostics', 'speed-test', 'zh');
+  assert.ok(zhSpeed);
+  assert.equal(zhSpeed.name, '网络速度与延迟测试');
 
   const viSheets = getLocalizedCheatsheetEntries('vi', 'git-cheatsheet');
   assert.equal(viSheets.length, 7);
@@ -584,6 +616,126 @@ async function runVerification() {
   assert.equal(ratingOnly.ratings[0].id, 'r2');
 
   console.log('   ✓ Pure feedback core (validation, honeypot, cooldown, debug context, aggregation, filters) validated.');
+
+  console.log('8. Verifying Pure Diagnostics Engine (Keyboard, Audio & Speed Test Math)...');
+  // Keyboard layouts (full-104 & tkl-80)
+  const fullRows = getKeyboardLayout('full-104');
+  const tklRows = getKeyboardLayout('tkl-80');
+  assert.equal(fullRows.length, 6);
+  assert.equal(tklRows.length, 6);
+
+  const fullCodes = getKeyboardLayoutKeyCodes('full-104');
+  const tklCodes = getKeyboardLayoutKeyCodes('tkl-80');
+  assert.equal(fullCodes.length, 104, `Expected 104 keys in full-104, got ${fullCodes.length}`);
+  assert.equal(tklCodes.length, 87, `Expected 87 keys in tkl-80, got ${tklCodes.length}`);
+  assert.equal(new Set(fullCodes).size, fullCodes.length, 'Expected unique key codes in full-104');
+  assert.equal(new Set(tklCodes).size, tklCodes.length, 'Expected unique key codes in tkl-80');
+  assert.ok(fullCodes.includes('NumpadEnter'));
+  assert.ok(!tklCodes.includes('NumpadEnter'));
+
+  // Keyboard stats (ignores codes outside target layout)
+  const kbStats = computeKeyboardStats({
+    layout: 'tkl-80',
+    testedCodes: ['KeyA', 'KeyS', 'Numpad0', 'NumpadEnter'],
+    activeCodes: ['KeyA'],
+    stuckCodes: [],
+    maxSimultaneous: 3,
+    totalPresses: 12,
+  });
+  assert.equal(kbStats.totalLayoutKeys, 87);
+  assert.equal(kbStats.testedCount, 2);
+  assert.equal(kbStats.coveragePercent, Math.round((2 / 87) * 1000) / 10);
+  assert.equal(kbStats.activeCount, 1);
+  assert.equal(kbStats.stuckCount, 0);
+  assert.equal(kbStats.maxSimultaneous, 3);
+  assert.equal(kbStats.totalPresses, 12);
+
+  // Key chatter detection
+  assert.equal(detectKeyChatter(null, 1000), false);
+  assert.equal(detectKeyChatter(1000, 1025), true);
+  assert.equal(detectKeyChatter(1000, 1040), false);
+  assert.equal(detectKeyChatter(1000, 990), false);
+
+  // Audio levels & mic noise classification
+  const emptyAudio = calculateAudioLevels(new Float32Array(0));
+  assert.equal(emptyAudio.rms, 0);
+  assert.equal(emptyAudio.dbfs, -100);
+  assert.equal(emptyAudio.isClipping, false);
+
+  const halfSineLike = calculateAudioLevels(new Float32Array([0.5, -0.5, 0.5, -0.5]));
+  assert.ok(Math.abs(halfSineLike.rms - 0.5) < 1e-6);
+  assert.ok(Math.abs(halfSineLike.peak - 0.5) < 1e-6);
+  assert.ok(Math.abs(halfSineLike.dbfs - 20 * Math.log10(0.5)) < 1e-4);
+  assert.equal(halfSineLike.isClipping, false);
+
+  const clippedAudio = calculateAudioLevels(new Float32Array([0.99, -0.2]));
+  assert.equal(clippedAudio.isClipping, true);
+  assert.equal(classifyMicNoiseFloor(-5, true), 'clipping');
+  assert.equal(classifyMicNoiseFloor(-70, false), 'silent');
+  assert.equal(classifyMicNoiseFloor(-48, false), 'quiet');
+  assert.equal(classifyMicNoiseFloor(-20, false), 'normal');
+  assert.equal(classifyMicNoiseFloor(-5, false), 'loud');
+
+  // Sweep frequency & safe master volume
+  assert.equal(computeSweepFrequencyAtProgress(0), 20);
+  assert.ok(Math.abs(computeSweepFrequencyAtProgress(1) - 20_000) < 1e-6);
+  assert.ok(Math.abs(computeSweepFrequencyAtProgress(0.5) - Math.sqrt(20 * 20_000)) < 1e-4);
+  assert.equal(clampSafeMasterVolume(35), 0.35);
+  assert.equal(clampSafeMasterVolume(150), 1);
+  assert.equal(clampSafeMasterVolume(-10), 0);
+  assert.equal(clampSafeMasterVolume(Number.NaN), 0.35);
+
+  // Speed test constants, clamping, ping, bandwidth, suitability & origin check
+  assert.equal(SPEED_TEST_MIN_DOWNLOAD_BYTES, 65_536);
+  assert.equal(SPEED_TEST_DEFAULT_DOWNLOAD_BYTES, 1_048_576);
+  assert.equal(SPEED_TEST_MAX_DOWNLOAD_BYTES, 4_194_304);
+  assert.equal(SPEED_TEST_MAX_UPLOAD_BYTES, 4_194_304);
+  assert.equal(clampDownloadBytes(null), 1_048_576);
+  assert.equal(clampDownloadBytes('bad'), 1_048_576);
+  assert.equal(clampDownloadBytes('1024'), 65_536);
+  assert.equal(clampDownloadBytes('99999999'), 4_194_304);
+  assert.equal(clampDownloadBytes('2097152'), 2_097_152);
+
+  const pingStats = computePingStats([10, 20, 14]);
+  assert.equal(pingStats.minMs, 10);
+  assert.equal(pingStats.maxMs, 20);
+  assert.ok(Math.abs(pingStats.avgMs - 14.67) < 0.01);
+  assert.equal(pingStats.jitterMs, 8);
+  assert.deepEqual(computePingStats([]), { minMs: 0, avgMs: 0, maxMs: 0, jitterMs: 0 });
+  assert.equal(computePingStats([15]).jitterMs, 0);
+
+  assert.equal(computeBandwidthMbps(1_000_000, 1000), 8);
+  assert.equal(computeBandwidthMbps(0, 1000), 0);
+  assert.equal(computeBandwidthMbps(1_000_000, 0), 0);
+
+  const fastNet = assessNetworkSuitability({
+    pingMs: 12,
+    jitterMs: 3,
+    downloadMbps: 120,
+    uploadMbps: 80,
+  });
+  assert.equal(fastNet.overallGrade, 'excellent');
+  assert.equal(fastNet.useCases.length, 4);
+  assert.ok(fastNet.useCases.every((u) => u.status === 'excellent'));
+
+  const slowNet = assessNetworkSuitability({
+    pingMs: 250,
+    jitterMs: 90,
+    downloadMbps: 1,
+    uploadMbps: 0.4,
+  });
+  assert.equal(slowNet.overallGrade, 'poor');
+
+  assert.equal(validateSameOriginHeaders(null, 'localhost:3000'), true);
+  assert.equal(validateSameOriginHeaders('https://omnidev.app', 'omnidev.app'), true);
+  assert.equal(validateSameOriginHeaders('http://localhost:3000', 'localhost:3000'), true);
+  assert.equal(validateSameOriginHeaders('https://evil.example', 'omnidev.app'), false);
+  assert.equal(validateSameOriginHeaders('not-a-url', 'omnidev.app'), false);
+
+  const randomBuf = generateIncompressibleBytes(1025, 12345);
+  assert.equal(randomBuf.byteLength, 1025);
+  assert.ok(new Set(randomBuf).size > 100);
+  console.log('   ✓ Pure diagnostics engine (keyboard, audio, speed test math & origin checks) validated.');
 
   console.log('\nALL AIDLC VERIFICATION CHECKS PASSED!');
 }

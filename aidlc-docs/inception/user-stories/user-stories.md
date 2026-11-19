@@ -205,3 +205,66 @@
 - **Then** `/[locale]/admin/feedback` emits `noindex, nofollow`, `/robots.txt` disallows `/admin` and `/*/admin`, and `/sitemap.xml` retains exactly `124` public URLs;
 - **When** `syncMode === 'supabase'`, an unauthenticated visitor or non-allowlisted user sees the Email/Password sign-in gate (using the isolated `persistSession: true` admin client) and cannot read or mutate rows;
 - **When** an allowlisted `feedback_admins` user signs in (or when `syncMode === 'local'` displays the "Local Mode" banner), the maintainer can filter by type/status/tool/keyword, save status + `admin_note`, inspect `debug_context`, and delete spam entries.
+
+---
+
+## `US-16`: Discovering Device & Network Diagnostics Hub (`FR-26`)
+**As** Alex,
+**I want** to browse `/[locale]/categories/diagnostics` or search `"keyboard"`, `"mic"`, `"speaker"`, or `"speed test"` in `Cmd+K` Command Palette in any of the 4 supported locales,
+**So that** I can launch hardware and network diagnostics immediately alongside my developer tools.
+
+### Acceptance Criteria
+- **Given** the app is rendered in `en`, `vi`, `ja`, or `zh`,
+- **When** the user navigates to `/[locale]/categories/diagnostics` or searches localized/English keywords in `Cmd+K`,
+- **Then** all 4 tools (`keyboard-tester`, `mic-tester`, `speaker-tester`, `speed-test`) appear with localized metadata and full ratings/feedback support.
+
+---
+
+## `US-17`: Visual Keyboard, NKRO & Stuck-Key Diagnostics (`FR-27`, `NFR-13`)
+**As** a developer inspecting a laptop or mechanical keyboard,
+**I want** an interactive Full-size 104 / TKL 80% visual keyboard with Win/Mac labels, persistent tested-key highlights, stuck-key & chatter warnings, NKRO counter, and Event Inspector,
+**So that** I can verify every key without triggering browser shortcuts or getting trapped.
+
+### Acceptance Criteria
+- **Given** the user opens `/[locale]/tools/diagnostics/keyboard-tester`,
+- **When** the user enables **Capture Browser Keys** and presses `Tab`, `Space`, `F1`–`F12`, or `Cmd/Ctrl+K`,
+- **Then** the keys highlight and stay marked as tested, `CommandPalette` does not hijack the keypress,
+- **And** pressing `Esc` twice within `600ms` (or clicking Unlock) immediately releases browser key capture, while `blur`/`visibilitychange` clears active keys.
+
+---
+
+## `US-18`: Microphone VU Meter, Visualizer & Record/Playback (`FR-28`, `NFR-12`, `PRE-02`)
+**As** a remote engineer preparing for a call,
+**I want** to choose my microphone, monitor live dBFS / Waveform / Frequency Spectrum, detect clipping/noise floor, and record a short clip to play back locally,
+**So that** I can verify audio input quality with clear guidance if permissions or HTTPS are missing.
+
+### Acceptance Criteria
+- **Given** the user opens `/[locale]/tools/diagnostics/mic-tester`,
+- **When** microphone access is granted in a Secure Context,
+- **Then** live RMS/Peak dBFS, Canvas Waveform/Spectrum, and short `MediaRecorder` playback (`<= 15s`) work locally and release all tracks/AudioContexts on Stop or unmount;
+- **And** if permissions are denied or `!window.isSecureContext`, a clear localized troubleshooting banner renders without throwing errors.
+
+---
+
+## `US-19`: Hearing-Safe Stereo Speaker & Headphone Tester (`FR-29`, `NFR-14`)
+**As** a user verifying headphones or desktop speakers,
+**I want** to test Left, Right, and Stereo channels using 440Hz Tone, 20Hz–20kHz Sweep, White/Pink Noise, or Sample Chime at a safe default volume (`35%`),
+**So that** I can confirm stereo imaging and speaker clarity without risking sudden loud bursts.
+
+### Acceptance Criteria
+- **Given** the user opens `/[locale]/tools/diagnostics/speaker-tester`,
+- **When** the user selects `Left`, `Stereo`, or `Right` and plays any test signal,
+- **Then** Web Audio routes strictly to the chosen channel(s) via `ChannelMergerNode(2)` + `DynamicsCompressorNode` limiter starting at `35%` volume with smooth gain ramps, and supports `setSinkId` output selection when available.
+
+---
+
+## `US-20`: Privacy-First Self-Hosted Network Speed Test (`FR-30`, `FR-31`, `NFR-15`)
+**As** a developer testing local or production connection quality,
+**I want** to measure Ping RTT, Jitter, Download Mbps, and Upload Mbps against self-hosted `/api/speedtest/*` routes with a real-time SVG chart, Abort button, local history, and suitability assessment,
+**So that** I can benchmark network speed and stability without sending traffic to third-party trackers.
+
+### Acceptance Criteria
+- **Given** the user opens `/[locale]/tools/diagnostics/speed-test`,
+- **When** the user starts a `Quick` or `Standard` test,
+- **Then** the app runs Ping/Jitter, streaming Download, and XHR Upload against `/api/speedtest/{ping,download,upload}`, plots live throughput in SVG, evaluates Video Call / 4K Streaming / Gaming / Cloud Sync suitability, and saves up to 20 runs in `localStorage`;
+- **And** clicking Abort or leaving the page immediately cancels in-flight requests.

@@ -132,3 +132,30 @@ To keep visitor flows zero-login (`EX-01`) and zero-server-secret (`CON-09`) whi
 - `src/app/[locale]/admin/feedback/page.tsx` exports `generateStaticParams()` for all 4 locales and `generateMetadata()` with `robots: { index: false, follow: false, nocache: true }`.
 - `src/app/sitemap.ts` remains strictly `124` public URLs (no admin routes).
 - `src/app/robots.ts` explicitly adds `disallow: ['/*/admin', '/*/admin/*', '/admin', '/admin/*']`.
+
+---
+
+## 5. Device & Network Diagnostics Architecture (`UNIT-14`–`UNIT-17`)
+
+### 5.1 Hybrid Client Hardware + Self-Hosted Speed Test Topology
+
+```text
+Browser Client ('use client')
+  ├── DiagnosticsToolsSuite.tsx (routes toolId -> 4 modular panels)
+  │     ├── KeyboardTesterPanel.tsx  ──▶ KeyboardEvent (capture) + Web Audio click (muted default)
+  │     ├── MicTesterPanel.tsx       ──▶ navigator.mediaDevices + AnalyserNode Canvas + MediaRecorder (<=15s)
+  │     ├── SpeakerTesterPanel.tsx   ──▶ ChannelMergerNode(2) + DynamicsCompressorNode + setSinkId
+  │     └── SpeedTestPanel.tsx       ──▶ fetch() ReadableStream (DL) + XHR upload.onprogress (UL) + localStorage history
+  │
+  ├── Pure Engine: src/lib/tools/engines/diagnostics.ts (Node/tsx-executable, zero DOM/WebAudio globals)
+  │
+  └── Same-Origin API Routes (Next.js Runtime: nodejs, force-dynamic, bypassed by src/proxy.ts):
+        ├── GET  /api/speedtest/ping     ──▶ 2-byte 'ok', no-store
+        ├── GET  /api/speedtest/download ──▶ incompressible xorshift32 Uint8Array, clamp 64KiB..4MiB, no-transform
+        └── POST /api/speedtest/upload   ──▶ stream byte counter, abort + 413 if > 4MiB, zero RAM/disk retention
+```
+
+### 5.2 Safety, Isolation & SEO Boundaries
+1. **Shortcut Coexistence (`NFR-13`)**: `AppShell.tsx` checks `if (e.defaultPrevented) return;` before opening `CommandPalette` on `Cmd/Ctrl+K`, allowing `KeyboardTesterPanel` in Capture Mode (`capture: true`) to intercept browser shortcuts while guaranteeing escape via `Esc × 2` (`<= 600ms`) or Unlock button.
+2. **Audio Lifecycle & Hearing Safety (`NFR-12`, `NFR-14`)**: `MicTesterPanel` and `SpeakerTesterPanel` centralize teardown in `useEffect` cleanup + Stop handlers (`track.stop()`, `AudioContext.close()`, `URL.revokeObjectURL()`, `cancelAnimationFrame`). `SpeakerTesterPanel` defaults to `35%` volume behind a `DynamicsCompressorNode` limiter (`-3 dBFS`, `12:1`).
+3. **Crawler & Abuse Protection (`NFR-15`, `NFR-16`)**: `src/app/robots.ts` adds `'/api/*'` to `disallow` so bots do not crawl `/api/speedtest/download`. `src/app/sitemap.ts` expands to `144` URLs (`4 × (1 + 7 + 28)`). `/api/speedtest/upload` enforces same-origin `Origin` vs `Host` validation and `<= 4 MiB` streaming cap.

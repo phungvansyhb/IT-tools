@@ -56,6 +56,15 @@ export const jaCatalog: CatalogDictionary = {
       seoDescription:
         'ワンクリックコピーとピン留めに対応した Git、HTTP ステータスコード、Linux、Docker、正規表現の高速フィルタリングチートシート。',
     },
+    diagnostics: {
+      name: 'デバイスとネットワーク',
+      tagline: 'キーボード NKRO、マイク VU/FFT、ステレオスピーカー、回線速度テスト',
+      description:
+        'メカニカルキーボードのロールオーバーやチャタリング検査、マイク入力レベルのローカル解析、左右スピーカー出力確認、Ping・ジッター・上下帯域幅を計測します。',
+      seoTitle: 'デバイス＆ネットワーク診断 — キーボード・マイク・スピーカー・速度テスト',
+      seoDescription:
+        'ブラウザ完結のハードウェア診断とセルフホスト速度測定：ANSI キーボード NKRO テスター、マイク波形/dBFS 解析、左右スピーカーチェック、Ping・帯域モニター。',
+    },
   },
   tools: {
     'image-converter': {
@@ -620,6 +629,102 @@ export const jaCatalog: CatalogDictionary = {
           question: '不要になった Docker のダングリングイメージを安全に削除するには？',
           answer:
             '`docker image prune` を実行すると、稼働中コンテナに影響を与えずタグなしレイヤーを削除できます。',
+        },
+      ],
+    },
+    'keyboard-tester': {
+      name: 'キーボードテスター & NKRO 検査',
+      shortDescription: 'キー入力、NKRO 同時押し、チャタリング警告、イベントコードを検証。',
+      longDescription:
+        'Windows/Mac 表記切替付きの ANSI フルサイズ 104 / TKL 80 キーボードで、同時押し数（NKRO）、チャタリング・キー固着検知、キャプチャモード、KeyboardEvent 詳細を確認できます。',
+      keywords: ['キーボード', 'keyboard', 'keyboard tester', 'nkro', '同時押し', 'チャタリング', 'テスト'],
+      howItWorks: [
+        'ローカルで `keydown` / `keyup` を監視し、オプションのキャプチャモード（`Esc × 2` で解除）によりブラウザショートカットも捕捉できます。',
+        '押下中のキー、配列カバー率、最大同時押し数（NKRO）、40ms 未満のチャタリングをリアルタイム追跡します。',
+        '`code`、`key`、`location`、`keyCode`、修飾キー状態、打鍵間隔（ms）を即時表示します。',
+      ],
+      faqs: [
+        {
+          question: 'キャプチャモードを安全に終了するにはどうすればよいですか？',
+          answer:
+            'Esc キーを素早く 2 回押す（`Esc × 2`）か、ツールバーの「ロック解除」ボタンをクリックすると通常のショートカットに戻ります。',
+        },
+        {
+          question: 'キーチャタリングとは何ですか？どう検出されますか？',
+          answer:
+            'メカニカルスイッチの接点劣化により 1 回の打鍵で 40ms 未満の間隔で二重入力が発生する現象を検出します。',
+        },
+      ],
+    },
+    'mic-tester': {
+      name: 'マイクテスター & 音声ビジュアライザー',
+      shortDescription: 'リアルタイム dBFS メーター、波形/FFT スペクトラム、ローカル録音再生。',
+      longDescription:
+        'Web Audio API を用いてマイク入力をローカル検証。入力デバイス選択、波形・FFT スペクトラム描画、クリッピング・環境ノイズ判定、最大 15 秒のローカル録音再生に対応します。',
+      keywords: ['マイク', 'mic', 'microphone', 'dbfs', 'waveform', 'spectrum', '録音'],
+      howItWorks: [
+        'ブラウザタブ内で `navigator.mediaDevices.getUserMedia` を通じてローカルマイク入力を取得します。',
+        '`AnalyserNode` で時間領域・周波数領域を解析し、RMS / ピーク dBFS とノイズフロア・クリッピングを判定します。',
+        '`MediaRecorder` による最大 15 秒のテスト録音に対応し、サーバー送信なしで再生・ダウンロードできます。',
+      ],
+      faqs: [
+        {
+          question: 'マイク音声が外部サーバーにアップロードされることはありますか？',
+          answer:
+            'いいえ。音声ストリーム、可視化データ、最大 15 秒のテスト録音はすべてブラウザメモリ内に留まります。',
+        },
+        {
+          question: 'なぜマイクテストには HTTPS または localhost が必要ですか？',
+          answer:
+            'ブラウザはユーザープライバシー保護のため `navigator.mediaDevices` をセキュアコンテキスト（`https://` または `localhost`）に制限しています。',
+        },
+      ],
+    },
+    'speaker-tester': {
+      name: 'スピーカー & ヘッドホン ステレオテスター',
+      shortDescription: '左右ステレオチャンネル、20Hz–20kHz スイープ、安全音量トーンを確認。',
+      longDescription:
+        'Web Audio 合成信号（440Hz/1kHz トーン、対数 20Hz–20kHz スイープ、ホワイト/ピンクノイズ、サンプルチャイム）と聴覚保護リミッターで左右チャンネルと再生特性を検証します。',
+      keywords: ['スピーカー', 'ヘッドホン', 'speaker', 'headphone', 'stereo', 'left right', '周波数スイープ'],
+      howItWorks: [
+        '`ChannelMergerNode(2)` 経由で信号を送出し、左（Left）・ステレオ（Stereo）・右（Right）を正確に分離出力します。',
+        '聴覚保護のため `DynamicsCompressorNode` リミッターを通し、初期音量を安全な 35% に設定しています。',
+        '`AudioContext.setSinkId()` 対応ブラウザでは出力デバイスの切り替えが可能です。',
+      ],
+      faqs: [
+        {
+          question: 'なぜ初期マスター音量が 35% に設定されているのですか？',
+          answer:
+            '内蔵リミッターと 35% スタートにより、突然の大音量テストトーンによる耳や機材のダメージを防ぎます。',
+        },
+        {
+          question: '出力デバイス選択が使えないブラウザではどうなりますか？',
+          answer:
+            'Safari や Firefox など `setSinkId` 非対応環境では、OS の既定オーディオ出力デバイスが自動的に使用されます。',
+        },
+      ],
+    },
+    'speed-test': {
+      name: 'ネットワーク速度 & 遅延テスト',
+      shortDescription: 'セルフホスト環境で Ping・Jitter・下り・上り帯域を計測。',
+      longDescription:
+        '同一オリジンエンドポイントに対してクイック／標準モードで応答性とスループットを計測。リアルタイム SVG グラフ、用途別適性判定、ローカル履歴保存（最大 20 件）を備えます。',
+      keywords: ['speed test', '回線速度', 'ping', 'jitter', 'download', 'upload', '帯域幅'],
+      howItWorks: [
+        '同一オリジンへの連続 Ping プローブで往復遅延（Ping）と揺らぎ（Jitter）を計測します。',
+        '非圧縮性擬似乱数ストリーム（`ReadableStream`）で下り速度を、`XMLHttpRequest.upload.onprogress` で上り速度を測定します。',
+        'ビデオ会議・4K 動画・オンラインゲーム・クラウド同期への適性を評価し、直近 20 件の結果を localStorage に保存します。',
+      ],
+      faqs: [
+        {
+          question: 'この速度テストは外部のサードパーティサーバーへ接続しますか？',
+          answer:
+            'いいえ。すべての計測は同一オリジンの `/api/speedtest/*` エンドポイントに対してのみ行われ、データは一切保存されません。',
+        },
+        {
+          question: 'クイックモードと標準モードの違いは何ですか？',
+          answer:
+            'クイックモードは軽量ペイロードで素早く確認でき、標準モードは数 MB 規模の転送でより安定した平均スループットを計測します。',
         },
       ],
     },

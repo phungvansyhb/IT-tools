@@ -56,6 +56,15 @@ export const viCatalog: CatalogDictionary = {
       seoDescription:
         'Sổ tay tra cứu tức thì cho lập trình viên với tính năng lọc nhanh, sao chép một chạm và ghim lệnh Git, HTTP, Linux, Docker và Regex.',
     },
+    diagnostics: {
+      name: 'Thiết bị & Mạng',
+      tagline: 'Kiểm tra bàn phím NKRO, Micro VU/FFT, Loa Stereo & Tốc độ mạng',
+      description:
+        'Kiểm tra độ nhận đa phím NKRO và lỗi lặp phím, theo dõi mức âm lượng micro cục bộ, kiểm tra kênh loa Trái/Phải và đo ping, jitter, tốc độ tải xuống/tải lên.',
+      seoTitle: 'Chẩn đoán Thiết bị & Mạng — Bàn phím, Micro, Loa & Speed Test',
+      seoDescription:
+        'Công cụ chẩn đoán phần cứng gốc trên trình duyệt và đo tốc độ mạng tự lưu trữ: kiểm tra bàn phím ANSI NKRO, phân tích sóng âm/dBFS micro, kiểm tra loa trái/phải và đo băng thông.',
+    },
   },
   tools: {
     'image-converter': {
@@ -644,6 +653,102 @@ export const viCatalog: CatalogDictionary = {
           question: 'Làm sao dọn các Docker image lơ lửng an toàn?',
           answer:
             'Chạy `docker image prune` để dọn các layer chưa gắn thẻ mà không đụng vào container đang chạy.',
+        },
+      ],
+    },
+    'keyboard-tester': {
+      name: 'Kiểm tra Bàn phím & NKRO',
+      shortDescription: 'Kiểm tra phím bấm, đa phím NKRO, cảnh báo chatter & mã sự kiện.',
+      longDescription:
+        'Kiểm tra bàn phím ANSI Full-Size 104 và TKL 80 với nhãn Windows/Mac, đo số phím nhận đồng thời NKRO, phát hiện kẹt/lặp phím, chế độ Capture Mode và xem chi tiết KeyboardEvent.',
+      keywords: ['bàn phím', 'keyboard', 'keyboard tester', 'nkro', 'lặp phím', 'chatter', 'kiểm tra phím'],
+      howItWorks: [
+        'Lắng nghe sự kiện `keydown` và `keyup` cục bộ với tùy chọn Capture Mode (`Esc × 2` để mở khóa) nhằm bắt cả phím tắt trình duyệt.',
+        'Theo dõi phím đang giữ, tỷ lệ phím đã kiểm tra, số phím bấm đồng thời tối đa (NKRO) và lỗi lặp phím dưới 40ms.',
+        'Hiển thị trực tiếp `code`, `key`, `location`, `keyCode`, phím bổ trợ và thời gian chênh lệch giữa các lần nhấn.',
+      ],
+      faqs: [
+        {
+          question: 'Làm sao thoát Capture Mode an toàn?',
+          answer:
+            'Nhấn phím Escape hai lần liên tiếp (`Esc × 2`) hoặc nhấn nút Mở khóa trên thanh công cụ để khôi phục phím tắt trình duyệt.',
+        },
+        {
+          question: 'Lỗi lặp phím (key chatter) là gì và được phát hiện thế nào?',
+          answer:
+            'Key chatter xảy ra khi switch cơ bị mòn ghi nhận hai lần nhấn ngoài ý muốn trong khoảng dưới ~40 mili-giây sau lần nhấn trước.',
+        },
+      ],
+    },
+    'mic-tester': {
+      name: 'Kiểm tra Micro & Phân tích Âm thanh',
+      shortDescription: 'Theo dõi mức dBFS trực tiếp, dạng sóng/phổ FFT & nghe lại cục bộ.',
+      longDescription:
+        'Kiểm tra độ rõ của micro cục bộ qua Web Audio API với chọn thiết bị đầu vào, biểu đồ sóng âm và phổ tần số FFT thời gian thực, cảnh báo rè/clipping và ghi âm thử tối đa 15 giây.',
+      keywords: ['micro', 'mic', 'microphone', 'dbfs', 'waveform', 'spectrum', 'ghi âm'],
+      howItWorks: [
+        'Yêu cầu quyền truy cập micro cục bộ qua `navigator.mediaDevices.getUserMedia` hoàn toàn trong tab trình duyệt.',
+        'Phân tích khung tín hiệu miền thời gian và tần số bằng `AnalyserNode` để tính RMS/Peak dBFS và phân loại mức nhiễu nền hoặc vỡ tiếng.',
+        'Hỗ trợ ghi thử qua `MediaRecorder` tối đa 15 giây để nghe lại và tải về ngay mà không tải âm thanh lên máy chủ.',
+      ],
+      faqs: [
+        {
+          question: 'Âm thanh từ micro có bị tải lên hay lưu ở máy chủ không?',
+          answer:
+            'Không. Toàn bộ luồng âm thanh, biểu đồ và đoạn ghi thử 15 giây chỉ tồn tại trong bộ nhớ trình duyệt của bạn.',
+        },
+        {
+          question: 'Vì sao kiểm tra micro cần HTTPS hoặc localhost?',
+          answer:
+            'Trình duyệt giới hạn `navigator.mediaDevices` chỉ hoạt động trong Ngữ cảnh Bảo mật (`https://` hoặc `localhost`) để bảo vệ quyền riêng tư.',
+        },
+      ],
+    },
+    'speaker-tester': {
+      name: 'Kiểm tra Loa & Tai nghe Stereo',
+      shortDescription: 'Kiểm tra kênh Trái/Phải, quét dải tần 20Hz–20kHz & âm chuẩn an toàn.',
+      longDescription:
+        'Kiểm tra đấu nối kênh trái/phải và đáp ứng tần số của loa bằng bộ tổng hợp Web Audio (âm đơn 440Hz/1kHz, quét logarit 20Hz–20kHz, nhiễu trắng/hồng và chuông mẫu) qua bộ giới hạn bảo vệ thính giác.',
+      keywords: ['loa', 'tai nghe', 'speaker', 'headphone', 'stereo', 'left right', 'kiểm tra loa'],
+      howItWorks: [
+        'Định tuyến tín hiệu tổng hợp qua `ChannelMergerNode(2)` để tách bạch hoàn toàn kênh Trái, Stereo hoặc Phải.',
+        'Áp dụng bộ giới hạn an toàn `DynamicsCompressorNode` và khởi đầu ở mức âm lượng mặc định 35% để bảo vệ thính giác.',
+        'Cho phép chuyển đổi thiết bị đầu ra trên các trình duyệt hỗ trợ `AudioContext.setSinkId()`.',
+      ],
+      faqs: [
+        {
+          question: 'Vì sao âm lượng mặc định được đặt ở mức 35%?',
+          answer:
+            'Mức khởi đầu 35% kết hợp bộ nén giới hạn giúp ngăn âm kiểm tra quá lớn gây hại cho tai hoặc tai nghe.',
+        },
+        {
+          question: 'Nếu trình duyệt không hỗ trợ chọn thiết bị đầu ra thì sao?',
+          answer:
+            'Một số trình duyệt (như Safari hoặc Firefox) chưa mở API `setSinkId`; âm thanh sẽ tự động phát qua thiết bị mặc định của hệ thống.',
+        },
+      ],
+    },
+    'speed-test': {
+      name: 'Đo Tốc độ Mạng & Độ trễ',
+      shortDescription: 'Đo Ping, Jitter, Download & Upload trực tiếp trên máy chủ nguồn.',
+      longDescription:
+        'Đo độ phản hồi và băng thông kết nối tới endpoint cùng nguồn với chế độ Nhanh hoặc Chuẩn, biểu đồ thông lượng SVG thời gian thực, xếp hạng tác vụ và lịch sử đo cục bộ.',
+      keywords: ['speed test', 'tốc độ mạng', 'ping', 'jitter', 'download', 'upload', 'bandwidth'],
+      howItWorks: [
+        'Đo độ trễ khứ hồi (Ping) và biến động độ trễ (Jitter) qua chuỗi probe cùng nguồn.',
+        'Truyền dữ liệu ngẫu nhiên khó nén qua `ReadableStream` để đo tốc độ tải xuống và theo dõi `XMLHttpRequest.upload.onprogress` cho tốc độ tải lên.',
+        'Đánh giá mức độ phù hợp cho Gọi video, Xem 4K, Chơi game và Đồng bộ đám mây, đồng thời lưu tối đa 20 lần đo trong localStorage.',
+      ],
+      faqs: [
+        {
+          question: 'Công cụ đo tốc độ này có kết nối tới máy chủ bên thứ ba không?',
+          answer:
+            'Không. Mọi lượt đo chỉ gửi yêu cầu tới các endpoint cùng nguồn `/api/speedtest/*` và không lưu dữ liệu tải lên.',
+        },
+        {
+          question: 'Chế độ Nhanh và Chuẩn khác nhau như thế nào?',
+          answer:
+            'Chế độ Nhanh dùng dung lượng nhỏ để kiểm tra sơ bộ nhanh chóng, còn chế độ Chuẩn truyền nhiều megabyte để lấy giá trị băng thông ổn định hơn.',
         },
       ],
     },

@@ -56,6 +56,15 @@ export const zhCatalog: CatalogDictionary = {
       seoDescription:
         '支持快速过滤、一键复制与片段固定的 Git、HTTP 状态码、Linux、Docker 与正则表达式速查表。',
     },
+    diagnostics: {
+      name: '设备与网络',
+      tagline: '键盘 NKRO 检测、麦克风 VU/FFT、立体声扬声器与网速测试',
+      description:
+        '本地检测机械键盘无冲与连击故障、实时监测麦克风音量与频谱、测试左右立体声声道，并测量 Ping、抖动与上下行带宽。',
+      seoTitle: '设备与网络诊断 — 键盘、麦克风、扬声器与网速测试',
+      seoDescription:
+        '浏览器原生硬件诊断与自托管测速工具：ANSI 键盘无冲测试仪、麦克风波形/dBFS 分析、左右声道扬声器测试与 Ping/抖动/带宽监测。',
+    },
   },
   tools: {
     'image-converter': {
@@ -583,6 +592,95 @@ export const zhCatalog: CatalogDictionary = {
         {
           question: '如何安全清理悬空的 Docker 镜像？',
           answer: '运行 `docker image prune` 可清理未打标签的镜像层，同时不影响正在运行的容器。',
+        },
+      ],
+    },
+    'keyboard-tester': {
+      name: '键盘测试仪 & NKRO 无冲检测',
+      shortDescription: '实时检测按键触发、全键无冲、连击告警与键码详情。',
+      longDescription:
+        '支持 ANSI 全尺寸 104 键与 TKL 80 键布局及 Windows/Mac 键帽标签，提供同时按下数（NKRO）统计、连击/卡键检测、按键捕获模式与实时 KeyboardEvent 检查。',
+      keywords: ['键盘', 'keyboard', 'keyboard tester', 'nkro', '无冲', '连击', '按键测试'],
+      howItWorks: [
+        '在本地监听硬件 `keydown` 与 `keyup` 事件，并支持开启捕获模式（`Esc × 2` 解锁）以拦截浏览器快捷键。',
+        '实时跟踪按下状态、按键覆盖率、最大同时按下键数（NKRO）以及小于 40ms 的开关连击异常。',
+        '在检查面板中展示 `code`、`key`、`location`、`keyCode`、修饰键状态及相邻按键间隔时间。',
+      ],
+      faqs: [
+        {
+          question: '如何安全退出按键捕获模式？',
+          answer: '连续快速按两次 Esc 键（`Esc × 2`），或点击工具栏中的“解锁”按钮即可恢复浏览器默认快捷键。',
+        },
+        {
+          question: '什么是按键连击（Chatter）？工具如何检测？',
+          answer:
+            '机械轴体老化时可能在单次按压后 40 毫秒内误触发二次信号，系统会自动计算两次按下间隔并标记告警。',
+        },
+      ],
+    },
+    'mic-tester': {
+      name: '麦克风测试 & 音频频谱分析',
+      shortDescription: '实时监测 dBFS 电平、波形/FFT 频谱与本地录音回放。',
+      longDescription:
+        '通过 Web Audio API 在本地验证麦克风拾音质量，支持输入设备切换、实时波形与 FFT 频谱绘制、削波与底噪状态提示以及最长 15 秒本地录音回放。',
+      keywords: ['麦克风', 'mic', 'microphone', 'dbfs', 'waveform', 'spectrum', '录音'],
+      howItWorks: [
+        '在浏览器标签页内通过 `navigator.mediaDevices.getUserMedia` 请求本地麦克风权限。',
+        '使用 `AnalyserNode` 分析时域与频域采样帧，计算 RMS/峰值 dBFS 并识别底噪或削波失真。',
+        '支持使用 `MediaRecorder` 录制最长 15 秒音频片段，供本地即时回放与下载，全程不上传音频。',
+      ],
+      faqs: [
+        {
+          question: '我的麦克风音频会上传到服务器吗？',
+          answer: '不会。所有音频流、频谱画面及 15 秒测试录音均严格保留在浏览器内存中。',
+        },
+        {
+          question: '为什么麦克风测试需要 HTTPS 或 localhost？',
+          answer: '为保护用户隐私，浏览器仅在安全上下文（`https://` 或 `localhost`）中允许调用 `navigator.mediaDevices`。',
+        },
+      ],
+    },
+    'speaker-tester': {
+      name: '扬声器与耳机立体声测试',
+      shortDescription: '测试左右声道分离、20Hz–20kHz 扫频与护耳测试音。',
+      longDescription:
+        '利用 Web Audio 合成信号（440Hz/1kHz 单音、对数 20Hz–20kHz 扫频、白噪/粉红噪声及示例和弦）搭配安全限幅器，精准验证左右声道接线与频响表现。',
+      keywords: ['扬声器', '耳机', 'speaker', 'headphone', 'stereo', 'left right', '扫频'],
+      howItWorks: [
+        '通过 `ChannelMergerNode(2)` 路由合成音频，可独立切换左声道、立体声或右声道输出。',
+        '内置 `DynamicsCompressorNode` 动态限幅器并将默认主音量设为 35%，防止突发强音损伤听力。',
+        '在支持 `AudioContext.setSinkId()` 的浏览器中可直接切换指定音频输出设备。',
+      ],
+      faqs: [
+        {
+          question: '为什么默认主音量设为 35%？',
+          answer: '35% 初始音量配合动态限幅器可避免高频或高音量测试信号突然刺激人耳或损坏耳机单元。',
+        },
+        {
+          question: '如果当前浏览器不支持选择输出设备怎么办？',
+          answer: '部分浏览器（如 Safari 或 Firefox）暂未开放 `setSinkId` 接口，音频将自动通过系统默认设备播放。',
+        },
+      ],
+    },
+    'speed-test': {
+      name: '网络速度与延迟测试',
+      shortDescription: '基于同源接口自托管测量 Ping、抖动、下载与上传带宽。',
+      longDescription:
+        '使用快速或标准测速模式面向同源端点测试连接响应速度与吞吐量，提供实时 SVG 速率曲线、场景适用性评级与本地历史记录。',
+      keywords: ['speed test', 'ping', 'jitter', 'download', 'upload', '测速', '带宽'],
+      howItWorks: [
+        '通过连续同源 Ping 探测计算往返延迟（Ping）与网络抖动（Jitter）。',
+        '借助 `ReadableStream` 流式下载不可压缩伪随机字节测算下行带宽，并通过 `XMLHttpRequest.upload.onprogress` 监测上行速率。',
+        '综合评估视频通话、4K 流媒体、在线游戏与云同步适用度，并在 localStorage 中保留最近 20 条记录。',
+      ],
+      faqs: [
+        {
+          question: '此测速工具会连接第三方测速服务器吗？',
+          answer: '不会。所有探测请求仅访问同源 `/api/speedtest/*` 接口，且服务端不留存任何载荷。',
+        },
+        {
+          question: '快速模式与标准模式有什么区别？',
+          answer: '快速模式使用较小数据包进行快速连通性与带宽初测；标准模式则传输多兆字节数据以获得更稳定的均值。',
         },
       ],
     },

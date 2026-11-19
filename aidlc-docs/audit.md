@@ -74,3 +74,20 @@
   - `src/hooks/{useUserWorkspace,useFeedback}.tsx`, `src/components/feedback/{StarRatingWidget,FeedbackModal}.tsx`, `src/components/layout/AppShell.tsx`, `src/components/tools/ToolWorkspace.tsx`, `src/components/bento/BentoCard.tsx`, `src/app/[locale]/layout.tsx`, `src/app/globals.css`.
   - `src/app/[locale]/admin/feedback/page.tsx`, `src/components/admin/AdminFeedbackClient.tsx`, `scripts/verify-aidlc.ts`.
 - **Verification & Gate Status**: `npm run lint`, `npx tsx scripts/verify-aidlc.ts`, and `npm run build` (134 static routes including 4 `noindex` admin pages; 1067 keys × 4 locales; 124 sitemap URLs; `robots.ts` admin disallow; pure feedback & debug-context assertions) passed with exit code 0.
+
+## [2026-11-19T02:36:00Z] — Prompt 5: Device & Network Diagnostics Category & 4 Tools (`UNIT-14`–`UNIT-17`)
+- **Phase / Stage**: `CONSTRUCTION / UNIT-14..UNIT-17 Complete (Gate 1 Approved → Full Verification Passed)`
+- **User Input**: `"/do_task thêm tính năng test bàn phím , test mic, test loa , đo tốc độ mạng và gom chúng vào 1 category mới"`
+- **Clarifications / Decisions**:
+  - **Category & Tool Naming (`A1`)**: New category `diagnostics` (*"Device & Network"* / *"Thiết bị & Mạng"*, icon `Activity`), expanding the hub to `7` categories / `28` tools / `144` sitemap URLs across `en`, `vi`, `ja`, `zh`, with 4 tools: `keyboard-tester`, `mic-tester`, `speaker-tester`, `speed-test`.
+  - **Speed Test Backend (`A2`)**: Self-hosted Next.js Route Handlers (`/api/speedtest/{ping,download,upload}`) with `force-dynamic`, `runtime = 'nodejs'`, `no-store`/`no-transform` anti-cache/compression headers, incompressible xorshift32 payloads, same-origin validation, and `<= 4 MiB` streaming upload cap (`413`).
+  - **Speed Test UX (`A3`)**: Full 4 metrics (Ping RTT, Jitter, Download Mbps, Upload Mbps), `Quick`/`Standard` presets, Start/Abort, real-time SVG chart, task suitability ratings (Video Call, 4K Streaming, Gaming, Cloud Sync), and local history (`omnidev_speedtest_history`, max 20).
+  - **Keyboard Tester (`A4`)**: Visual ANSI Full-size 104 / TKL 80%, Win/Mac labels, persistent tested-key highlights, stuck-key & chatter detection, NKRO & total presses, Event Inspector, Capture Browser Keys mode (`Esc × 2` unlock + `AppShell` `defaultPrevented` guard), and muted-default Web Audio click.
+  - **Mic & Speaker Diagnostics (`A5`)**: Mic input selector, VU/dBFS + Canvas Waveform/Spectrum, noise/clipping status, `<= 15s` Record/Playback/Download, Secure Context/permission guidance; Speaker output selector (`setSinkId` + fallback), `ChannelMergerNode(2)` Left/Stereo/Right, Tone/Sweep/Noise/Chime, hearing-safe `35%` default volume + `DynamicsCompressorNode` limiter.
+  - **Gate 1 Sign-Off**: Approved by user prior to `UNIT-14`–`UNIT-17` implementation.
+- **Artifacts & Code Updated**:
+  - `aidlc-docs/` (`requirements.md`, `user-stories.md`, `architecture.md`, `ui-design.md`, `units.md`, `execution-plan.md`, `construction-plan.md`, `aidlc-state.md`, `audit.md`).
+  - `src/lib/tools/engines/diagnostics.ts`, `src/app/api/speedtest/{ping,download,upload}/route.ts`, `src/app/robots.ts`.
+  - `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/{common,catalog,tools}.ts`, `src/lib/tools/registry.ts`, `src/components/common/ToolIcon.tsx`, `src/components/tools/ToolWorkspace.tsx`.
+  - `src/components/layout/AppShell.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/components/tools/suites/diagnostics/{KeyboardTesterPanel,MicTesterPanel,SpeakerTesterPanel,SpeedTestPanel}.tsx`, `src/app/globals.css`, `scripts/verify-aidlc.ts`.
+- **Verification & Gate Status**: `npm run lint`, `npm run build` (154 static pages + 3 dynamic `/api/speedtest/*` routes), and `npx tsx scripts/verify-aidlc.ts` (all 8 suites: 7 categories, 28 tools, 144 sitemap URLs, 1,262 keys × 4 locales parity, `robots.ts` `/admin` + `/api/*` disallow, pure diagnostics engine assertions) passed with exit code 0.

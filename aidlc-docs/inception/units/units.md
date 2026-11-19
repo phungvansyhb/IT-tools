@@ -194,3 +194,58 @@ The implementation of **OmniDev / IT-Tools Hub** is decomposed into 4 cohesive, 
   - `scripts/verify-aidlc.ts`
 - **Dependencies**: `UNIT-10`, `UNIT-11`, `UNIT-12`.
 - **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly across all routes.
+
+---
+
+## Device & Network Diagnostics Units (`UNIT-14` – `UNIT-17`)
+
+## `UNIT-14`: Pure Diagnostics Engine & Self-Hosted Speed Test API Route Handlers
+- **Scope**:
+  - Build pure Node-executable engine `src/lib/tools/engines/diagnostics.ts` (ANSI 104/TKL 80 keyboard layouts, coverage/chatter math, audio RMS/dBFS/clipping/log-sweep/safe-volume, download byte clamping, ping/jitter/Mbps, task suitability, same-origin header validation).
+  - Create 3 self-hosted Next.js Route Handlers (`/api/speedtest/ping`, `/api/speedtest/download`, `/api/speedtest/upload`) with `force-dynamic`, `runtime = 'nodejs'`, `no-store`/`no-transform`, incompressible xorshift32 payloads, same-origin validation, and `<= 4 MiB` streaming upload cap (`413`).
+  - Update `src/app/robots.ts` to disallow `'/api/*'` alongside `/admin`, and extend `scripts/verify-aidlc.ts` with Section 8 Diagnostics Engine assertions.
+- **Target Files**:
+  - `src/lib/tools/engines/diagnostics.ts` *(new)*
+  - `src/app/api/speedtest/{ping,download,upload}/route.ts` *(new)*
+  - `src/app/robots.ts`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-02`, `UNIT-11`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly.
+
+---
+
+## `UNIT-15`: Diagnostics Registry, 4-Locale Dictionaries (`en`, `vi`, `ja`, `zh`) & SEO Integration
+- **Scope**:
+  - Expand `CategoryId` (`+diagnostics`), `ToolId` (`+keyboard-tester`, `+mic-tester`, `+speaker-tester`, `+speed-test`), `ToolsDictionary` (`+diagnosticsSuite`), `CATEGORIES` (7), `TOOLS` (28), and `ToolIcon.tsx` (`+Activity`).
+  - Update 4-locale `common.ts` (`24→28`, `6→7`), `catalog.ts`, and `tools.ts` with 100% recursive key/placeholder parity across `en`, `vi`, `ja`, `zh`.
+  - Create initial `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, wire `case 'diagnostics':` in `ToolWorkspace.tsx`, and update `scripts/verify-aidlc.ts` (`7` categories, `28` tools, `144` sitemap URLs).
+- **Target Files**:
+  - `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/{common,catalog,tools}.ts`
+  - `src/lib/tools/registry.ts`, `src/components/common/ToolIcon.tsx`, `src/components/tools/ToolWorkspace.tsx`
+  - `src/components/tools/suites/DiagnosticsToolsSuite.tsx` *(new)*, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-14`, `UNIT-06`, `UNIT-09`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes with 144 sitemap URLs and 100% 4-locale parity.
+
+---
+
+## `UNIT-16`: Keyboard Tester (`keyboard-tester`) & AppShell Shortcut Guard
+- **Scope**:
+  - Add `if (e.defaultPrevented) return;` guard to global `Cmd/Ctrl+K` handler in `src/components/layout/AppShell.tsx`.
+  - Implement `src/components/tools/suites/diagnostics/KeyboardTesterPanel.tsx` (Full 104 / TKL 80 ANSI visual keyboard, Win/Mac labels, active/tested/stuck/chatter states, Capture Mode with `Esc × 2` unlock, NKRO & press counters, Event Inspector, optional muted-default Web Audio click) and Monochrome Zinc Glass keyboard CSS in `src/app/globals.css`.
+- **Target Files**:
+  - `src/components/layout/AppShell.tsx`, `src/components/tools/suites/diagnostics/KeyboardTesterPanel.tsx` *(new)*
+  - `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/app/globals.css`
+- **Dependencies**: `UNIT-14`, `UNIT-15`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly.
+
+---
+
+## `UNIT-17`: Mic Tester, Speaker Tester, Speed Test & Final Verification
+- **Scope**:
+  - Implement `MicTesterPanel.tsx` (Secure Context & permission diagnostics, input selector, VU/dBFS + Canvas Waveform/Spectrum, noise/clipping, `<= 15s` Record/Playback/Download, full teardown).
+  - Implement `SpeakerTesterPanel.tsx` (output selector via `setSinkId` with fallback, Left/Stereo/Right via `ChannelMergerNode(2)`, 440Hz Tone / 20Hz–20kHz Sweep / White-Pink Noise / Sample Chime, hearing-safe `35%` default volume + `DynamicsCompressorNode`).
+  - Implement `SpeedTestPanel.tsx` (`Quick`/`Standard`, Start/Abort, Ping/Jitter + streaming Download + XHR Upload, live SVG chart, suitability ratings, `localStorage` history up to 20 runs) and wire all 3 panels in `DiagnosticsToolsSuite.tsx` + CSS in `src/app/globals.css`.
+- **Target Files**:
+  - `src/components/tools/suites/diagnostics/{MicTesterPanel,SpeakerTesterPanel,SpeedTestPanel}.tsx` *(new)*
+  - `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/app/globals.css`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-14`, `UNIT-15`, `UNIT-16`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly across all routes.

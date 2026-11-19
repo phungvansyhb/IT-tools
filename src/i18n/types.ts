@@ -4,7 +4,8 @@ export type CategoryId =
   | 'text'
   | 'color'
   | 'calculators'
-  | 'cheatsheets';
+  | 'cheatsheets'
+  | 'diagnostics';
 
 export type ToolId =
   | 'image-converter'
@@ -30,7 +31,11 @@ export type ToolId =
   | 'unit-base-calculator'
   | 'git-cheatsheet'
   | 'http-cheatsheet'
-  | 'devops-cheatsheet';
+  | 'devops-cheatsheet'
+  | 'keyboard-tester'
+  | 'mic-tester'
+  | 'speaker-tester'
+  | 'speed-test';
 
 export type CheatsheetEntryId =
   | 'git-interactive-rebase'
@@ -625,6 +630,138 @@ export interface ToolsDictionary {
     allFilterPill: string;
     pinSnippetAria: string;
     unpinSnippetAria: string;
+  };
+  diagnosticsSuite: {
+    keyboard: {
+      layoutLabel: string;
+      layoutFull104: string;
+      layoutTkl80: string;
+      osLabel: string;
+      osWin: string;
+      osMac: string;
+      captureMode: string;
+      captureActiveBadge: string;
+      unlockHint: string;
+      unlockButton: string;
+      clickSound: string;
+      resetButton: string;
+      kpiTested: string;
+      kpiTotalPresses: string;
+      kpiMaxNkro: string;
+      kpiAlerts: string;
+      statusActive: string;
+      statusTested: string;
+      statusStuck: string;
+      statusChatter: string;
+      inspectorTitle: string;
+      fieldCode: string;
+      fieldKey: string;
+      fieldLocation: string;
+      fieldKeyCode: string;
+      fieldModifiers: string;
+      fieldDeltaMs: string;
+      noneLabel: string;
+      emptyInspector: string;
+      recentEventsTitle: string;
+      emptyRecentEvents: string;
+      alertsTitle: string;
+      stuckAlertMessage: string;
+      chatterAlertMessage: string;
+      noAlertsMessage: string;
+    };
+    mic: {
+      deviceLabel: string;
+      defaultDevice: string;
+      refreshDevices: string;
+      startMic: string;
+      stopMic: string;
+      startRecord: string;
+      stopRecord: string;
+      downloadRecording: string;
+      clearRecording: string;
+      visualizerModeLabel: string;
+      modeWaveform: string;
+      modeSpectrum: string;
+      modeBoth: string;
+      currentDbfs: string;
+      peakDbfs: string;
+      noiseStateLabel: string;
+      noiseSilent: string;
+      noiseQuiet: string;
+      noiseNormal: string;
+      noiseLoud: string;
+      noiseClipping: string;
+      recordingTimer: string;
+      playbackTitle: string;
+      headphoneTip: string;
+      errorInsecureContext: string;
+      errorPermissionDenied: string;
+      errorNoDevice: string;
+      errorUnsupported: string;
+      errorGeneric: string;
+    };
+    speaker: {
+      outputDeviceLabel: string;
+      defaultOutputDevice: string;
+      outputUnsupportedHint: string;
+      channelLabel: string;
+      channelLeft: string;
+      channelStereo: string;
+      channelRight: string;
+      masterVolumeLabel: string;
+      safeVolumeHint: string;
+      highVolumeWarning: string;
+      signalTypeLabel: string;
+      signalTone: string;
+      signalSweep: string;
+      signalNoise: string;
+      signalChime: string;
+      frequencyLabel: string;
+      noiseVariantLabel: string;
+      noiseWhite: string;
+      noisePink: string;
+      playButton: string;
+      stopButton: string;
+      playingStatus: string;
+      idleStatus: string;
+      currentFreqLabel: string;
+    };
+    speed: {
+      modeLabel: string;
+      modeQuick: string;
+      modeStandard: string;
+      startTest: string;
+      abortTest: string;
+      selfHostedBadge: string;
+      phaseIdle: string;
+      phasePing: string;
+      phaseDownload: string;
+      phaseUpload: string;
+      phaseComplete: string;
+      phaseAborted: string;
+      phaseError: string;
+      kpiPing: string;
+      kpiJitter: string;
+      kpiDownload: string;
+      kpiUpload: string;
+      statMin: string;
+      statAvg: string;
+      statMax: string;
+      chartTitle: string;
+      suitabilityTitle: string;
+      gradeExcellent: string;
+      gradeGood: string;
+      gradeFair: string;
+      gradePoor: string;
+      useCaseVideoCall: string;
+      useCaseStreaming4k: string;
+      useCaseGaming: string;
+      useCaseCloudSync: string;
+      historyTitle: string;
+      clearHistory: string;
+      emptyHistory: string;
+      errorMessage: string;
+    };
   };
 }
 

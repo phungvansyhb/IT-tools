@@ -41,7 +41,7 @@ export const jaCommon: CommonDictionary = {
   },
   commandPalette: {
     dialogAria: 'グローバルツール・コマンドパレット',
-    placeholder: '24種類のツール、キーワード、Git/HTTP/Docker コマンドを検索...',
+    placeholder: '28種類のツール、キーワード、Git/HTTP/Docker コマンドを検索...',
     searchAria: 'ツールとコマンドを検索',
     closeAria: 'コマンドパレットを閉じる',
     emptyState: '「{{query}}」に一致するツールやチートシートは見つかりませんでした。',
@@ -62,7 +62,7 @@ export const jaCommon: CommonDictionary = {
   },
   home: {
     badgeNative: '100% ブラウザネイティブ',
-    badgeCount: '24 ツール · 6 カテゴリー',
+    badgeCount: '28 ツール · 7 カテゴリー',
     heroTitle: '高速処理と完全なローカルプライバシーを追求した開発者ツール。',
     heroSubtitle:
       '画像変換、JSON/YAML、JWT、OKLCH カラー、chmod マトリックス、DevOps チートシートをモノクロ Bento ワークスペースで処理。サーバー送信はゼロです。',
@@ -111,7 +111,7 @@ export const jaCommon: CommonDictionary = {
     untitledPreset: '無題のプリセット',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 24+ プライバシー重視のブラウザ開発者ツール',
+    homeTitle: 'OmniDev IT-Tools — 28+ プライバシー重視のブラウザ開発者ツール',
     homeDescription:
       '100% クライアント側で動作する高速開発者ユーティリティ：画像変換・圧縮、JSON/YAML/CSV、SHA-256、JWT デコーダー、正規表現テスター、OKLCH & WCAG コントラスト、Chmod、Cron、DevOps チートシート。',
     homeKeywords: [

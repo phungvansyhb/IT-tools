@@ -103,3 +103,25 @@
    - `syncMode === 'local'`: `.badge-warning` **Local Mode** banner managing `localStorage` data directly.
    - `syncMode === 'supabase'`: Email/Password sign-in card (zero sign-up UI) when unauthenticated or non-allowlisted; full moderation view once verified via `check_is_feedback_admin()`.
    - 4 Bento KPI cards (`span="3"`), multi-filter bar (type including `rating`, status, tool, keyword), expandable `debug_context` JSON drawer, status selector + `admin_note` editor + Save, and 2-step confirmed Delete action.
+
+---
+
+## 6. Device & Network Diagnostics UI Specs (`UNIT-16`–`UNIT-17`)
+
+All 4 panels strictly reuse Monochrome Zinc Glass tokens (`#09090B`, `#10B981` / `#059669`, `--warning`, `--danger`, `.bento-grid`, `.glass-surface`, `.glass-panel`, `.glass-pill`, `.btn`, `.btn-primary`):
+
+1. **Keyboard Tester (`KeyboardTesterPanel.tsx`)**:
+   - Top control bar: Layout toggle (`Full 104` / `TKL 80`), OS Label toggle (`Win` / `Mac`), Capture Browser Keys toggle (with `Esc × 2 to unlock` pill), Click Sound toggle (muted default), Reset button, and 4 KPI pills (`Tested X/Y`, `Total Presses`, `Max NKRO`, `Alerts`).
+   - Visual Keyboard Chassis (`.keyboard-chassis`): Horizontally scrollable (`overflow-x: auto`) on narrow viewports so `1u..6.25u` ANSI keycap proportions never break at `375px`. States: default (`--bg-input`), active (`--accent` + glow), tested (`--accent-glow` + `--accent-border`), stuck/chatter (`--warning-bg` / `--danger-bg`).
+   - Bottom Bento Split (`span="6"` + `span="6"`): Live Event Inspector (`code`, `key`, `location`, `keyCode`, modifiers, delta ms) and Recent History + Stuck/Chatter Log.
+2. **Microphone Tester (`MicTesterPanel.tsx`)**:
+   - Control bar: Input `<select>`, Start/Stop Mic `.btn-primary`, Record (`<= 15s`) button, and Permission/HTTPS diagnostic banner (`.badge-warning` / `.badge-danger`) when blocked or insecure.
+   - Visualizer Bento Card: `Waveform` / `Spectrum` / `Both` toggle on monochrome HTML5 `<canvas>` (`--accent` trace + `--danger` peak line), horizontal dBFS VU meter, and 3 metric readouts (`Current dBFS`, `Peak dBFS`, `Noise / Clip Status`).
+   - Playback Card: `<audio controls>`, Download recording button, and headphone feedback tip.
+3. **Speaker & Headphone Tester (`SpeakerTesterPanel.tsx`)**:
+   - Control Bento (`span="6"`): Output `<select>` (`setSinkId` with unsupported-browser status pill), **Left / Stereo / Right** selector with live L/R indicators, and **Master Volume** slider (`35%` default, soft warning above `75%`).
+   - Signal Generator Bento (`span="6"`): 4 signal cards (**440Hz Tone** + `100Hz`/`440Hz`/`1kHz`/`8kHz` chips, **20Hz–20kHz Sweep** with live Hz readout, **White / Pink Noise**, **Sample Chime**), Play/Stop `.btn-primary`, and active signal indicator.
+4. **Network Speed Test (`SpeedTestPanel.tsx`)**:
+   - Top Action Bento (`span="12"`): `Quick` / `Standard` preset toggle, `Start Speed Test` / `Abort Test` button, phase progress bar (`Idle → Ping → Download → Upload → Complete`), and `Self-Hosted Same-Origin` badge.
+   - 4 KPI Bento Cards (`span="3"`): **Ping (ms)**, **Jitter (ms)**, **Download (Mbps)**, **Upload (Mbps)** in tabular monospace.
+   - Bottom Bento Split (`span="7"` + `span="5"`): Real-time SVG throughput chart (`Download` `--accent`, `Upload` secondary dashed) and Suitability Matrix (Video Call, 4K Streaming, Gaming, Cloud Sync) + Local History list (max 20 runs + Clear).

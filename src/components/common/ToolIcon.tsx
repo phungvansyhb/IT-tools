@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Activity,
   Image as ImageIcon,
   FileCode2,
   Type,
@@ -16,6 +17,8 @@ interface ToolIconProps {
 
 export function ToolIcon({ name, size = 16 }: ToolIconProps) {
   switch (name) {
+    case 'Activity':
+      return <Activity size={size} aria-hidden="true" />;
     case 'Image':
       return <ImageIcon size={size} aria-hidden="true" />;
     case 'FileCode2':

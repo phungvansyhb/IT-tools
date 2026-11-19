@@ -8,16 +8,19 @@ export type ToolCategorySlug =
   | 'text'
   | 'color'
   | 'calculators'
-  | 'cheatsheets';
+  | 'cheatsheets'
+  | 'diagnostics';
 
 export interface CategoryDefinition {
   slug: ToolCategorySlug;
   name: string;
+  shortName?: string;
   tagline: string;
   description: string;
   seoTitle: string;
   seoDescription: string;
   iconName: string;
+  accentLabel?: string;
 }
 
 export interface ToolFaq {
@@ -35,6 +38,7 @@ export interface ToolDefinition {
   keywords: string[];
   bentoSpan: '4' | '6' | '8';
   featured?: boolean;
+  badge?: string;
   howItWorks: string[];
   faqs: ToolFaq[];
 }
@@ -105,6 +109,19 @@ export const CATEGORIES: CategoryDefinition[] = [
     seoDescription:
       'Instant filterable developer cheatsheets with one-click copy and snippet pinning for Git, HTTP status codes, Linux, Docker, and Regex.',
     iconName: 'BookOpen',
+  },
+  {
+    slug: 'diagnostics',
+    name: 'Device & Network',
+    shortName: 'Diagnostics',
+    tagline: 'Keyboard NKRO, Microphone VU/FFT, Stereo Speaker & Speed Test',
+    description:
+      'Test mechanical keyboard rollover and key chatter, inspect microphone input levels locally, verify stereo speaker channels, and measure ping, jitter, download, and upload speeds.',
+    seoTitle: 'Device & Network Diagnostics — Keyboard, Mic, Speaker & Speed Test',
+    seoDescription:
+      'Browser-native hardware diagnostics and self-hosted speed test: ANSI keyboard NKRO tester, microphone waveform/dBFS analyzer, left/right speaker tester, and ping/jitter/bandwidth monitor.',
+    iconName: 'Activity',
+    accentLabel: 'Hardware & Speed',
   },
 ];
 
@@ -751,6 +768,128 @@ export const TOOLS: ToolDefinition[] = [
       {
         question: 'How do I remove dangling Docker images safely?',
         answer: 'Run `docker image prune` to clean untagged layers without touching active containers.',
+      },
+    ],
+  },
+
+  // 7. DEVICE & NETWORK DIAGNOSTICS (4 tools)
+  {
+    id: 'keyboard-tester',
+    slug: 'keyboard-tester',
+    name: 'Keyboard Tester & NKRO Checker',
+    shortDescription: 'Inspect key presses, NKRO rollover, chatter alerts & event codes.',
+    longDescription:
+      'Test ANSI Full-Size 104 and TKL 80 keyboards with Windows/Mac labels, simultaneous NKRO tracking, chatter/stuck-key detection, optional Capture Mode, and live KeyboardEvent inspection.',
+    category: 'diagnostics',
+    keywords: ['keyboard', 'keyboard tester', 'nkro', 'rollover', 'chatter', 'key test', 'ansi'],
+    bentoSpan: '6',
+    featured: true,
+    badge: 'NKRO',
+    howItWorks: [
+      'Listens to hardware `keydown` and `keyup` events locally with optional Capture Mode (`Esc × 2` to unlock) to intercept browser shortcuts.',
+      'Tracks active keys, tested layout coverage, maximum simultaneous NKRO presses, and sub-40ms key chatter.',
+      'Displays real-time `code`, `key`, `location`, `keyCode`, modifier states, and inter-press delta timing.',
+    ],
+    faqs: [
+      {
+        question: 'How do I exit Capture Mode safely?',
+        answer:
+          'Press the Escape key twice rapidly (`Esc × 2`) or click the Unlock button in the toolbar to restore normal browser shortcuts.',
+      },
+      {
+        question: 'What is key chatter and how is it detected?',
+        answer:
+          'Key chatter occurs when a worn mechanical switch registers unintended double presses within ~40 milliseconds of a prior keydown.',
+      },
+    ],
+  },
+  {
+    id: 'mic-tester',
+    slug: 'mic-tester',
+    name: 'Microphone Tester & Audio Visualizer',
+    shortDescription: 'Monitor live dBFS levels, waveform/FFT spectrum & local playback.',
+    longDescription:
+      'Verify microphone clarity locally via Web Audio API with device selection, real-time waveform and FFT spectrum plots, clipping/noise floor alerts, and up to 15-second local recording playback.',
+    category: 'diagnostics',
+    keywords: ['mic', 'microphone', 'audio', 'dbfs', 'waveform', 'spectrum', 'recording'],
+    bentoSpan: '6',
+    featured: false,
+    badge: 'Web Audio',
+    howItWorks: [
+      'Requests local microphone access via `navigator.mediaDevices.getUserMedia` strictly inside your browser tab.',
+      'Analyzes time-domain and frequency-domain frames with `AnalyserNode` to calculate RMS/Peak dBFS and classify noise floor or clipping.',
+      'Supports optional `MediaRecorder` clips capped at 15 seconds for instant local playback and download without uploading audio.',
+    ],
+    faqs: [
+      {
+        question: 'Is my microphone audio ever uploaded or recorded remotely?',
+        answer:
+          'No. All audio streams, visualizations, and optional 15-second test recordings remain strictly in browser memory.',
+      },
+      {
+        question: 'Why does microphone testing require HTTPS or localhost?',
+        answer:
+          'Browsers restrict `navigator.mediaDevices` to Secure Contexts (`https://` or `localhost`) to protect user privacy.',
+      },
+    ],
+  },
+  {
+    id: 'speaker-tester',
+    slug: 'speaker-tester',
+    name: 'Speaker & Headphone Stereo Tester',
+    shortDescription: 'Test Left/Right stereo channels, 20Hz–20kHz sweeps & safe tones.',
+    longDescription:
+      'Verify left/right channel wiring and speaker response using Web Audio synthesis (440Hz/1kHz tones, logarithmic 20Hz–20kHz sweep, white/pink noise, and sample chime) behind a hearing-safe limiter.',
+    category: 'diagnostics',
+    keywords: ['speaker', 'headphone', 'stereo', 'left right', 'frequency sweep', 'pink noise', 'audio'],
+    bentoSpan: '6',
+    featured: false,
+    badge: 'Stereo',
+    howItWorks: [
+      'Routes synthesized test signals through a `ChannelMergerNode(2)` so Left, Stereo, and Right channels can be isolated cleanly.',
+      'Applies a `DynamicsCompressorNode` safety limiter and starts at 35% master volume to protect hearing.',
+      'Allows switching output devices on browsers supporting `AudioContext.setSinkId()`.',
+    ],
+    faqs: [
+      {
+        question: 'Why is the default master volume set to 35%?',
+        answer:
+          'Starting at 35% behind a built-in dynamics limiter prevents sudden loud test tones from hurting your ears or headphones.',
+      },
+      {
+        question: 'What if output device selection is unavailable in my browser?',
+        answer:
+          'Some browsers (such as Safari or Firefox) do not expose `setSinkId`; playback will automatically use your system default audio output.',
+      },
+    ],
+  },
+  {
+    id: 'speed-test',
+    slug: 'speed-test',
+    name: 'Network Speed & Latency Test',
+    shortDescription: 'Measure self-hosted Ping, Jitter, Download & Upload bandwidth.',
+    longDescription:
+      'Benchmark connection responsiveness and throughput against same-origin endpoints using Quick or Standard profiles with live SVG throughput charts, suitability grading, and local run history.',
+    category: 'diagnostics',
+    keywords: ['speed test', 'ping', 'jitter', 'download', 'upload', 'bandwidth', 'latency'],
+    bentoSpan: '6',
+    featured: true,
+    badge: 'Self-Hosted',
+    howItWorks: [
+      'Measures round-trip latency and jitter across sequential same-origin ping probes.',
+      'Streams incompressible pseudo-random bytes via `ReadableStream` for download throughput and tracks `XMLHttpRequest.upload.onprogress` for upload speed.',
+      'Grades connection readiness for Video Calls, 4K Streaming, Gaming, and Cloud Sync, saving up to 20 runs in localStorage.',
+    ],
+    faqs: [
+      {
+        question: 'Does this speed test contact third-party speed test servers?',
+        answer:
+          'No. All probes run strictly against same-origin `/api/speedtest/*` endpoints with zero payload retention.',
+      },
+      {
+        question: 'What is the difference between Quick and Standard modes?',
+        answer:
+          'Quick mode uses lighter payloads for fast sanity checks, while Standard mode runs multi-megabyte transfers for steadier throughput averaging.',
       },
     ],
   },

@@ -39,7 +39,7 @@ export const zhCommon: CommonDictionary = {
   },
   commandPalette: {
     dialogAria: '全局工具命令面板',
-    placeholder: '搜索 24 个工具、关键词或 Git/HTTP/Docker 命令...',
+    placeholder: '搜索 28 个工具、关键词或 Git/HTTP/Docker 命令...',
     searchAria: '搜索工具和命令',
     closeAria: '关闭命令面板',
     emptyState: '未找到与“{{query}}”匹配的工具或速查命令。',
@@ -60,7 +60,7 @@ export const zhCommon: CommonDictionary = {
   },
   home: {
     badgeNative: '100% 浏览器原生运行',
-    badgeCount: '24 个工具 · 6 个分类',
+    badgeCount: '28 个工具 · 7 个分类',
     heroTitle: '为极速与绝对本地隐私而设计的开发者工具。',
     heroSubtitle:
       '在单色 Bento 工作区中处理图像、JSON/YAML、JWT、OKLCH 色彩、chmod 权限矩阵与 DevOps 速查表。零服务器上传。',
@@ -109,7 +109,7 @@ export const zhCommon: CommonDictionary = {
     untitledPreset: '未命名预设',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 24+ 隐私优先的浏览器开发者工具',
+    homeTitle: 'OmniDev IT-Tools — 28+ 隐私优先的浏览器开发者工具',
     homeDescription:
       '高性能、100% 客户端运行的开发者实用工具：图片转换与压缩、JSON/YAML/CSV、SHA-256、JWT 解码器、正则测试、OKLCH 与 WCAG 对比度、Chmod、Cron 及 DevOps 速查表。',
     homeKeywords: [

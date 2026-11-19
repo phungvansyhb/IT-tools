@@ -110,9 +110,41 @@
   - `AdminFeedbackClient` handling Supabase Email/Password sign-in (`check_is_feedback_admin()`) and Local Mode `localStorage` management, KPI row, multi-filters, `status`/`admin_note` updates, `debug_context` viewer, and 2-step confirmed `DELETE`
 - **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
 
+### [x] `UNIT-14`: Pure Diagnostics Engine & Self-Hosted Speed Test API Route Handlers
+- **Files**: `src/lib/tools/engines/diagnostics.ts`, `src/app/api/speedtest/ping/route.ts`, `src/app/api/speedtest/download/route.ts`, `src/app/api/speedtest/upload/route.ts`, `src/app/robots.ts`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - Pure engine exports: `getKeyboardLayout`, `getKeyboardLayoutKeyCodes`, `computeKeyboardStats`, `detectKeyChatter`, `calculateAudioLevels`, `classifyMicNoiseFloor`, `computeSweepFrequencyAtProgress`, `clampSafeMasterVolume`, `clampDownloadBytes`, `computePingStats`, `computeBandwidthMbps`, `assessNetworkSuitability`, `validateSameOriginHeaders`, and `SPEED_TEST_*_BYTES` constants (`64 KiB .. 4 MiB`)
+  - API routes (`dynamic = 'force-dynamic'`, `runtime = 'nodejs'`, `no-store`/`no-transform`): `GET /api/speedtest/ping`, `GET /api/speedtest/download?bytes=...`, `POST /api/speedtest/upload` (same-origin check + `413` streaming cap at `4 MiB`)
+  - `robots()` adds `'/api/*'` disallow alongside `/admin`
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-15`: Diagnostics Registry, 4-Locale Dictionaries (`en`, `vi`, `ja`, `zh`) & SEO Integration
+- **Files**: `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/{common,catalog,tools}.ts`, `src/lib/tools/registry.ts`, `src/components/common/ToolIcon.tsx`, `src/components/tools/ToolWorkspace.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `CategoryId` includes `'diagnostics'`; `ToolId` includes `'keyboard-tester' | 'mic-tester' | 'speaker-tester' | 'speed-test'`; `CATEGORIES` = 7, `TOOLS` = 28, `sitemap()` = 144 URLs
+  - `ToolsDictionary['diagnosticsSuite']` with 100% recursive key/placeholder parity across `en`, `vi`, `ja`, `zh`
+  - `ToolIcon` supports `'Activity'`; `ToolWorkspace` routes `case 'diagnostics':` to `DiagnosticsToolsSuite`
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-16`: Keyboard Tester (`keyboard-tester`) & AppShell Shortcut Guard
+- **Files**: `src/components/layout/AppShell.tsx`, `src/components/tools/suites/diagnostics/KeyboardTesterPanel.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/app/globals.css`
+- **Key Interfaces / Contracts**:
+  - `AppShell` global `Cmd/Ctrl+K` listener checks `if (e.defaultPrevented) return;`
+  - `DiagnosticsPanelProps`: `{ initialState?: Record<string, unknown> | null; onStateChange?: (state: Record<string, unknown>) => void; onRun?: () => void }`
+  - `KeyboardTesterPanel`: ANSI Full-size 104 / TKL 80, Win/Mac labels, active/tested/stuck/chatter states, Capture Mode (`Esc × 2` unlock), NKRO & total presses, Event Inspector, optional Web Audio click (muted default)
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-17`: Mic Tester (`mic-tester`), Speaker Tester (`speaker-tester`), Speed Test (`speed-test`) & Final Verification
+- **Files**: `src/components/tools/suites/diagnostics/MicTesterPanel.tsx`, `src/components/tools/suites/diagnostics/SpeakerTesterPanel.tsx`, `src/components/tools/suites/diagnostics/SpeedTestPanel.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/app/globals.css`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `MicTesterPanel`: Secure Context / permission diagnostics, input device selector, VU/dBFS + Canvas Waveform/Spectrum, noise/clipping status, `<= 15s` Record/Playback/Download, full teardown
+  - `SpeakerTesterPanel`: output device selector (`setSinkId` + fallback), `ChannelMergerNode(2)` Left/Stereo/Right, 440Hz Tone / 20Hz–20kHz Sweep / White-Pink Noise / Sample Chime, hearing-safe `35%` default volume + `DynamicsCompressorNode`
+  - `SpeedTestPanel`: `Quick`/`Standard`, Start/Abort, Ping/Jitter + streaming Download + XHR Upload, real-time SVG chart, suitability assessment, `localStorage` history (`omnidev_speedtest_history`, max 20)
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
 ---
 
-## Pending / Active Verification Checklist (Feedback Cycle)
+## Pending / Active Verification Checklist (Diagnostics Cycle)
 - [x] `npm run lint` passes with 0 errors
-- [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline, i18n 4-locale parity, `robots.ts` `/admin` disallow, `124` sitemap URLs, feedback validation/honeypot/cooldown, rating aggregation, and `buildSafeDebugContext()` `?state=`-stripping assertions
-- [x] `npm run build` statically generates all routes cleanly with `noindex` on `/[locale]/admin/feedback`
+- [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline, i18n 4-locale parity, Feedback, `7` categories, `28` tools, `144` sitemap URLs, `robots.ts` `/admin` + `/api/*` disallow, and pure `engines/diagnostics.ts` assertions
+- [x] `npm run build` statically generates all routes cleanly alongside dynamic `/api/speedtest/*` Route Handlers

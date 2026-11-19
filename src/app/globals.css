@@ -497,3 +497,321 @@ kbd,
   border-color: var(--glass-border);
 }
 
+/* Keyboard Tester (UNIT-16) */
+.keyboard-chassis {
+  --key-unit: 44px;
+  --key-gap: 5px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.9rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 0 var(--glass-specular);
+  -webkit-overflow-scrolling: touch;
+}
+
+.keyboard-blocks {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: max-content;
+}
+
+.keyboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--key-gap);
+}
+
+.keyboard-row {
+  display: flex;
+  align-items: center;
+  gap: var(--key-gap);
+  min-height: var(--key-unit);
+}
+
+.keyboard-row-empty {
+  height: var(--key-unit);
+}
+
+.keyboard-row-nav-arrows-top {
+  justify-content: center;
+}
+
+.keycap {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: var(--key-unit);
+  padding: 5px 7px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border-highlight);
+  background: var(--glass-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.1;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-specular),
+    0 2px 0 0 rgba(0, 0, 0, 0.25);
+  transition:
+    transform 80ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+[data-theme='light'] .keycap {
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-specular),
+    0 2px 0 0 rgba(24, 24, 27, 0.08);
+}
+
+.keycap:hover {
+  border-color: var(--glass-border-highlight);
+  background: var(--glass-surface-hover);
+}
+
+.keycap-primary {
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.keycap-secondary {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.keycap-tested {
+  background: var(--accent-glow);
+  border-color: var(--accent-border);
+  color: var(--text-primary);
+}
+
+.keycap-chatter {
+  background: var(--danger-bg);
+  border-color: rgba(248, 113, 113, 0.55);
+  color: var(--danger);
+}
+
+.keycap-chatter .keycap-secondary {
+  color: var(--danger);
+}
+
+.keycap-stuck {
+  background: var(--warning-bg);
+  border-color: rgba(251, 191, 36, 0.6);
+  color: var(--warning);
+}
+
+.keycap-stuck .keycap-secondary {
+  color: var(--warning);
+}
+
+.keycap-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  transform: translateY(1px);
+  box-shadow:
+    0 0 0 2px var(--accent-glow),
+    0 0 16px var(--accent-glow);
+}
+
+.keycap-active .keycap-secondary {
+  color: var(--accent-contrast);
+  opacity: 0.85;
+}
+
+.keycap-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.keyboard-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 290px;
+  overflow-y: auto;
+}
+
+.keyboard-event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .keyboard-chassis {
+    --key-unit: 38px;
+    --key-gap: 4px;
+    padding: 0.65rem;
+  }
+
+  .keycap {
+    padding: 4px 5px;
+    font-size: 0.66rem;
+  }
+
+  .keycap-primary {
+    font-size: 0.66rem;
+  }
+
+  .keycap-secondary {
+    font-size: 0.56rem;
+  }
+}
+
+/* Mic, Speaker & Speed Test Diagnostics (UNIT-17) */
+.diag-canvas-frame {
+  width: 100%;
+  height: 240px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 0 var(--glass-specular);
+  overflow: hidden;
+}
+
+.diag-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.diag-vu-track {
+  width: 100%;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+}
+
+.diag-vu-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--accent) 0%, #34d399 78%, var(--warning) 100%);
+  transition: width 70ms linear;
+}
+
+.diag-vu-fill.diag-vu-clipping {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--warning) 60%, var(--danger) 100%);
+}
+
+.diag-speaker-channels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.diag-speaker-channel-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  transition: all 160ms ease;
+}
+
+.diag-speaker-channel-box.active {
+  background: var(--accent-glow);
+  border-color: var(--accent-border);
+  color: var(--text-primary);
+}
+
+.diag-speaker-channel-box.active.playing {
+  box-shadow: 0 0 0 1px var(--accent-border), 0 0 18px var(--accent-glow);
+}
+
+.diag-speaker-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border-highlight);
+  background: var(--glass-surface);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.diag-speaker-channel-box.active .diag-speaker-badge {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.diag-progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+}
+
+.diag-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--accent);
+  transition: width 180ms ease;
+}
+
+.diag-speed-chart-box {
+  width: 100%;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  padding: 0.5rem;
+}
+
+.diag-speed-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 170px;
+}
+
+.diag-legend-line {
+  display: inline-block;
+  width: 16px;
+  height: 2.5px;
+  border-radius: 2px;
+}
+
+.diag-legend-download {
+  background: #10b981;
+}
+
+.diag-legend-upload {
+  border-top: 2px dashed #a1a1aa;
+  height: 0;
+}
+

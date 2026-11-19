@@ -40,7 +40,7 @@ export const enCommon: CommonDictionary = {
   },
   commandPalette: {
     dialogAria: 'Global Tool Command Palette',
-    placeholder: 'Search 24 tools, keywords, or Git/HTTP/Docker commands...',
+    placeholder: 'Search 28 tools, keywords, or Git/HTTP/Docker commands...',
     searchAria: 'Search tools and commands',
     closeAria: 'Close command palette',
     emptyState: 'No matching tools or cheatsheet commands for “{{query}}”.',
@@ -61,7 +61,7 @@ export const enCommon: CommonDictionary = {
   },
   home: {
     badgeNative: '100% Browser-Native',
-    badgeCount: '24 Utilities · 6 Categories',
+    badgeCount: '28 Utilities · 7 Categories',
     heroTitle: 'Developer tools engineered for speed & absolute local privacy.',
     heroSubtitle:
       'Transform images, payloads, JWTs, OKLCH colors, chmod matrices, and DevOps cheatsheets inside a monochrome Bento workspace. Zero server uploads.',
@@ -110,7 +110,7 @@ export const enCommon: CommonDictionary = {
     untitledPreset: 'Untitled Preset',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 24+ Privacy-First Browser Developer Tools',
+    homeTitle: 'OmniDev IT-Tools — 28+ Privacy-First Browser Developer Tools',
     homeDescription:
       'High-performance, 100% client-side developer utilities: Image converter & compressor, JSON/YAML/CSV, SHA-256, JWT decoder, Regex tester, OKLCH & WCAG contrast, Chmod, Cron, and DevOps cheatsheets.',
     homeKeywords: [

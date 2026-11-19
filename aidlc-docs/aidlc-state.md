@@ -3,22 +3,23 @@
 ## Project Metadata
 - **Project Name**: OmniDev / IT-Tools Hub — Privacy-First Developer & Utility Tools Hub
 - **Project Type**: Brownfield (`Next.js 16.4.6 App Router + TypeScript 5 + React 19.3 + Vanilla CSS Monochrome Zinc Glass / Bento Grid + Optional Supabase`)
-- **Active Phase**: `CONSTRUCTION` (Feedback, Ratings & Admin Cycle — `UNIT-10`–`UNIT-13` Complete)
+- **Active Phase**: `CONSTRUCTION` (Device & Network Diagnostics Cycle — `UNIT-14`–`UNIT-17` Complete)
 - **Active Stage**: `Phase 2 Construction Complete — Ready for Phase 3 Operations Verification`
-- **Last Updated**: `2026-11-18T11:30:00Z`
+- **Last Updated**: `2026-11-19T02:36:00Z`
 
 ---
 
-## Phase 1: INCEPTION Progress (Baseline v0.1.0 + i18n + Feedback Cycle)
+## Phase 1: INCEPTION Progress (Baseline v0.1.0 + i18n + Feedback + Diagnostics Cycle)
 - [x] **Stage 1.1: Workspace Detection** — Classified workspace (`Brownfield`) and verified baseline stack (`Next.js 16.4.6`, `React 19.3.0`, `TypeScript 5`, `js-yaml`, `lucide-react`, `@supabase/supabase-js`, `i18next`).
-- [x] **Stage 1.2: Requirements Analysis** — Validated `FR-01`–`FR-25`, `NFR-01`–`NFR-11`, `CON-01`–`CON-09`, `EX-01`–`EX-03`, `SC-01`–`SC-03` in [`requirements.md`](inception/requirements/requirements.md).
-- [x] **Stage 1.3: User Stories** — Validated `US-01`–`US-15` in [`user-stories.md`](inception/user-stories/user-stories.md).
-- [x] **Stage 1.4: Application & UI Design** — Documented Feedback RLS/`SECURITY DEFINER` RPC architecture, pure `src/lib/feedback/` core, Sidebar Footer & `ToolWorkspace` UI, `FeedbackModal`, `StarRatingWidget`, and `/[locale]/admin/feedback` console in [`architecture.md`](inception/application-design/architecture.md) and [`ui-design.md`](inception/application-design/ui-design.md).
-- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`–`UNIT-04` (baseline), `UNIT-05`–`UNIT-09` (i18n), and `UNIT-10`–`UNIT-13` (Feedback & Admin) in [`units.md`](inception/units/units.md).
+- [x] **Stage 1.2: Requirements Analysis** — Validated `FR-01`–`FR-31`, `NFR-01`–`NFR-16`, `CON-01`–`CON-13`, `PRE-01`–`PRE-02`, `EX-01`–`EX-04`, `SC-01`–`SC-04` in [`requirements.md`](inception/requirements/requirements.md).
+- [x] **Stage 1.3: User Stories** — Validated `US-01`–`US-20` in [`user-stories.md`](inception/user-stories/user-stories.md).
+- [x] **Stage 1.4: Application & UI Design** — Documented Diagnostics hybrid architecture (pure `engines/diagnostics.ts`, self-hosted `/api/speedtest/*`, 4 interactive panels) in [`architecture.md`](inception/application-design/architecture.md) and [`ui-design.md`](inception/application-design/ui-design.md).
+- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`–`UNIT-13` and decomposed Diagnostics cycle into `UNIT-14`–`UNIT-17` in [`units.md`](inception/units/units.md).
 - [x] **Stage 1.6: Workflow Planning** — Updated [`execution-plan.md`](inception/plans/execution-plan.md) and [`construction-plan.md`](construction/plans/construction-plan.md).
 - [x] **Gate 1 Sign-Off (Baseline v0.1.0)**: Completed prior to governance standardization.
 - [x] **Gate 1 Sign-Off (i18n Expansion `UNIT-05`–`UNIT-09`)**: Approved and implemented.
-- [x] **Gate 1 Sign-Off (Feedback, Ratings & Admin Cycle `UNIT-10`–`UNIT-13`)**: Approved by user; Construction unlocked.
+- [x] **Gate 1 Sign-Off (Feedback, Ratings & Admin Cycle `UNIT-10`–`UNIT-13`)**: Approved and implemented.
+- [x] **Gate 1 Sign-Off (Device & Network Diagnostics Cycle `UNIT-14`–`UNIT-17`)**: Approved by user; Construction unlocked.
 
 ---
 
@@ -38,6 +39,11 @@
 - [x] **`UNIT-12`**: Feedback Provider, Unified Modal, Per-Tool Rating Widget & Shell Integration (`src/hooks/useUserWorkspace.tsx`, `src/hooks/useFeedback.tsx`, `src/components/feedback/*`, `src/components/layout/AppShell.tsx`, `src/components/tools/ToolWorkspace.tsx`, `src/components/bento/BentoCard.tsx`, `src/app/[locale]/layout.tsx`, `src/app/globals.css`)
 - [x] **`UNIT-13`**: Admin Moderation Console (`/[locale]/admin/feedback`) & Final Verification (`src/app/[locale]/admin/feedback/page.tsx`, `src/components/admin/AdminFeedbackClient.tsx`, `scripts/verify-aidlc.ts`)
 - [x] **Full Build & Verification (Feedback Cycle)**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+- [x] **`UNIT-14`**: Pure Diagnostics Engine & Self-Hosted Speed Test API Route Handlers (`src/lib/tools/engines/diagnostics.ts`, `src/app/api/speedtest/*`, `src/app/robots.ts`, `scripts/verify-aidlc.ts`)
+- [x] **`UNIT-15`**: Diagnostics Registry, 4-Locale Dictionaries (`en`, `vi`, `ja`, `zh`) & SEO Integration (`src/i18n/*`, `src/lib/tools/registry.ts`, `src/components/common/ToolIcon.tsx`, `src/components/tools/ToolWorkspace.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `scripts/verify-aidlc.ts`)
+- [x] **`UNIT-16`**: Keyboard Tester (`keyboard-tester`) & AppShell Shortcut Guard (`src/components/layout/AppShell.tsx`, `src/components/tools/suites/diagnostics/KeyboardTesterPanel.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/app/globals.css`)
+- [x] **`UNIT-17`**: Mic Tester, Speaker Tester, Speed Test & Final Verification (`src/components/tools/suites/diagnostics/{MicTesterPanel,SpeakerTesterPanel,SpeedTestPanel}.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/app/globals.css`, `scripts/verify-aidlc.ts`)
+- [x] **Full Build & Verification (Diagnostics Cycle)**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
 
 ---
 

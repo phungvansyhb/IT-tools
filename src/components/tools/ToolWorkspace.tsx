@@ -26,6 +26,7 @@ import { TextToolsSuite } from '@/components/tools/suites/TextToolsSuite';
 import { ColorToolsSuite } from '@/components/tools/suites/ColorToolsSuite';
 import { CalculatorToolsSuite } from '@/components/tools/suites/CalculatorToolsSuite';
 import { CheatsheetToolsSuite } from '@/components/tools/suites/CheatsheetToolsSuite';
+import { DiagnosticsToolsSuite } from '@/components/tools/suites/DiagnosticsToolsSuite';
 
 const DRAFT_STORAGE_PREFIX = 'omnidev:draft:';
 const MAX_DRAFT_IMAGE_DATA_URL_LENGTH = 1_500_000;
@@ -190,6 +191,8 @@ export function ToolWorkspace({ tool, category, relatedTools }: ToolWorkspacePro
         return <CalculatorToolsSuite key={suiteNonce} {...props} />;
       case 'cheatsheets':
         return <CheatsheetToolsSuite key={suiteNonce} {...props} />;
+      case 'diagnostics':
+        return <DiagnosticsToolsSuite key={suiteNonce} {...props} />;
     }
   };
 

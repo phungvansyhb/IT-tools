@@ -41,7 +41,7 @@ export const viCommon: CommonDictionary = {
   },
   commandPalette: {
     dialogAria: 'Bảng lệnh Công cụ Toàn cục',
-    placeholder: 'Tìm 24 công cụ, từ khóa hoặc lệnh Git/HTTP/Docker...',
+    placeholder: 'Tìm 28 công cụ, từ khóa hoặc lệnh Git/HTTP/Docker...',
     searchAria: 'Tìm công cụ và lệnh',
     closeAria: 'Đóng bảng lệnh',
     emptyState: 'Không tìm thấy công cụ hoặc lệnh cheatsheet nào khớp với “{{query}}”.',
@@ -62,7 +62,7 @@ export const viCommon: CommonDictionary = {
   },
   home: {
     badgeNative: '100% Trình duyệt Gốc',
-    badgeCount: '24 Tiện ích · 6 Danh mục',
+    badgeCount: '28 Tiện ích · 7 Danh mục',
     heroTitle: 'Công cụ lập trình tối ưu tốc độ & bảo mật cục bộ tuyệt đối.',
     heroSubtitle:
       'Xử lý hình ảnh, payload, JWT, màu OKLCH, ma trận chmod và cheatsheet DevOps trong không gian Bento đơn sắc. Không tải dữ liệu lên máy chủ.',
@@ -111,7 +111,7 @@ export const viCommon: CommonDictionary = {
     untitledPreset: 'Cấu hình chưa đặt tên',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 24+ Công cụ Lập trình Trình duyệt Riêng tư',
+    homeTitle: 'OmniDev IT-Tools — 28+ Công cụ Lập trình Trình duyệt Riêng tư',
     homeDescription:
       'Tiện ích lập trình hiệu năng cao, chạy 100% phía client: chuyển đổi & nén ảnh, JSON/YAML/CSV, SHA-256, giải mã JWT, kiểm thử Regex, màu OKLCH & tương phản WCAG, Chmod, Cron và cheatsheet DevOps.',
     homeKeywords: [
