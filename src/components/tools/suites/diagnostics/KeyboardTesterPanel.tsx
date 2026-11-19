@@ -17,6 +17,7 @@ import {
   computeKeyboardStats,
   detectKeyChatter,
   getKeyboardLayout,
+  shouldPreventDefaultBrowserKey,
   type KeyDefinition,
   type KeyboardLayoutId,
   type KeyboardOsMode,
@@ -66,6 +67,11 @@ function isEditableElement(target: EventTarget | null): boolean {
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
   if (target.isContentEditable) return true;
   return false;
+}
+
+function hasOpenModalDialog(): boolean {
+  if (typeof document === 'undefined') return false;
+  return Boolean(document.querySelector('[role="dialog"][aria-modal="true"]'));
 }
 
 function buildModifierList(e: KeyboardEvent): string[] {
@@ -129,6 +135,7 @@ export function KeyboardTesterPanel({
   const lastKeyDownTimesRef = useRef<Map<string, number>>(new Map());
   const lastEventTimeRef = useRef<number | null>(null);
   const lastEscPressRef = useRef<number | null>(null);
+  const lastContextMenuKeyAtRef = useRef<number>(0);
   const eventSeqRef = useRef<number>(0);
   const alertSeqRef = useRef<number>(0);
   const runTriggeredRef = useRef<boolean>(false);
@@ -246,10 +253,7 @@ export function KeyboardTesterPanel({
 
   const toggleCaptureMode = useCallback((nextValue: boolean) => {
     if (nextValue && typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
-      const tag = document.activeElement.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
-        document.activeElement.blur();
-      }
+      document.activeElement.blur();
     }
     lastEscPressRef.current = null;
     setCaptureMode(nextValue);
@@ -258,12 +262,33 @@ export function KeyboardTesterPanel({
   // Global keyboard listeners + blur/visibilitychange teardown
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Never hijack input while CommandPalette / FeedbackModal is open
+      if (hasOpenModalDialog()) {
+        return;
+      }
+
       if (!captureMode && isEditableElement(e.target)) {
         return;
       }
 
-      if (captureMode) {
+      const shouldPrevent = shouldPreventDefaultBrowserKey({
+        code: e.code,
+        key: e.key,
+        ctrlKey: e.ctrlKey,
+        metaKey: e.metaKey,
+        altKey: e.altKey,
+        captureMode,
+      });
+
+      if (shouldPrevent) {
         e.preventDefault();
+      }
+
+      if (e.code === 'ContextMenu' || (e.code === 'F10' && e.shiftKey)) {
+        lastContextMenuKeyAtRef.current = performance.now();
+      }
+
+      if (captureMode) {
         e.stopPropagation();
 
         // NFR-13 safe escape hatch: Esc twice within 600ms unlocks capture mode
@@ -353,12 +378,28 @@ export function KeyboardTesterPanel({
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      if (hasOpenModalDialog()) {
+        return;
+      }
+
       if (!captureMode && isEditableElement(e.target)) {
         return;
       }
 
-      if (captureMode) {
+      const shouldPrevent = shouldPreventDefaultBrowserKey({
+        code: e.code,
+        key: e.key,
+        ctrlKey: e.ctrlKey,
+        metaKey: e.metaKey,
+        altKey: e.altKey,
+        captureMode,
+      });
+
+      if (shouldPrevent) {
         e.preventDefault();
+      }
+
+      if (captureMode) {
         e.stopPropagation();
       }
 
@@ -375,6 +416,14 @@ export function KeyboardTesterPanel({
       }
     };
 
+    const handleContextMenu = (e: MouseEvent) => {
+      if (hasOpenModalDialog()) return;
+      const isKeyboardContextMenu = performance.now() - lastContextMenuKeyAtRef.current < 350;
+      if (captureMode || isKeyboardContextMenu) {
+        e.preventDefault();
+      }
+    };
+
     const handleWindowBlur = () => {
       clearActivePresses();
     };
@@ -385,14 +434,16 @@ export function KeyboardTesterPanel({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown, { capture: captureMode });
-    window.addEventListener('keyup', handleKeyUp, { capture: captureMode });
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    window.addEventListener('keyup', handleKeyUp, { capture: true });
+    window.addEventListener('contextmenu', handleContextMenu, { capture: true });
     window.addEventListener('blur', handleWindowBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown, { capture: captureMode });
-      window.removeEventListener('keyup', handleKeyUp, { capture: captureMode });
+      window.removeEventListener('keydown', handleKeyDown, { capture: true });
+      window.removeEventListener('keyup', handleKeyUp, { capture: true });
+      window.removeEventListener('contextmenu', handleContextMenu, { capture: true });
       window.removeEventListener('blur', handleWindowBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
@@ -491,10 +542,12 @@ export function KeyboardTesterPanel({
       <button
         key={keyDef.code}
         type="button"
+        tabIndex={-1}
         className={classes.join(' ')}
         style={{
           width: `calc(var(--key-unit) * ${keyDef.widthU} + var(--key-gap) * ${Math.max(0, keyDef.widthU - 1)})`,
         }}
+        onMouseDown={(e) => e.preventDefault()}
         onClick={() => handleInspectKeycap(keyDef)}
         title={`${primaryLabel} (${keyDef.code})`}
         aria-label={`${primaryLabel} (${keyDef.code})`}
@@ -530,6 +583,7 @@ export function KeyboardTesterPanel({
               <button
                 type="button"
                 className={`btn btn-sm ${layout === 'full-104' ? 'glass-pill-active' : ''}`}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setLayout('full-104')}
                 aria-pressed={layout === 'full-104'}
               >
@@ -538,6 +592,7 @@ export function KeyboardTesterPanel({
               <button
                 type="button"
                 className={`btn btn-sm ${layout === 'tkl-80' ? 'glass-pill-active' : ''}`}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setLayout('tkl-80')}
                 aria-pressed={layout === 'tkl-80'}
               >
@@ -550,6 +605,7 @@ export function KeyboardTesterPanel({
               <button
                 type="button"
                 className={`btn btn-sm ${osMode === 'win' ? 'glass-pill-active' : ''}`}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setOsMode('win')}
                 aria-pressed={osMode === 'win'}
               >
@@ -558,6 +614,7 @@ export function KeyboardTesterPanel({
               <button
                 type="button"
                 className={`btn btn-sm ${osMode === 'mac' ? 'glass-pill-active' : ''}`}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => setOsMode('mac')}
                 aria-pressed={osMode === 'mac'}
               >
@@ -571,6 +628,7 @@ export function KeyboardTesterPanel({
             <button
               type="button"
               className={`btn btn-sm ${captureMode ? 'btn-primary' : ''}`}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => toggleCaptureMode(!captureMode)}
               aria-pressed={captureMode}
             >
@@ -581,6 +639,7 @@ export function KeyboardTesterPanel({
             <button
               type="button"
               className={`btn btn-sm ${soundEnabled ? 'glass-pill-active' : ''}`}
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => setSoundEnabled((v) => !v)}
               aria-pressed={soundEnabled}
             >
@@ -588,7 +647,12 @@ export function KeyboardTesterPanel({
               <span>{t('tools:diagnosticsSuite.keyboard.clickSound')}</span>
             </button>
 
-            <button type="button" className="btn btn-sm" onClick={handleReset}>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleReset}
+            >
               <RotateCcw size={14} />
               <span>{t('tools:diagnosticsSuite.keyboard.resetButton')}</span>
             </button>
@@ -622,6 +686,7 @@ export function KeyboardTesterPanel({
             <button
               type="button"
               className="btn btn-sm"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => toggleCaptureMode(false)}
             >
               <Unlock size={13} />

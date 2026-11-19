@@ -258,6 +258,64 @@ export function detectKeyChatter(
   return delta >= 0 && delta < thresholdMs;
 }
 
+const ALWAYS_PREVENT_DEFAULT_KEY_CODES = new Set<string>([
+  // Page / container scrolling keys
+  'Space',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'PageUp',
+  'PageDown',
+  'Home',
+  'End',
+  // Focus / navigation / activation / menu keys
+  'Tab',
+  'Enter',
+  'NumpadEnter',
+  'Backspace',
+  'ContextMenu',
+  'AltLeft',
+  'AltRight',
+  // Browser help, find, address bar, caret browsing, and menu bar keys
+  'F1',
+  'F3',
+  'F6',
+  'F7',
+  'F10',
+]);
+
+const QUICK_FIND_KEY_CODES = new Set<string>(['Slash', 'Quote']);
+
+export function shouldPreventDefaultBrowserKey(params: {
+  code: string;
+  key?: string;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  altKey?: boolean;
+  captureMode: boolean;
+}): boolean {
+  if (params.captureMode) {
+    return true;
+  }
+
+  if (params.key === ' ' || ALWAYS_PREVENT_DEFAULT_KEY_CODES.has(params.code)) {
+    return true;
+  }
+
+  // Prevent Firefox Quick Find ('/' and "'") when pressed without OS/Ctrl modifiers
+  if (
+    !params.ctrlKey &&
+    !params.metaKey &&
+    !params.altKey &&
+    (QUICK_FIND_KEY_CODES.has(params.code) || params.key === '/' || params.key === "'")
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 export interface AudioLevelMetrics {
   rms: number;
   peak: number;

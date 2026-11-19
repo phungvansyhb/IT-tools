@@ -75,6 +75,7 @@ import {
   generateIncompressibleBytes,
   getKeyboardLayout,
   getKeyboardLayoutKeyCodes,
+  shouldPreventDefaultBrowserKey,
   validateSameOriginHeaders,
 } from '../src/lib/tools/engines/diagnostics';
 
@@ -655,6 +656,22 @@ async function runVerification() {
   assert.equal(detectKeyChatter(1000, 1025), true);
   assert.equal(detectKeyChatter(1000, 1040), false);
   assert.equal(detectKeyChatter(1000, 990), false);
+
+  // Browser default-action prevention matrix (Space scroll, arrows, Tab, Alt, Quick Find, Capture Mode)
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'Space', key: ' ', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'ArrowDown', key: 'ArrowDown', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'PageDown', key: 'PageDown', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'Tab', key: 'Tab', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'AltLeft', key: 'Alt', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'ContextMenu', key: 'ContextMenu', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'F1', key: 'F1', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'Slash', key: '/', captureMode: false }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'Quote', key: "'", captureMode: false }), true);
+  // Cmd/Ctrl+K and F5 stay available outside Capture Mode, but are captured when captureMode=true
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'KeyK', key: 'k', metaKey: true, captureMode: false }), false);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'F5', key: 'F5', captureMode: false }), false);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'KeyK', key: 'k', metaKey: true, captureMode: true }), true);
+  assert.equal(shouldPreventDefaultBrowserKey({ code: 'F5', key: 'F5', captureMode: true }), true);
 
   // Audio levels & mic noise classification
   const emptyAudio = calculateAudioLevels(new Float32Array(0));

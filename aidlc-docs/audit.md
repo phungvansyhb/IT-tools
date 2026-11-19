@@ -91,3 +91,18 @@
   - `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/{common,catalog,tools}.ts`, `src/lib/tools/registry.ts`, `src/components/common/ToolIcon.tsx`, `src/components/tools/ToolWorkspace.tsx`.
   - `src/components/layout/AppShell.tsx`, `src/components/tools/suites/DiagnosticsToolsSuite.tsx`, `src/components/tools/suites/diagnostics/{KeyboardTesterPanel,MicTesterPanel,SpeakerTesterPanel,SpeedTestPanel}.tsx`, `src/app/globals.css`, `scripts/verify-aidlc.ts`.
 - **Verification & Gate Status**: `npm run lint`, `npm run build` (154 static pages + 3 dynamic `/api/speedtest/*` routes), and `npx tsx scripts/verify-aidlc.ts` (all 8 suites: 7 categories, 28 tools, 144 sitemap URLs, 1,262 keys × 4 locales parity, `robots.ts` `/admin` + `/api/*` disallow, pure diagnostics engine assertions) passed with exit code 0.
+
+## [2026-11-19T03:22:00Z] — Prompt 6: Keyboard Tester Default Browser Action Prevention & Focus Audit
+- **Phase / Stage**: `CONSTRUCTION / Hotfix & Hardening (Keyboard Tester)`
+- **User Input**: `"khi test phím space thì màn hình bị cuộn theo mặc định, cần để ý nhưng case kích hoạt hành động mặc định của trình duyệt, hãy fix lỗi và rà soát"`
+- **Clarifications / Decisions**:
+  - Added pure `shouldPreventDefaultBrowserKey()` in `src/lib/tools/engines/diagnostics.ts` to prevent default browser actions outside editable inputs and modal dialogs (`[role="dialog"][aria-modal="true"]`) even when Capture Mode is off:
+    - Scrolling keys (`Space`, `ArrowUp`/`Down`/`Left`/`Right`, `PageUp`/`PageDown`, `Home`, `End`)
+    - Focus / navigation / activation / menu keys (`Tab`, `Enter`, `NumpadEnter`, `Backspace`, `ContextMenu`, `AltLeft`/`AltRight`)
+    - Browser help/find/address-bar/caret/menu function keys (`F1`, `F3`, `F6`, `F7`, `F10`) and Firefox Quick Find (`Slash`, `Quote` without modifiers)
+    - Kept `Cmd/Ctrl+K` (CommandPalette) and `F5` working outside Capture Mode, and prevented all keys when `captureMode === true` (with `Esc × 2` safe unlock).
+  - Attached `keydown`/`keyup` on `{ capture: true }` and suppressed keyboard-triggered `contextmenu` events (`ContextMenu` key / `Shift+F10` or Capture Mode).
+  - Added `tabIndex={-1}` on keycaps and `onMouseDown={(e) => e.preventDefault()}` on keycap & toolbar buttons so mouse clicks never trap focus on buttons.
+- **Artifacts & Code Updated**:
+  - `src/lib/tools/engines/diagnostics.ts`, `src/components/tools/suites/diagnostics/KeyboardTesterPanel.tsx`, `scripts/verify-aidlc.ts`, `aidlc-docs/audit.md`.
+- **Verification & Gate Status**: `npm run lint`, `npm run build` (154 static pages + 3 dynamic `/api/speedtest/*` routes), and `npx tsx scripts/verify-aidlc.ts` (all 8 suites including `shouldPreventDefaultBrowserKey()` assertions) passed with exit code 0.
