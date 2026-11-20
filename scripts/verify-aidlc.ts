@@ -36,6 +36,7 @@ import {
   buildHomeMetadata,
   buildInfoPageJsonLd,
   buildInfoPageMetadata,
+  buildNotFoundMetadata,
   buildToolJsonLd,
   buildWebSiteJsonLd,
 } from '../src/lib/seo';
@@ -98,6 +99,11 @@ import {
   shouldPreventDefaultBrowserKey,
   validateSameOriginHeaders,
 } from '../src/lib/tools/engines/diagnostics';
+import {
+  analyzeNotFoundPath,
+  findNotFoundSuggestions,
+  getNotFoundFallbackData,
+} from '../src/lib/not-found';
 
 async function runVerification() {
   console.log('1. Verifying Registry Integrity...');
@@ -985,6 +991,97 @@ async function runVerification() {
   assert.ok(twImages.length > 0, 'Expected twitter.images on home metadata');
 
   console.log('   ✓ Brand assets, starter SVG cleanup, site config, proxy bypass, manifest & SEO social images validated.');
+
+  console.log('10. Verifying Pure 404 Suggestion Engine, Fallback Data & Not-Found Metadata...');
+  const analyzedJwt = analyzeNotFoundPath('/vi/tools/text/jwt-decode?state=secret_token_123#frag');
+  assert.equal(analyzedJwt.cleanPath, '/vi/tools/text/jwt-decode');
+  assert.equal(analyzedJwt.strippedPath, '/tools/text/jwt-decode');
+  assert.equal(analyzedJwt.context, 'tool');
+  assert.equal(analyzedJwt.categorySlugCandidate, 'text');
+  assert.equal(analyzedJwt.slugCandidate, 'jwt-decode');
+  assert.ok(!analyzedJwt.cleanPath.includes('secret_token_123'));
+  assert.ok(!analyzedJwt.cleanPath.includes('?'));
+  assert.ok(!analyzedJwt.cleanPath.includes('#'));
+
+  const analyzedTextCat = analyzeNotFoundPath('/vi/tools/text');
+  assert.equal(analyzedTextCat.context, 'tool');
+  assert.equal(analyzedTextCat.categorySlugCandidate, 'text');
+
+  const analyzedCatMissing = analyzeNotFoundPath('/ja/categories/security');
+  assert.equal(analyzedCatMissing.context, 'category');
+  assert.equal(analyzedCatMissing.categorySlugCandidate, null);
+
+  const analyzedGeneral = analyzeNotFoundPath('/en/faq');
+  assert.equal(analyzedGeneral.context, 'general');
+  assert.equal(analyzedGeneral.categorySlugCandidate, null);
+
+  const jwtSuggestions = findNotFoundSuggestions('/vi/tools/text/jwt-decode?state=secret#hash', 'vi', 4);
+  assert.ok(jwtSuggestions.length >= 1, 'Expected suggestions for /vi/tools/text/jwt-decode');
+  assert.equal(jwtSuggestions[0].id, 'jwt-decoder');
+  assert.equal(jwtSuggestions[0].href, '/vi/tools/text/jwt-decoder');
+
+  const faqSuggestions = findNotFoundSuggestions('/en/faq', 'en', 4);
+  assert.ok(faqSuggestions.length >= 1, 'Expected suggestions for /en/faq');
+  assert.equal(faqSuggestions[0].kind, 'page');
+  assert.equal(faqSuggestions[0].id, 'help');
+  assert.equal(faqSuggestions[0].href, '/en/help');
+
+  const securityCatSuggestions = findNotFoundSuggestions('/ja/categories/security', 'ja', 4);
+  assert.ok(securityCatSuggestions.length >= 1, 'Expected suggestions for /ja/categories/security');
+  assert.equal(securityCatSuggestions[0].kind, 'category');
+  assert.equal(securityCatSuggestions[0].id, 'text');
+
+  const jsonFormaterSuggestions = findNotFoundSuggestions('/en/tools/text/json-formater', 'en', 4);
+  assert.ok(jsonFormaterSuggestions.length >= 1, 'Expected suggestions for /en/tools/text/json-formater');
+  assert.equal(jsonFormaterSuggestions[0].id, 'data-converter');
+
+  const garbageSuggestions = findNotFoundSuggestions('/en/zzzzqqqqxxxx9999', 'en', 4);
+  assert.deepEqual(garbageSuggestions, [], 'Expected empty suggestions for random garbage path');
+
+  for (const probe of [
+    '/en/admin',
+    '/vi/admin/feedback',
+    '/en/api/speedtest/ping',
+    '/vi/tools/text/jwt-decode',
+    '/en/tools',
+  ]) {
+    const res = findNotFoundSuggestions(probe, 'en', 10);
+    for (const item of res) {
+      assert.ok(!item.href.includes('/admin'), `Suggestion must never expose /admin: ${item.href}`);
+      assert.ok(!item.href.includes('/api'), `Suggestion must never expose /api: ${item.href}`);
+    }
+  }
+
+  const fallbackTool = getNotFoundFallbackData('vi', analyzedJwt);
+  assert.equal(fallbackTool.matchedCategory?.slug, 'text');
+  assert.ok(fallbackTool.categoryTools.length > 0 && fallbackTool.categoryTools.length <= 6);
+  assert.equal(fallbackTool.featuredTools.length, 6);
+  assert.equal(fallbackTool.categories.length, 7);
+  assert.equal(fallbackTool.infoPages.length, 5);
+
+  const nfMeta = buildNotFoundMetadata('vi', 'tool');
+  assert.ok(nfMeta.metadataBase instanceof URL, 'Expected metadataBase on notFound metadata');
+  assert.equal(typeof nfMeta.title, 'string');
+  assert.ok((nfMeta.title as string).includes('404'));
+  assert.deepEqual(nfMeta.robots, { index: false, follow: false, nocache: true });
+
+  const requiredNotFoundFiles = [
+    'src/app/global-not-found.tsx',
+    'src/app/[locale]/not-found.tsx',
+    'src/app/[locale]/[...rest]/page.tsx',
+    'src/app/[locale]/categories/[category]/not-found.tsx',
+    'src/app/[locale]/tools/[category]/[slug]/not-found.tsx',
+  ];
+  for (const relPath of requiredNotFoundFiles) {
+    assert.ok(fs.existsSync(path.join(process.cwd(), relPath)), `Missing 404 route file: ${relPath}`);
+  }
+  const localeNfSource = fs.readFileSync(
+    path.join(process.cwd(), 'src/app/[locale]/not-found.tsx'),
+    'utf8'
+  );
+  assert.ok(!localeNfSource.includes('glass-btn'), 'Legacy .glass-btn stub must be removed from [locale]/not-found.tsx');
+
+  console.log('   ✓ Pure 404 suggestion engine, sanitization, /admin & /api exclusion, fallback data, route boundaries, and noindex metadata validated.');
 
   console.log('\nALL AIDLC VERIFICATION CHECKS PASSED!');
 }

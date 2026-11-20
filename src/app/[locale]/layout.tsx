@@ -35,6 +35,8 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin', 'vietnamese'],
 });
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
 }

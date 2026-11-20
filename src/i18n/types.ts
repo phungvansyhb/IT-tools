@@ -187,9 +187,54 @@ export interface CommonDictionary {
     toolTitleTemplate: string;
   };
   notFound: {
+    badgeCode: string;
+    contextBadges: {
+      tool: string;
+      category: string;
+      general: string;
+    };
+    titles: {
+      tool: string;
+      category: string;
+      general: string;
+    };
+    descriptions: {
+      tool: string;
+      category: string;
+      general: string;
+    };
     title: string;
     description: string;
+    requestedPathLabel: string;
+    searchPlaceholder: string;
+    searchAria: string;
+    searchEmpty: string;
+    didYouMeanTitle: string;
+    didYouMeanSubtitle: string;
+    categoryToolsTitle: string;
+    browseCategoriesTitle: string;
+    featuredToolsTitle: string;
+    quickPagesTitle: string;
     backHome: string;
+    openCategory: string;
+    openCommandPalette: string;
+    reportBrokenLink: string;
+    brokenLinkTitlePrefix: string;
+    kindLabels: {
+      tool: string;
+      category: string;
+      page: string;
+    };
+    seoTitle: {
+      tool: string;
+      category: string;
+      general: string;
+    };
+    seoDescription: {
+      tool: string;
+      category: string;
+      general: string;
+    };
   };
   locales: {
     en: string;

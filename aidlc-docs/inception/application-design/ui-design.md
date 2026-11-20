@@ -143,3 +143,21 @@ All 4 panels strictly reuse Monochrome Zinc Glass tokens (`#09090B`, `#10B981` /
    - `Contact`: conditional `supportEmail` card (`mailto:` + Copy button) when configured, or direct `FeedbackModal` primary CTA when unset, alongside configured GitHub link.
    - Internal backlink strip linking back to Home Hub, featured categories/tools, and sibling info pages.
 
+---
+
+## 8. Contextual 404 Recovery Hub & Root Fallback UI Specs (`UNIT-22`–`UNIT-24`)
+
+1. **Localized `NotFoundHub` (`src/components/not-found/NotFoundHub.tsx`)**:
+   - **Hero Terminal Bento Card (`span="12"`)**: Status badge `>_ 404` (`--accent-glow` / `--accent-border`) + contextual badge (`Tool Not Found` / `Category Not Found` / `Route Not Found`), single `<h1>`, concise explanation, and hydration-gated monospace pill displaying the **sanitized path** (never `?state=` or `#hash`).
+   - **Action Row (`.btn` / `.btn-primary` replacing broken `.glass-btn`)**: **Back to Home Hub**, **Command Palette (`⌘K`)**, **Report Broken Link** (`Bug` icon opening `FeedbackModal`), and conditional **Open `<Category>`** when a valid category is inferred.
+   - **Inline Quick Search**: `.input-field` with `Search` icon filtering tools, categories, and public info pages live inside the 404 hub.
+   - **"Did You Mean?" Bento Grid**: Shown when `suggestions.length > 0` (`span="6"` cards collapsing to 1 column at `<= 640px`), each showing type badge (`Tool` / `Category` / `Page`) and `ArrowUpRight`.
+   - **Contextual Recovery Grid**:
+     - `tool` context (with `matchedCategory`): `Tools in <Category>` (`ToolBentoCard`).
+     - `category` context: Interactive grid of all `7` Categories.
+     - `general` context: `Featured Tools` + quick info page pills (`About`, `Help & FAQ`, `Contact`).
+2. **Minimalist Root Fallback (`RootNotFoundView` in `src/app/global-not-found.tsx`)**:
+   - Centered Monochrome Zinc Glass card (`max-width: 640px`) on `--bg-canvas` with client `localStorage` Dark/Light theme sync, `<BrandLogo size={36} />` + `>_ 404`, sanitized path pill, Back to Hub CTA, 4 language hub pills (`/en`, `/vi`, `/ja`, `/zh`), and `/en/help` link.
+   - Responsive fit down to `375px` mobile with zero horizontal overflow.
+
+

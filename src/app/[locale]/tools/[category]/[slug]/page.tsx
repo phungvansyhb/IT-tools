@@ -1,14 +1,14 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { SUPPORTED_LOCALES, isValidLocale } from '@/i18n/config';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isValidLocale } from '@/i18n/config';
 import {
   TOOLS,
   getLocalizedCategoryBySlug,
   getLocalizedRelatedTools,
   getLocalizedToolBySlug,
 } from '@/lib/tools/registry';
-import { buildToolJsonLd, buildToolMetadata } from '@/lib/seo';
+import { buildNotFoundMetadata, buildToolJsonLd, buildToolMetadata } from '@/lib/seo';
 import { ToolWorkspace } from '@/components/tools/ToolWorkspace';
 
 export function generateStaticParams() {
@@ -27,10 +27,11 @@ export async function generateMetadata({
   params: Promise<{ locale: string; category: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, category: catSlug, slug } = await params;
-  if (!isValidLocale(locale)) return {};
+  const safeLocale = isValidLocale(locale) ? locale : DEFAULT_LOCALE;
+  if (!isValidLocale(locale)) return buildNotFoundMetadata(safeLocale, 'tool');
   const tool = getLocalizedToolBySlug(catSlug, slug, locale);
   const category = getLocalizedCategoryBySlug(catSlug, locale);
-  if (!tool || !category) return {};
+  if (!tool || !category) return buildNotFoundMetadata(safeLocale, 'tool');
   return buildToolMetadata(tool, category, locale);
 }
 

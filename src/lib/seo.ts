@@ -10,6 +10,7 @@ import { getBundle, getFixedT } from '@/i18n/translator';
 import { getSiteConfig } from '@/lib/site';
 import { CategoryDefinition, ToolDefinition } from '@/lib/tools/registry';
 import { getInfoPageBySlug, getLocalizedInfoPage, type InfoPageSlug } from '@/lib/info/pages';
+import type { NotFoundContext } from '@/lib/not-found/suggestions';
 
 export const SITE_NAME = 'OmniDev IT-Tools';
 export const SITE_TAGLINE = 'Privacy-First Developer & Utility Tools Hub';
@@ -382,3 +383,24 @@ export function buildInfoPageJsonLd(slug: InfoPageSlug, locale: Locale = DEFAULT
     },
   ];
 }
+
+export function buildNotFoundMetadata(
+  locale: Locale = DEFAULT_LOCALE,
+  context: NotFoundContext = 'general'
+): Metadata {
+  const nf = getBundle(locale).common.notFound;
+  const title = nf.seoTitle[context] ?? nf.seoTitle.general;
+  const description = nf.seoDescription[context] ?? nf.seoDescription.general;
+
+  return {
+    metadataBase: getMetadataBase(),
+    title,
+    description,
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+    },
+  };
+}
+

@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import {
   FEEDBACK_COOLDOWN_MS,
+  TITLE_MAX,
   aggregateToolRatings,
   insertLocalFeedback,
   isValidToolId,
@@ -44,6 +45,17 @@ export interface OpenFeedbackModalOptions {
   defaultTab?: FeedbackModalTab;
   defaultType?: FeedbackType;
   defaultToolId?: string;
+  defaultTitle?: string;
+}
+
+function sanitizeFeedbackDefaultTitle(rawTitle?: string): string {
+  if (typeof rawTitle !== 'string') return '';
+  const stripped = rawTitle
+    .replace(/[?#]\S*/g, '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return stripped.slice(0, TITLE_MAX);
 }
 
 export interface SubmitRatingResult {
@@ -88,9 +100,11 @@ interface FeedbackContextValue {
   modalTab: FeedbackModalTab;
   modalType: FeedbackType;
   modalToolId: string;
+  modalTitle: string;
   setModalTab: (tab: FeedbackModalTab) => void;
   setModalType: (type: FeedbackType) => void;
   setModalToolId: (toolId: string) => void;
+  setModalTitle: (title: string) => void;
   openFeedbackModal: (options?: OpenFeedbackModalOptions) => void;
   closeFeedbackModal: () => void;
 }
@@ -137,6 +151,7 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
   const [modalTab, setModalTab] = useState<FeedbackModalTab>('submit');
   const [modalType, setModalType] = useState<FeedbackType>('feedback');
   const [modalToolId, setModalToolId] = useState<string>('general');
+  const [modalTitle, setModalTitle] = useState<string>('');
 
   const refreshFeedbackData = useCallback(async () => {
     const effectiveClientId = clientId || getOrCreateClientId();
@@ -385,11 +400,13 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
     setModalToolId(
       candidateToolId && isValidToolId(candidateToolId, true) ? candidateToolId : 'general'
     );
+    setModalTitle(sanitizeFeedbackDefaultTitle(options?.defaultTitle));
     setModalOpen(true);
   }, []);
 
   const closeFeedbackModal = useCallback(() => {
     setModalOpen(false);
+    setModalTitle('');
   }, []);
 
   const hydrated = workspaceHydrated && feedbackHydrated;
@@ -409,9 +426,11 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
       modalTab,
       modalType,
       modalToolId,
+      modalTitle,
       setModalTab,
       setModalType,
       setModalToolId,
+      setModalTitle,
       openFeedbackModal,
       closeFeedbackModal,
     }),
@@ -429,6 +448,7 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
       modalTab,
       modalType,
       modalToolId,
+      modalTitle,
       openFeedbackModal,
       closeFeedbackModal,
     ]

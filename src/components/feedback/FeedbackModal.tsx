@@ -40,6 +40,8 @@ export function FeedbackModal() {
     setModalType,
     modalToolId,
     setModalToolId,
+    modalTitle,
+    setModalTitle,
   } = useFeedback();
 
   if (!modalOpen) return null;
@@ -54,6 +56,8 @@ export function FeedbackModal() {
       setModalType={setModalType}
       modalToolId={modalToolId}
       setModalToolId={setModalToolId}
+      modalTitle={modalTitle}
+      setModalTitle={setModalTitle}
     />
   );
 }
@@ -66,6 +70,8 @@ interface FeedbackModalInnerProps {
   setModalType: (type: FeedbackType) => void;
   modalToolId: string;
   setModalToolId: (toolId: string) => void;
+  modalTitle: string;
+  setModalTitle: (title: string) => void;
 }
 
 function getStatusBadgeClass(status: FeedbackStatus): string {
@@ -89,6 +95,8 @@ function FeedbackModalInner({
   setModalType,
   modalToolId,
   setModalToolId,
+  modalTitle,
+  setModalTitle,
 }: FeedbackModalInnerProps) {
   const { locale, t } = useI18n();
   const { theme } = useUserWorkspace();
@@ -103,7 +111,7 @@ function FeedbackModalInner({
     return map;
   }, [localizedTools]);
 
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(modalTitle);
   const [message, setMessage] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [honeypot, setHoneypot] = useState('');
@@ -210,6 +218,7 @@ function FeedbackModalInner({
       setHoneypotSuccess(false);
       setSubmittedSuccess(true);
       setTitle('');
+      setModalTitle('');
       setMessage('');
       setContactEmail('');
       setHoneypot('');
@@ -454,7 +463,10 @@ function FeedbackModalInner({
                     className="input-field"
                     maxLength={TITLE_MAX}
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setModalTitle(e.target.value);
+                    }}
                     placeholder={t('feedback.titlePlaceholder')}
                   />
                 </label>

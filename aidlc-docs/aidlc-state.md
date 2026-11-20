@@ -3,24 +3,25 @@
 ## Project Metadata
 - **Project Name**: OmniDev / IT-Tools Hub — Privacy-First Developer & Utility Tools Hub
 - **Project Type**: Brownfield (`Next.js 16.4.6 App Router + TypeScript 5 + React 19.3 + Vanilla CSS Monochrome Zinc Glass / Bento Grid + Optional Supabase`)
-- **Active Phase**: `CONSTRUCTION` (Brand Assets & Backlink Pages Cycle — `UNIT-18`–`UNIT-21` Complete)
+- **Active Phase**: `CONSTRUCTION` (Contextual 404 Recovery Hub & Root Fallback Cycle — `UNIT-22`–`UNIT-24` Complete)
 - **Active Stage**: `Phase 2 Construction Complete — Ready for Phase 3 Operations Verification`
-- **Last Updated**: `2026-11-19T09:20:00Z`
+- **Last Updated**: `2026-11-20T02:20:00Z`
 
 ---
 
-## Phase 1: INCEPTION Progress (Baseline v0.1.0 + i18n + Feedback + Diagnostics + Brand/Backlink Cycle)
+## Phase 1: INCEPTION Progress (Baseline v0.1.0 + i18n + Feedback + Diagnostics + Brand/Backlink + 404 Cycle)
 - [x] **Stage 1.1: Workspace Detection** — Classified workspace (`Brownfield`) and verified baseline stack (`Next.js 16.4.6`, `React 19.3.0`, `TypeScript 5`, `js-yaml`, `lucide-react`, `@supabase/supabase-js`, `i18next`).
-- [x] **Stage 1.2: Requirements Analysis** — Validated `FR-01`–`FR-39`, `NFR-01`–`NFR-21`, `CON-01`–`CON-17`, `PRE-01`–`PRE-02`, `EX-01`–`EX-05`, `SC-01`–`SC-05` in [`requirements.md`](inception/requirements/requirements.md).
-- [x] **Stage 1.3: User Stories** — Validated `US-01`–`US-24` in [`user-stories.md`](inception/user-stories/user-stories.md).
-- [x] **Stage 1.4: Application & UI Design** — Documented Terminal `>_` Brand Asset suite, `src/lib/site.ts`, `<SiteFooter />`, `CommandPalette` page search, and 5 localized SSG info pages in [`architecture.md`](inception/application-design/architecture.md) and [`ui-design.md`](inception/application-design/ui-design.md).
-- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`–`UNIT-17` and decomposed Brand/Backlink cycle into `UNIT-18`–`UNIT-21` in [`units.md`](inception/units/units.md).
+- [x] **Stage 1.2: Requirements Analysis** — Validated `FR-01`–`FR-45`, `NFR-01`–`NFR-25`, `CON-01`–`CON-20`, `PRE-01`–`PRE-02`, `EX-01`–`EX-06`, `SC-01`–`SC-06` in [`requirements.md`](inception/requirements/requirements.md).
+- [x] **Stage 1.3: User Stories** — Validated `US-01`–`US-27` in [`user-stories.md`](inception/user-stories/user-stories.md).
+- [x] **Stage 1.4: Application & UI Design** — Documented Contextual 404 Recovery Hub (`NotFoundHub`), `RootNotFoundView` (`global-not-found.tsx`), pure fuzzy-match engine, and `noindex` SEO guards in [`architecture.md`](inception/application-design/architecture.md) and [`ui-design.md`](inception/application-design/ui-design.md).
+- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`–`UNIT-21` and decomposed Contextual 404 cycle into `UNIT-22`–`UNIT-24` in [`units.md`](inception/units/units.md).
 - [x] **Stage 1.6: Workflow Planning** — Updated [`execution-plan.md`](inception/plans/execution-plan.md) and [`construction-plan.md`](construction/plans/construction-plan.md).
 - [x] **Gate 1 Sign-Off (Baseline v0.1.0)**: Completed prior to governance standardization.
 - [x] **Gate 1 Sign-Off (i18n Expansion `UNIT-05`–`UNIT-09`)**: Approved and implemented.
 - [x] **Gate 1 Sign-Off (Feedback, Ratings & Admin Cycle `UNIT-10`–`UNIT-13`)**: Approved and implemented.
 - [x] **Gate 1 Sign-Off (Device & Network Diagnostics Cycle `UNIT-14`–`UNIT-17`)**: Approved and implemented.
-- [x] **Gate 1 Sign-Off (Brand Assets & Backlink Pages Cycle `UNIT-18`–`UNIT-21`)**: Approved by user; Construction unlocked.
+- [x] **Gate 1 Sign-Off (Brand Assets & Backlink Pages Cycle `UNIT-18`–`UNIT-21`)**: Approved and implemented.
+- [x] **Gate 1 Sign-Off (Contextual 404 Recovery Hub & Root Fallback Cycle `UNIT-22`–`UNIT-24`)**: Approved by user; Construction unlocked.
 
 ---
 
@@ -50,6 +51,10 @@
 - [x] **`UNIT-20`**: Global `<SiteFooter />`, `<BrandLogo />` Shell Integration, Sidebar Links & `CommandPalette` Quick-Jump (`src/components/layout/{SiteFooter,AppShell,CommandPalette}.tsx`, `src/components/common/ToolIcon.tsx`, `src/app/globals.css`)
 - [x] **`UNIT-21`**: 5 Static Localized Info Pages (`about`, `help`, `privacy`, `terms`, `contact`) & Full Verification Suite (`src/components/info/*`, `src/app/[locale]/{about,help,privacy,terms,contact}/page.tsx`, `scripts/verify-aidlc.ts`)
 - [x] **Full Build & Verification (Brand Assets & Backlink Pages Cycle)**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+- [x] **`UNIT-22`**: Next.js 16 Docs Verification, Pure 404 Suggestion Engine, 4-Locale `notFound` Dictionaries & SEO Metadata (`src/lib/not-found/*`, `src/i18n/*`, `src/lib/seo.ts`, `scripts/verify-aidlc.ts`)
+- [x] **`UNIT-23`**: `NotFoundHub` & `RootNotFoundView` UI, Shell/Feedback Integration & Monochrome CSS (`src/components/layout/{AppShell,CommandPalette}.tsx`, `src/hooks/useFeedback.tsx`, `src/components/feedback/FeedbackModal.tsx`, `src/components/not-found/*`, `src/app/globals.css`)
+- [x] **`UNIT-24`**: App Router 404 Routes (`global-not-found`, `[...rest]`, Segment Boundaries), Metadata `noindex` Guards & Full Verification (`next.config.ts`, `src/app/global-not-found.tsx`, `src/app/[locale]/{not-found,[...rest]/page}.tsx`, `src/app/[locale]/categories/[category]/{not-found,page}.tsx`, `src/app/[locale]/tools/[category]/[slug]/{not-found,page}.tsx`, `scripts/verify-aidlc.ts`)
+- [x] **Full Build & Verification (Contextual 404 Cycle)**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` + HTTP `404` smoke checks
 
 ---
 

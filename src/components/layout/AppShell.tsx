@@ -28,12 +28,19 @@ import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { FeedbackModal } from '@/components/feedback/FeedbackModal';
 
+export const OPEN_COMMAND_PALETTE_EVENT = 'omnidev:open-command-palette';
+
+export interface OpenCommandPaletteDetail {
+  query?: string;
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { locale, t } = useI18n();
   const { theme, toggleTheme, favorites, toggleFavorite, syncMode, hydrated } = useUserWorkspace();
   const { myFeedback, hydrated: feedbackHydrated, openFeedbackModal } = useFeedback();
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [cmdInitialQuery, setCmdInitialQuery] = useState<string | undefined>(undefined);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
 
@@ -47,11 +54,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       if (e.defaultPrevented) return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
+        setCmdInitialQuery(undefined);
         setCmdOpen((prev) => !prev);
       }
     };
+    const onOpenPalette = (e: Event) => {
+      const customEvent = e as CustomEvent<OpenCommandPaletteDetail | undefined>;
+      const nextQuery =
+        typeof customEvent.detail?.query === 'string' && customEvent.detail.query.trim().length > 0
+          ? customEvent.detail.query.trim()
+          : undefined;
+      setCmdInitialQuery(nextQuery);
+      setCmdOpen(true);
+    };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, onOpenPalette);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, onOpenPalette);
+    };
   }, []);
 
   const favoriteTools = useMemo(
@@ -103,7 +124,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Quick Search Trigger inside Sidebar */}
         <button
           type="button"
-          onClick={() => setCmdOpen(true)}
+          onClick={() => {
+            setCmdInitialQuery(undefined);
+            setCmdOpen(true);
+          }}
           className="btn"
           style={{
             justifyContent: 'space-between',
@@ -314,7 +338,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
             <button
               type="button"
-              onClick={() => setCmdOpen(true)}
+              onClick={() => {
+                setCmdInitialQuery(undefined);
+                setCmdOpen(true);
+              }}
               className="btn topbar-search-btn"
               aria-label={t('nav.openPaletteAria')}
             >
@@ -448,7 +475,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SiteFooter />
       </div>
 
-      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => {
+          setCmdOpen(false);
+          setCmdInitialQuery(undefined);
+        }}
+        initialQuery={cmdInitialQuery}
+      />
       <FeedbackModal />
     </div>
   );

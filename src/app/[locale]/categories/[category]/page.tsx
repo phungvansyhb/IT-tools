@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ChevronRight } from 'lucide-react';
-import { SUPPORTED_LOCALES, isValidLocale, localePath } from '@/i18n/config';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, isValidLocale, localePath } from '@/i18n/config';
 import { getBundle, getFixedT } from '@/i18n/translator';
 import {
   CATEGORIES,
   getLocalizedCategoryBySlug,
   getLocalizedToolsByCategory,
 } from '@/lib/tools/registry';
-import { buildCategoryMetadata, buildCollectionPageJsonLd } from '@/lib/seo';
+import { buildCategoryMetadata, buildCollectionPageJsonLd, buildNotFoundMetadata } from '@/lib/seo';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard, ToolBentoCard } from '@/components/bento/BentoCard';
 import { ToolIcon } from '@/components/common/ToolIcon';
@@ -27,9 +27,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string; category: string }>;
 }): Promise<Metadata> {
   const { locale, category: slug } = await params;
-  if (!isValidLocale(locale)) return {};
+  const safeLocale = isValidLocale(locale) ? locale : DEFAULT_LOCALE;
+  if (!isValidLocale(locale)) return buildNotFoundMetadata(safeLocale, 'category');
   const cat = getLocalizedCategoryBySlug(slug, locale);
-  if (!cat) return {};
+  if (!cat) return buildNotFoundMetadata(safeLocale, 'category');
   return buildCategoryMetadata(cat, locale);
 }
 

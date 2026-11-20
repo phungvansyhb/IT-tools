@@ -13,6 +13,7 @@ import { ToolIcon } from '@/components/common/ToolIcon';
 interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
+  initialQuery?: string;
 }
 
 type SearchResultItem =
@@ -44,16 +45,22 @@ type SearchResultItem =
       href: string;
     };
 
-export function CommandPalette({ open, onClose }: CommandPaletteProps) {
+export function CommandPalette({ open, onClose, initialQuery }: CommandPaletteProps) {
   if (!open) return null;
-  return <CommandPaletteInner onClose={onClose} />;
+  return <CommandPaletteInner onClose={onClose} initialQuery={initialQuery} />;
 }
 
-function CommandPaletteInner({ onClose }: { onClose: () => void }) {
+function CommandPaletteInner({
+  onClose,
+  initialQuery,
+}: {
+  onClose: () => void;
+  initialQuery?: string;
+}) {
   const router = useRouter();
   const { locale, t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery ?? '');
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {

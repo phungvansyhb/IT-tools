@@ -190,3 +190,29 @@ Next.js App Router Metadata & Vector Brand Assets:
 - **Info Pages (`src/lib/info/pages.ts`)**: `INFO_PAGE_SLUGS = ['about', 'help', 'privacy', 'terms', 'contact']` with Schema.org mapping (`AboutPage`, `FAQPage`, `WebPage`, `ContactPage`), 4-locale `'pages'` namespace (`src/i18n/locales/{en,vi,ja,zh}/pages.ts`), and `164`-URL `sitemap.ts` (`4 × (1 + 7 + 28 + 5)`).
 - **UI & Discovery**: Global `<SiteFooter />` mounted inside `.app-main-wrap` below `<main className="app-content">` (`flex: 1`), compact `.sidebar-legal-links` in Sidebar Footer, and `kind: 'page'` entries in `CommandPalette.tsx` (`Cmd/Ctrl+K`). `/[locale]/admin/feedback` remains strictly excluded from public navigation and sitemap.
 
+---
+
+## 7. Contextual 404 Recovery Hub & Root Fallback Architecture (`UNIT-22`–`UNIT-24`)
+
+### 7.1 Routing & Single-`<html>` 404 Pipeline
+```text
+Unmatched / Missing Routes:
+  ├── /{locale}/tools/{category}/{slug} (invalid) ─▶ page.tsx notFound() ─▶ tools/[category]/[slug]/not-found.tsx ─▶ <NotFoundHub contextOverride="tool" />
+  ├── /{locale}/categories/{category} (invalid)   ─▶ page.tsx notFound() ─▶ categories/[category]/not-found.tsx   ─▶ <NotFoundHub contextOverride="category" />
+  ├── /{locale}/{...rest} (any unmatched path)    ─▶ [...rest]/page.tsx notFound() ─▶ [locale]/not-found.tsx      ─▶ <NotFoundHub /> (auto-detects partial /tools/* or /categories/*)
+  └── /old-page.html, /wp-login.php, /invalid/*   ─▶ proxy bypass / [locale]/layout.tsx notFound() ─▶ src/app/global-not-found.tsx ─▶ <RootNotFoundView /> (own <html><body>)
+```
+- **Single-`<html>` Guarantee (`NFR-24`)**: `src/app/global-not-found.tsx` owns its own `<html><body>` strictly for root-level fallback 404s, preserving `src/app/[locale]/layout.tsx` as the sole `<html lang={...}>` owner for all localized routes.
+- **Locale & Hydration Safety**: `[locale]` 404 boundaries render inside `<I18nProvider locale={locale}>`, so `NotFoundHub` resolves active translations via `useI18n()` synchronously while gating `usePathname()` displays and fuzzy suggestions behind a client `hydrated` flag.
+
+### 7.2 Pure Fuzzy-Match Engine & Shell Integration
+- **Pure Node/tsx Engine (`src/lib/not-found/suggestions.ts`)**:
+  - `analyzeNotFoundPath(rawPath)` strips `?query` (including `?state=...`) and `#hash` via `sanitizePathname()`, removes locale prefix, classifies context (`tool` | `category` | `general`), and extracts clean tokens + valid `categorySlugCandidate`.
+  - `findNotFoundSuggestions(rawPath, locale, limit = 4)` scores public `TOOLS` (28), `CATEGORIES` (7), and `INFO_PAGES` (5) using normalized Levenshtein distance + substring/prefix/token/category boosts + aliases (`faq`→`help`, `tos`→`terms`, `privacy-policy`→`privacy`, `about-us`→`about`, `contact-us`→`contact`), strictly excluding `/admin/feedback` and `/api/*`.
+  - `getNotFoundFallbackData(locale, analyzed)` returns contextual fallback items (`matchedCategory`, `categoryTools`, `featuredTools`, `categories`, `infoPages`).
+- **SEO & Shell Contracts**:
+  - `buildNotFoundMetadata(locale, context)` in `src/lib/seo.ts` emits `robots: { index: false, follow: false, nocache: true }` and `metadataBase`; `sitemap.ts` remains strictly `164` URLs.
+  - `AppShell.tsx` listens for `OPEN_COMMAND_PALETTE_EVENT = 'omnidev:open-command-palette'` (optional `{ query?: string }`) and forwards `initialQuery` to `CommandPalette.tsx`.
+  - `useFeedback.tsx` & `FeedbackModal.tsx` support optional sanitized `defaultTitle` (`<= 140` chars) for one-click "Report Broken Link" submissions.
+
+

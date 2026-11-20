@@ -313,3 +313,55 @@ The implementation of **OmniDev / IT-Tools Hub** is decomposed into 4 cohesive, 
 - **Dependencies**: `UNIT-18`, `UNIT-19`, `UNIT-20`.
 - **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly across all 174+ static routes.
 
+---
+
+## Contextual 404 Recovery Hub & Root Fallback Units (`UNIT-22` – `UNIT-24`)
+
+## `UNIT-22`: Next.js 16 Docs Verification, Pure 404 Suggestion Engine, 4-Locale `notFound` Dictionaries & SEO Metadata
+- **Scope**:
+  - Run `npm install` (if `node_modules/` absent) and inspect `node_modules/next/dist/docs/` (`not-found.md`, `global-not-found.md`) per `AGENTS.md` to confirm `global-not-found.tsx` / `next.config.ts` rules in Next.js `16.4.6`.
+  - Build pure Node/tsx-executable `src/lib/not-found/suggestions.ts` & `src/lib/not-found/index.ts` (`analyzeNotFoundPath`, `findNotFoundSuggestions`, `getNotFoundFallbackData`, Levenshtein/fuzzy scoring, alias dictionary, strict `/admin` exclusion, `?state=`/`#hash` stripping).
+  - Extend `CommonDictionary['notFound']` in `src/i18n/types.ts` and author complete translations across `src/i18n/locales/{en,vi,ja,zh}/common.ts` with 100% recursive key & `{{placeholder}}` parity.
+  - Add `buildNotFoundMetadata(locale, context)` in `src/lib/seo.ts` emitting `robots: { index: false, follow: false, nocache: true }` + `metadataBase`, and extend `scripts/verify-aidlc.ts` with pure assertions.
+- **Target Files**:
+  - `src/lib/not-found/{suggestions.ts,index.ts}` *(new)*
+  - `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/common.ts`
+  - `src/lib/seo.ts`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-02`, `UNIT-05`, `UNIT-06`, `UNIT-10`, `UNIT-19`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly.
+
+---
+
+## `UNIT-23`: `NotFoundHub` & `RootNotFoundView` UI, Shell/Feedback Integration & Monochrome CSS
+- **Scope**:
+  - Extend `src/components/layout/AppShell.tsx` & `src/components/layout/CommandPalette.tsx` to handle `OPEN_COMMAND_PALETTE_EVENT` (`omnidev:open-command-palette`, optional `query`).
+  - Extend `src/hooks/useFeedback.tsx` & `src/components/feedback/FeedbackModal.tsx` with optional sanitized `defaultTitle` in `OpenFeedbackModalOptions`.
+  - Build `src/components/not-found/NotFoundHub.tsx` (`'use client'`, hydration-safe `usePathname()` + `useI18n()`, inline search, fuzzy "Did you mean?", contextual Tool/Category/General recovery grids, `⌘K`, and Broken Link Report).
+  - Build `src/components/not-found/RootNotFoundView.tsx` (`'use client'`, `<BrandLogo />`, client Dark/Light `localStorage` theme sync, sanitized path, 4-locale links, Back to Hub) and add `.notfound-*` responsive CSS to `src/app/globals.css`.
+- **Target Files**:
+  - `src/components/layout/{AppShell.tsx,CommandPalette.tsx}`
+  - `src/hooks/useFeedback.tsx`, `src/components/feedback/FeedbackModal.tsx`
+  - `src/components/not-found/{NotFoundHub.tsx,RootNotFoundView.tsx}` *(new)*
+  - `src/app/globals.css`
+- **Dependencies**: `UNIT-22`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly.
+
+---
+
+## `UNIT-24`: App Router 404 Routes (`global-not-found`, `[...rest]`, Segment Boundaries), Metadata `noindex` Guards & Full Verification
+- **Scope**:
+  - Create `src/app/global-not-found.tsx` (updating `next.config.ts` if required per verified Next.js `16.4.6` docs) for extension/non-locale fallback 404s.
+  - Replace stub `src/app/[locale]/not-found.tsx` with `<NotFoundHub />`, and create contextual `src/app/[locale]/categories/[category]/not-found.tsx` and `src/app/[locale]/tools/[category]/[slug]/not-found.tsx`.
+  - Create `src/app/[locale]/[...rest]/page.tsx` calling `notFound()` with `generateMetadata()` returning `buildNotFoundMetadata()`, and update missing-resource `generateMetadata()` in `categories/[category]/page.tsx` and `tools/[category]/[slug]/page.tsx`.
+  - Run full verification (`npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`) plus HTTP `404` & `noindex` smoke checks for localized, contextual, catch-all, and `.html` fallback paths.
+- **Target Files**:
+  - `next.config.ts` *(if required by Next.js 16.4.6 `globalNotFound`)*
+  - `src/app/global-not-found.tsx` *(new)*
+  - `src/app/[locale]/not-found.tsx` *(updated)*, `src/app/[locale]/[...rest]/page.tsx` *(new)*
+  - `src/app/[locale]/categories/[category]/{not-found.tsx,page.tsx}`
+  - `src/app/[locale]/tools/[category]/[slug]/{not-found.tsx,page.tsx}`
+  - `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-22`, `UNIT-23`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` + HTTP `404` smoke checks pass cleanly.
+
+

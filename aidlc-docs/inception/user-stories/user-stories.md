@@ -322,3 +322,35 @@
 - **Then** `sitemap()` contains exactly `164` URLs with `en`, `vi`, `ja`, `zh-Hans`, and `x-default` alternates,
 - **And** each info page renders a single `<html lang>` attribute, `canonical` + `og:image`, internal links back to tools/categories, and valid JSON-LD matching the page's Schema.org type and `inLanguage`.
 
+---
+
+## `US-25`: Contextual Multilingual 404 Recovery (`FR-40`, `FR-42`, `FR-43`, `FR-45`)
+**As** a developer hitting a mistyped or outdated route such as `/vi/tools/text/jwt-decode`, `/ja/categories/security`, or `/en/faq`,
+**I want** to see a localized 404 Bento Hub inside `AppShell` tailored to the missing context (Tool, Category, or General) with accurate "Did you mean?" fuzzy suggestions and category tools,
+**So that** I reach the right utility in one click without losing my selected language or hitting a dead-end error screen.
+
+### Acceptance Criteria
+- **Given** a visitor opens `/vi/tools/text/jwt-decode` or `/vi/tools/text`,
+- **Then** HTTP `404` is returned with `vi` UI inside `AppShell`, displaying the sanitized path (stripping any `?state=...`), suggesting `JWT Decoder` under "Did you mean?", and listing tools in `Xử lý Văn bản`.
+- **Given** a visitor opens `/en/categories/security` or `/en/faq`,
+- **Then** HTTP `404` is returned with `7` category cards (for Category 404) or closest matches like `Help & FAQ` (for General 404), never surfacing `/admin/feedback`.
+
+---
+
+## `US-26`: Inline Search, `⌘K` Quick Jump & Broken Link Reporting from 404 (`FR-44`, `NFR-23`)
+**As** a visitor landing on a 404 page on desktop or mobile (`375px`),
+**I want** to search tools inline, open the global `CommandPalette` (`⌘K`), or click "Report Broken Link" to open `FeedbackModal`,
+**So that** I can recover immediately or alert maintainers safely without exposing URL query payloads.
+
+### Acceptance Criteria
+- **Given** the user is on any localized 404 page,
+- **When** clicking **Command Palette** (`⌘K`), `CommandPalette` opens; when clicking **Report Broken Link**, `FeedbackModal` opens with `type="bug"`, `toolId="general"`, and sanitized `Broken link (404): <cleanPath>` title.
+
+---
+
+## `US-27`: Minimalist Monochrome Root 404 for Non-Locale & Extension URLs (`FR-41`, `NFR-22`, `NFR-24`)
+**As** a visitor or crawler requesting a legacy `.html`/`.php` URL or invalid locale bypassed by `src/proxy.ts`,
+**I want** a clean Monochrome Zinc Glass 404 page with `<BrandLogo />`, `noindex, nofollow`, and quick links to all 4 language hubs,
+**So that** every broken URL looks cohesive without breaking `AppShell` or creating duplicate `<html>` tags on valid locale pages.
+
+

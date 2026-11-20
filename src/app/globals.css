@@ -1117,3 +1117,228 @@ kbd,
   }
 }
 
+/* Contextual 404 Recovery Hub & Root Fallback (UNIT-23) */
+.notfound-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.notfound-hero-card {
+  gap: 0.9rem;
+}
+
+.notfound-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notfound-description {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 66ch;
+}
+
+.notfound-path-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.notfound-path-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.notfound-path-pill {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.notfound-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.notfound-search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+}
+
+.notfound-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.notfound-search-input {
+  padding-left: 2.4rem;
+}
+
+.notfound-inline-results {
+  margin-top: 0.25rem;
+}
+
+.notfound-empty-search {
+  padding: 1rem 1.15rem;
+}
+
+.notfound-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.notfound-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.notfound-suggestion-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  height: 100%;
+  min-width: 0;
+}
+
+.notfound-suggestion-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.notfound-suggestion-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.notfound-suggestion-sub {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.notfound-quick-pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  padding-top: 0.25rem;
+}
+
+.notfound-quick-pages-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.notfound-quick-pages-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.root-notfound-viewport {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+
+.root-notfound-card {
+  width: 100%;
+  max-width: 640px;
+  border-radius: var(--radius-xl);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.root-notfound-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.root-notfound-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.root-notfound-brand-name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.root-notfound-brand-sub {
+  font-size: 0.74rem;
+}
+
+.root-notfound-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.root-notfound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.root-notfound-locales {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.root-notfound-locale-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+@media (max-width: 640px) {
+  .notfound-actions-row .btn,
+  .root-notfound-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .root-notfound-card {
+    padding: 1.25rem;
+  }
+}
+
+

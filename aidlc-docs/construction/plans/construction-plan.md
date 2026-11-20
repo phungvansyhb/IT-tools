@@ -193,3 +193,41 @@
 - [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline, i18n, Feedback, Diagnostics, Brand Asset, `resolveSiteConfig()`, `shouldBypassLocaleProxy()`, `164`-URL sitemap, `pages` 4-locale parity, and Info Page HTML/JSON-LD assertions
 - [x] `npm run build` statically generates all routes cleanly (`178` static routes + 3 dynamic speedtest routes)
 
+---
+
+### [x] `UNIT-22`: Next.js 16 Docs Verification, Pure 404 Suggestion Engine, 4-Locale `notFound` Dictionaries & SEO Metadata
+- **Files**: `src/lib/not-found/{suggestions.ts,index.ts}`, `src/i18n/types.ts`, `src/i18n/locales/{en,vi,ja,zh}/common.ts`, `src/lib/seo.ts`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `analyzeNotFoundPath(rawPath: string): AnalyzedNotFoundPath` (strips `?query`/`#hash`, classifies `tool` | `category` | `general`, extracts tokens & valid `categorySlugCandidate`)
+  - `findNotFoundSuggestions(rawPath: string, locale: Locale, limit?: number): NotFoundSuggestion[]` (fuzzy Levenshtein + token/prefix/category boost + aliases across 28 tools, 7 categories, 5 info pages; strictly excludes `/admin` and `/api`)
+  - `getNotFoundFallbackData(locale: Locale, analyzed: AnalyzedNotFoundPath)`
+  - `buildNotFoundMetadata(locale: Locale, context?: NotFoundContext): Metadata` (`robots: { index: false, follow: false, nocache: true }`, `metadataBase`)
+  - Expanded `CommonDictionary['notFound']` with 100% 4-locale parity
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-23`: `NotFoundHub` & `RootNotFoundView` UI, Shell/Feedback Integration & Monochrome CSS
+- **Files**: `src/components/layout/{AppShell.tsx,CommandPalette.tsx}`, `src/hooks/useFeedback.tsx`, `src/components/feedback/FeedbackModal.tsx`, `src/components/not-found/{NotFoundHub.tsx,RootNotFoundView.tsx}`, `src/app/globals.css`
+- **Key Interfaces / Contracts**:
+  - `OPEN_COMMAND_PALETTE_EVENT = 'omnidev:open-command-palette'` (`CustomEvent<{ query?: string }>`) handled in `AppShell.tsx` & forwarded to `CommandPalette.tsx`
+  - `OpenFeedbackModalOptions.defaultTitle?: string` sanitized via `sanitizePathname()` and capped at `TITLE_MAX` (`140`)
+  - `NotFoundHub({ contextOverride?: NotFoundContext })` (hydration-safe `usePathname()`, inline search, "Did you mean?", contextual Tool/Category/General recovery grids, `⌘K`, Broken Link Report)
+  - `RootNotFoundView` (`<BrandLogo />`, client Dark/Light `localStorage` theme sync, sanitized path, 4-locale links, Back to Hub)
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-24`: App Router 404 Routes (`global-not-found`, `[...rest]`, Segment Boundaries), Metadata `noindex` Guards & Full Verification
+- **Files**: `next.config.ts` *(if required)*, `src/app/global-not-found.tsx`, `src/app/[locale]/not-found.tsx`, `src/app/[locale]/[...rest]/page.tsx`, `src/app/[locale]/categories/[category]/{not-found.tsx,page.tsx}`, `src/app/[locale]/tools/[category]/[slug]/{not-found.tsx,page.tsx}`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `src/app/global-not-found.tsx` owning standalone `<html><body>` for bypassed extension/non-locale 404s without duplicating `<html>` on `[locale]` routes
+  - Segment-level `not-found.tsx` boundaries (`[locale]`, `categories/[category]`, `tools/[category]/[slug]`) + `[locale]/[...rest]/page.tsx` calling `notFound()`
+  - Missing-resource `generateMetadata()` returning `buildNotFoundMetadata()` (`noindex, nofollow`)
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` + HTTP `404` smoke checks
+
+---
+
+## Pending / Active Verification Checklist (Contextual 404 Cycle)
+- [x] `npm run lint` passes with 0 errors
+- [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline + 404 pure engine (`analyzeNotFoundPath`, `findNotFoundSuggestions`, `/admin` exclusion, `?state=` stripping), `buildNotFoundMetadata()`, 4-locale `notFound` parity, `164`-URL sitemap, and single-`<html>` assertions
+- [x] `npm run build` succeeds cleanly with zero nested `<html>` tags
+- [x] HTTP `404` + `noindex` smoke checks pass for localized catch-all (`/[locale]/missing`), contextual tool/category 404, and extension fallback (`/old-page.html`)
+
+
