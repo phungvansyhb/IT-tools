@@ -11,6 +11,8 @@ import {
 import { buildNotFoundMetadata, buildToolJsonLd, buildToolMetadata } from '@/lib/seo';
 import { ToolWorkspace } from '@/components/tools/ToolWorkspace';
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.flatMap((locale) =>
     TOOLS.map((tool) => ({

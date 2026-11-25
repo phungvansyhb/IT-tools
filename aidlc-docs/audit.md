@@ -169,3 +169,19 @@
   - `package.json`, `package-lock.json`, `next.config.ts`, `eslint.config.mjs`, `.gitignore`.
   - `aidlc-docs/operations/release-and-packaging.md`, `aidlc-docs/audit.md`.
 - **Verification & Gate Status**: `npm run cf:build` (`opennextjs-cloudflare build` -> `.open-next/worker.js` + `178/178` static pages), `OPEN_NEXT_DEPLOY=true npx wrangler deploy --dry-run` (`tien-ich` + `WORKER_SELF_REFERENCE (tien-ich)`), `npm run lint`, and `npx tsx scripts/verify-aidlc.ts` (all 11 suites) passed with exit code 0.
+
+## [2026-11-25T07:28:00Z] — Prompt 11: Migrate Deployment Target to Cloudflare Pages (Static Export `out/` + Pages Functions)
+- **Phase / Stage**: `OPERATIONS / Release & Packaging (Cloudflare Pages Migration)`
+- **User Input**: `"chuyển sang Cloudflare Pages giúp tô"`
+- **Clarifications / Decisions**:
+  - Removed `@opennextjs/cloudflare`, `wrangler`, `wrangler.jsonc`, `open-next.config.ts`, `src/proxy.ts`, `src/app/[locale]/[...rest]/page.tsx`, and `src/app/api/speedtest/*` to run cleanly on **Cloudflare Pages** (free unlimited static bandwidth, zero 3 MiB Worker bundle limit).
+  - Configured Next.js `output: 'export'` + `images: { unoptimized: true }` in `next.config.ts` and `export const dynamic = 'force-static'` on all 6 metadata routes (`sitemap.ts`, `robots.ts`, `manifest.ts`, `apple-icon.tsx`, `opengraph-image.tsx`, `twitter-image.tsx`) plus `dynamicParams = false` on dynamic route pages.
+  - Added static root locale router `public/index.html`, legacy unprefixed path redirects `public/_redirects`, Cloudflare Pages security/cache/PNG MIME headers `public/_headers`, and Web Standard Cloudflare Pages Functions in `functions/api/speedtest/{ping,download,upload}.ts`.
+- **Artifacts & Code Updated**:
+  - `next.config.ts`, `package.json`, `package-lock.json` (removed 260 OpenNext/Wrangler packages).
+  - `public/index.html` *(new)*, `public/_redirects` *(new)*, `public/_headers` *(updated)*.
+  - `functions/api/speedtest/{ping,download,upload}.ts` *(new)*.
+  - `src/app/{sitemap,robots,manifest}.ts`, `src/app/{apple-icon,opengraph-image,twitter-image}.tsx`, `src/app/[locale]/categories/[category]/page.tsx`, `src/app/[locale]/tools/[category]/[slug]/page.tsx`.
+  - Removed: `wrangler.jsonc`, `open-next.config.ts`, `src/proxy.ts`, `src/app/[locale]/[...rest]/page.tsx`, `src/app/api/speedtest/*`.
+  - `scripts/verify-aidlc.ts`, `aidlc-docs/operations/release-and-packaging.md`, `aidlc-docs/audit.md`.
+- **Verification & Gate Status**: `npm run lint`, `npm run build` (`178/178` static pages exported cleanly into `out/` including `index.html`, `404.html`, `en/vi/ja/zh.html`, `sitemap.xml`, `robots.txt`, `_headers`, `_redirects`), and `npx tsx scripts/verify-aidlc.ts` (all 11 suites) passed with exit code 0.

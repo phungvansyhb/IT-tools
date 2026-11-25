@@ -1,11 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
-import {
-  SPEED_TEST_MAX_UPLOAD_BYTES,
-  validateSameOriginHeaders,
-} from '@/lib/tools/engines/diagnostics';
-
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+const SPEED_TEST_MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // 4 MiB
 
 const NO_CACHE_HEADERS = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, no-transform',
@@ -13,30 +6,52 @@ const NO_CACHE_HEADERS = {
   'CDN-Cache-Control': 'no-store',
 } as const;
 
-export async function POST(request: NextRequest) {
+interface PagesFunctionContext {
+  request: Request;
+}
+
+function validateSameOriginHeaders(origin: string | null, host: string | null): boolean {
+  if (!origin) return true;
+  if (!host) return false;
+  try {
+    const parsed = new URL(origin);
+    return parsed.host.toLowerCase() === host.trim().toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
+function jsonResponse(body: Record<string, unknown>, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      ...NO_CACHE_HEADERS,
+    },
+  });
+}
+
+export async function onRequestPost({ request }: PagesFunctionContext): Promise<Response> {
   const isSameOrigin = validateSameOriginHeaders(
     request.headers.get('origin'),
     request.headers.get('host')
   );
 
   if (!isSameOrigin) {
-    return NextResponse.json(
-      { ok: false, error: 'forbidden_origin' },
-      { status: 403, headers: NO_CACHE_HEADERS }
-    );
+    return jsonResponse({ ok: false, error: 'forbidden_origin' }, 403);
   }
 
   const contentLengthHeader = request.headers.get('content-length');
   if (contentLengthHeader !== null) {
     const declaredLength = Number(contentLengthHeader);
     if (Number.isFinite(declaredLength) && declaredLength > SPEED_TEST_MAX_UPLOAD_BYTES) {
-      return NextResponse.json(
+      return jsonResponse(
         {
           ok: false,
           error: 'payload_too_large',
           maxBytes: SPEED_TEST_MAX_UPLOAD_BYTES,
         },
-        { status: 413, headers: NO_CACHE_HEADERS }
+        413
       );
     }
   }
@@ -54,13 +69,13 @@ export async function POST(request: NextRequest) {
           receivedBytes += value.byteLength;
           if (receivedBytes > SPEED_TEST_MAX_UPLOAD_BYTES) {
             await reader.cancel();
-            return NextResponse.json(
+            return jsonResponse(
               {
                 ok: false,
                 error: 'payload_too_large',
                 maxBytes: SPEED_TEST_MAX_UPLOAD_BYTES,
               },
-              { status: 413, headers: NO_CACHE_HEADERS }
+              413
             );
           }
         }
@@ -72,12 +87,12 @@ export async function POST(request: NextRequest) {
 
   const serverDurationMs = Math.max(0, Date.now() - startMs);
 
-  return NextResponse.json(
+  return jsonResponse(
     {
       ok: true,
       receivedBytes,
       serverDurationMs,
     },
-    { status: 200, headers: NO_CACHE_HEADERS }
+    200
   );
 }

@@ -1094,7 +1094,6 @@ async function runVerification() {
   const requiredNotFoundFiles = [
     'src/app/global-not-found.tsx',
     'src/app/[locale]/not-found.tsx',
-    'src/app/[locale]/[...rest]/page.tsx',
     'src/app/[locale]/categories/[category]/not-found.tsx',
     'src/app/[locale]/tools/[category]/[slug]/not-found.tsx',
   ];
@@ -1109,7 +1108,7 @@ async function runVerification() {
 
   console.log('   ✓ Pure 404 suggestion engine, sanitization, /admin & /api exclusion, fallback data, route boundaries, and noindex metadata validated.');
 
-  console.log('11. Verifying Pure Cloudflare Telemetry Core, Vercel Cleanup, Proxy Matcher & Robots Bypass...');
+  console.log('11. Verifying Pure Cloudflare Telemetry Core, Static Export & Cloudflare Pages Functions...');
   const pkgJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8')) as {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
@@ -1214,14 +1213,30 @@ async function runVerification() {
     '/vi/tools/text/jwt-decoder'
   );
 
-  // Proxy bypass + src/proxy.ts matcher + robots() /cdn-cgi/* guard
+  // Static export & Cloudflare Pages files + robots() /cdn-cgi/* guard
   assert.equal(shouldBypassLocaleProxy('/cdn-cgi/rum'), true);
   assert.equal(shouldBypassLocaleProxy('/cdn-cgi'), true);
   assert.equal(shouldBypassLocaleProxy('/cdn-cgi/scripts/test.js'), true);
 
-  const proxySource = fs.readFileSync(path.join(process.cwd(), 'src/proxy.ts'), 'utf8');
-  assert.ok(proxySource.includes('cdn-cgi'), 'Expected src/proxy.ts matcher to exclude cdn-cgi');
-  assert.equal(proxySource.includes('_vercel'), false, 'Expected src/proxy.ts not to contain _vercel');
+  const nextConfigSource = fs.readFileSync(path.join(process.cwd(), 'next.config.ts'), 'utf8');
+  assert.ok(nextConfigSource.includes("output: 'export'"), "Expected next.config.ts to configure output: 'export'");
+  assert.equal(fs.existsSync(path.join(process.cwd(), 'src/proxy.ts')), false, 'src/proxy.ts must be absent in static export mode');
+  for (const cfFile of [
+    'public/index.html',
+    'public/_headers',
+    'public/_redirects',
+    'functions/api/speedtest/ping.ts',
+    'functions/api/speedtest/download.ts',
+    'functions/api/speedtest/upload.ts',
+  ]) {
+    assert.ok(fs.existsSync(path.join(process.cwd(), cfFile)), `Missing Cloudflare Pages file: ${cfFile}`);
+  }
+  const outDir = path.join(process.cwd(), 'out');
+  if (fs.existsSync(outDir)) {
+    for (const outAsset of ['index.html', '404.html', 'en.html', 'vi.html', 'ja.html', 'zh.html', 'sitemap.xml', 'robots.txt', '_headers', '_redirects']) {
+      assert.ok(fs.existsSync(path.join(outDir, outAsset)), `Missing exported static artifact: out/${outAsset}`);
+    }
+  }
   assert.ok(disallowList.includes('/cdn-cgi/*'), 'Expected robots() disallow to include /cdn-cgi/*');
   assert.equal(disallowList.includes('/_vercel/*'), false, 'Expected robots() disallow not to include /_vercel/*');
 

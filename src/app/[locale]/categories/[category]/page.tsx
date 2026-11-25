@@ -15,6 +15,8 @@ import { BentoGrid } from '@/components/bento/BentoGrid';
 import { BentoCard, ToolBentoCard } from '@/components/bento/BentoCard';
 import { ToolIcon } from '@/components/common/ToolIcon';
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.flatMap((locale) =>
     CATEGORIES.map((cat) => ({ locale, category: cat.slug }))

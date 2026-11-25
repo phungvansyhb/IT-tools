@@ -4,6 +4,8 @@ import { INFO_PAGES } from '@/lib/info/pages';
 import { getSiteUrl } from '@/lib/seo';
 import { DEFAULT_LOCALE, LOCALE_META, SUPPORTED_LOCALES, localePath } from '@/i18n/config';
 
+export const dynamic = 'force-static';
+
 function buildAlternates(path: string) {
   const base = getSiteUrl();
   const languages: Record<string, string> = {};

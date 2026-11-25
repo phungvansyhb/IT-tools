@@ -1,4 +1,21 @@
-# https://developers.cloudflare.com/workers/static-assets/headers
-# https://opennext.js.org/cloudflare/caching#static-assets-caching
+# Cloudflare Pages response headers
+# https://developers.cloudflare.com/pages/configuration/headers/
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
+
+/apple-icon
+  Content-Type: image/png
+  Cache-Control: public,max-age=86400
+
+/opengraph-image
+  Content-Type: image/png
+  Cache-Control: public,max-age=86400
+
+/twitter-image
+  Content-Type: image/png
+  Cache-Control: public,max-age=86400

@@ -1,0 +1,10 @@
+# Cloudflare Pages legacy unprefixed path redirects
+# https://developers.cloudflare.com/pages/configuration/redirects/
+/categories/* /en/categories/:splat 307
+/tools/* /en/tools/:splat 307
+/about /en/about 307
+/help /en/help 307
+/privacy /en/privacy 307
+/terms /en/terms 307
+/contact /en/contact 307
+/admin/feedback /en/admin/feedback 307

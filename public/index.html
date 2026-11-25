@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OmniDev / IT-Tools Hub</title>
+    <meta name="robots" content="noindex, follow" />
+    <meta http-equiv="refresh" content="0; url=/en" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #09090b;
+        color: #f4f4f5;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      nav {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+      a {
+        color: #10b981;
+        text-decoration: none;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid #27272a;
+        border-radius: 0.5rem;
+      }
+    </style>
+    <script>
+      (function () {
+        var SUPPORTED = ['en', 'vi', 'ja', 'zh'];
+        function normalize(val) {
+          if (!val) return null;
+          var primary = String(val).trim().toLowerCase().split(/[-_]/)[0];
+          return SUPPORTED.indexOf(primary) !== -1 ? primary : null;
+        }
+        var target = null;
+        try {
+          target = normalize(window.localStorage.getItem('omnidev_locale'));
+        } catch (_) {}
+        if (!target && document.cookie) {
+          var match = document.cookie.match(/(?:^|;\s*)omnidev_locale=([^;]+)/);
+          if (match) target = normalize(decodeURIComponent(match[1]));
+        }
+        if (!target && navigator) {
+          var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+          for (var i = 0; i < langs.length; i++) {
+            var found = normalize(langs[i]);
+            if (found) {
+              target = found;
+              break;
+            }
+          }
+        }
+        var search = window.location.search || '';
+        var hash = window.location.hash || '';
+        window.location.replace('/' + (target || 'en') + search + hash);
+      })();
+    </script>
+  </head>
+  <body>
+    <main style="text-align: center; padding: 1.5rem">
+      <p>Redirecting to OmniDev IT-Tools Hub…</p>
+      <noscript>
+        <nav aria-label="Choose language">
+          <a href="/en">English</a>
+          <a href="/vi">Tiếng Việt</a>
+          <a href="/ja">日本語</a>
+          <a href="/zh">简体中文</a>
+        </nav>
+      </noscript>
+    </main>
+  </body>
+</html>
