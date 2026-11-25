@@ -4,7 +4,7 @@ export const enPages: PagesDictionary = {
   shared: {
     breadcrumbHome: 'Home',
     lastUpdatedLabel: 'Last updated',
-    lastUpdatedDate: '2026-11-19',
+    lastUpdatedDate: '2026-11-25',
     exploreToolsHeading: 'Explore Tool Suites',
     relatedPagesHeading: 'More Information & Policies',
     openFeedbackBtn: 'Send Feedback',
@@ -133,22 +133,22 @@ export const enPages: PagesDictionary = {
   privacy: {
     navLabel: 'Privacy Policy',
     title: 'Privacy Policy',
-    metaTitle: 'Privacy Policy — Local Storage, Cookies & Optional Supabase | OmniDev IT-Tools',
+    metaTitle: 'Privacy Policy — Local Execution, Cookies & Cloudflare Web Analytics | OmniDev IT-Tools',
     metaDescription:
-      'Transparent privacy policy for OmniDev IT-Tools: zero third-party analytics, localStorage & sessionStorage usage, strictly necessary omnidev_locale cookie, and optional Supabase sync.',
+      'Transparent privacy policy for OmniDev IT-Tools: 100% client-side tool execution, localStorage & sessionStorage usage, omnidev_locale cookie, optional cookieless Cloudflare Web Analytics, and Supabase sync.',
     subtitle:
-      'Complete transparency on what stays in your browser memory, what is saved in local/session storage, and what is synced only when you opt in.',
+      'Complete transparency on what stays in your browser memory, what is saved locally, and how optional cookieless performance metrics work.',
     keywords: [
       'omnidev privacy policy',
       'client-side privacy',
       'localstorage keys',
       'omnidev_locale cookie',
-      'zero tracking developer tools',
+      'cloudflare web analytics cookieless',
     ],
     sections: [
       {
-        heading: 'Zero Payload Tracking & Client-Side Execution',
-        body: 'OmniDev does not embed third-party ad trackers, behavioral analytics scripts, or telemetry beacons. Inputs pasted into tools (JWT tokens, hashes, regexes, images, JSON/YAML/CSV files, microphone streams) remain inside your local browser runtime.',
+        heading: '100% Client-Side Tool Execution & Zero Payload Tracking',
+        body: 'OmniDev does not embed advertising trackers, cross-site profiling scripts, or payload logging. All 28 tools run inside your local browser runtime—inputs you paste or upload (JWT tokens, hashes, regexes, images, JSON/YAML/CSV files, microphone streams) never leave your device.',
       },
       {
         heading: 'Browser Storage (`localStorage` & `sessionStorage`)',
@@ -161,6 +161,15 @@ export const enPages: PagesDictionary = {
       {
         heading: 'Strictly Necessary Cookie (`omnidev_locale`)',
         body: 'OmniDev sets a single strictly necessary first-party cookie (`omnidev_locale`, `SameSite=Lax`, 1-year expiry) solely to remember your chosen display language (`en`, `vi`, `ja`, `zh`) during SSR/proxy route resolution. No advertising or cross-site tracking cookies are used.',
+      },
+      {
+        heading: 'Optional Cloudflare Web Analytics (Pageviews & Core Web Vitals)',
+        body: 'On hosted deployments where `NEXT_PUBLIC_CF_BEACON_TOKEN` (or Cloudflare Automatic Setup) is configured, OmniDev may load Cloudflare Web Analytics (`static.cloudflareinsights.com/beacon.min.js`) to measure aggregate pageviews and Core Web Vitals (`LCP`, `INP`, `CLS`, `FCP`, `TTFB`). It is disabled by default in local/self-hosted environments.',
+        bullets: [
+          '100% Cookieless & Zero Fingerprinting: Cloudflare Web Analytics does not set cookies, does not read or write `localStorage`, and does not fingerprint IP addresses or User-Agents across sites.',
+          'Sanitized Routes Only: Only aggregate pageview counts and Web Vitals performance metrics are measured—query strings (such as `?state=`) and URL fragments are never used to capture tool inputs.',
+          'Admin & Root Fallback Exclusion: The manual beacon skips `/admin` and `/{locale}/admin/*` routes as well as non-locale root error fallbacks (`global-not-found`).',
+        ],
       },
       {
         heading: 'Optional Supabase Sync, Feedback & Speed Test Endpoints',

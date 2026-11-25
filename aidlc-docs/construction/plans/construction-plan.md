@@ -230,4 +230,42 @@
 - [x] `npm run build` succeeds cleanly with zero nested `<html>` tags
 - [x] HTTP `404` + `noindex` smoke checks pass for localized catch-all (`/[locale]/missing`), contextual tool/category 404, and extension fallback (`/old-page.html`)
 
+---
+
+### [x] `UNIT-25`: Dependency Cleanup, Pure Cloudflare Telemetry Core (`cloudflare.ts`) & `/cdn-cgi/*` Proxy / Robots Bypass
+- **Files**: `package.json`, `package-lock.json`, `.env.example`, `src/lib/telemetry/{cloudflare.ts,index.ts}`, `src/i18n/detect.ts`, `src/proxy.ts`, `src/app/robots.ts`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `CLOUDFLARE_BEACON_SCRIPT_URL = 'https://static.cloudflareinsights.com/beacon.min.js'`
+  - `resolveCloudflareBeaconToken(rawToken?: string | null): string | null`
+  - `buildCloudflareBeaconConfig(token: string, options?: { spa?: boolean }): string | null`
+  - `extractTelemetryPathname(rawUrlOrPath: string): string`
+  - `isTelemetryExcludedPath(rawUrlOrPath: string, routeTemplate?: string | null): boolean`
+  - `sanitizeTelemetryUrl(rawUrl: string): string`
+  - `shouldBypassLocaleProxy('/cdn-cgi/rum') === true` & `src/proxy.ts` matcher excludes `cdn-cgi`
+  - `robots()` includes `'/cdn-cgi/*'` in `disallow`
+  - Zero `@vercel/analytics` or `@vercel/speed-insights` dependencies in `package.json`
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+### [x] `UNIT-26`: `CloudflareAnalytics.tsx` Client Component & Token-Gated Layout Integration
+- **Files**: `src/components/telemetry/CloudflareAnalytics.tsx`, `src/app/[locale]/layout.tsx`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - `CloudflareAnalytics({ token }: { token: string }): React.JSX.Element | null` (`'use client'`, uses `next/script` `strategy="afterInteractive"` inside `<Suspense fallback={null}>`, skips rendering when `isTelemetryExcludedPath(pathname)` is true)
+  - Token-gated render in `LocaleRootLayout` via `resolveCloudflareBeaconToken(process.env.NEXT_PUBLIC_CF_BEACON_TOKEN)`
+  - `src/app/global-not-found.tsx` remains untouched (zero telemetry)
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` (plus SSG sanity build check with `NEXT_PUBLIC_CF_BEACON_TOKEN=0123456789abcdef0123456789abcdef`)
+
+### [x] `UNIT-27`: 4-Locale Privacy & Sidebar Copy (`en`/`vi`/`ja`/`zh`), Operations Docs & Final Verification
+- **Files**: `src/i18n/locales/{en,vi,ja,zh}/common.ts`, `src/i18n/locales/{en,vi,ja,zh}/pages.ts`, `aidlc-docs/operations/release-and-packaging.md`, `scripts/verify-aidlc.ts`
+- **Key Interfaces / Contracts**:
+  - Updated `CommonDictionary['nav']['privacyDesc']` and `PagesDictionary['privacy']` + `shared.lastUpdatedDate` with 100% recursive leaf-key, section-count, bullet-count, and `{{placeholder}}` parity across `en`, `vi`, `ja`, and `zh`
+  - Updated `aidlc-docs/operations/release-and-packaging.md` with Cloudflare Web Analytics setup (`PRE-03`: Manual `NEXT_PUBLIC_CF_BEACON_TOKEN` vs Automatic Setup) & updated route/tool posture
+- **Verification Gate**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build`
+
+---
+
+## Pending / Active Verification Checklist (Cloudflare Web Analytics Cycle)
+- [x] `npm run lint` passes with 0 errors
+- [x] `npx tsx scripts/verify-aidlc.ts` passes all baseline + Cloudflare telemetry core (`resolveCloudflareBeaconToken`, `buildCloudflareBeaconConfig`, `isTelemetryExcludedPath`, `sanitizeTelemetryUrl`), `/cdn-cgi/*` proxy bypass, `robots()` `'/cdn-cgi/*'`, `global-not-found.tsx` exclusion, local built HTML zero-`cloudflareinsights.com` check, and 100% 4-locale `privacy` / `privacyDesc` parity assertions
+- [x] `npm run build` succeeds cleanly (both default local mode and `NEXT_PUBLIC_CF_BEACON_TOKEN=...` SSG sanity check)
+
 

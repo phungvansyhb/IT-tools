@@ -100,6 +100,8 @@ const BYPASS_EXACT_PATHS = new Set([
 export function shouldBypassLocaleProxy(pathname: string): boolean {
   if (
     pathname.startsWith('/_next') ||
+    pathname === '/cdn-cgi' ||
+    pathname.startsWith('/cdn-cgi/') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/icons/')
   ) {

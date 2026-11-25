@@ -364,4 +364,47 @@ The implementation of **OmniDev / IT-Tools Hub** is decomposed into 4 cohesive, 
 - **Dependencies**: `UNIT-22`, `UNIT-23`.
 - **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` + HTTP `404` smoke checks pass cleanly.
 
+---
 
+## Cloudflare Web Analytics & Core Web Vitals Units (`UNIT-25` – `UNIT-27`)
+
+## `UNIT-25`: Dependency Cleanup, Pure Cloudflare Telemetry Core (`cloudflare.ts`) & `/cdn-cgi/*` Proxy / Robots Bypass
+- **Scope**:
+  - Remove unused `@vercel/analytics` and `@vercel/speed-insights` packages (`npm uninstall`) and delete `src/lib/telemetry/vercel.ts` / `src/components/telemetry/VercelTelemetry.tsx` if present.
+  - Create pure Node-testable `src/lib/telemetry/cloudflare.ts` (`CLOUDFLARE_BEACON_SCRIPT_URL`, `resolveCloudflareBeaconToken`, `buildCloudflareBeaconConfig`, `extractTelemetryPathname`, `isTelemetryExcludedPath`, `sanitizeTelemetryUrl`) and `src/lib/telemetry/index.ts`.
+  - Update `shouldBypassLocaleProxy()` in `src/i18n/detect.ts` (`/cdn-cgi`), `config.matcher` in `src/proxy.ts` (`cdn-cgi`), `disallow` in `src/app/robots.ts` (`'/cdn-cgi/*'`), and document `NEXT_PUBLIC_CF_BEACON_TOKEN=` in `.env.example`.
+  - Update `scripts/verify-aidlc.ts` with pure Cloudflare token/config/path exclusion/sanitization assertions, `/cdn-cgi/*` proxy-bypass assertions, `src/proxy.ts` matcher assertion, `robots()` `'/cdn-cgi/*'` assertion, and absence of `@vercel/analytics`/`@vercel/speed-insights` in `package.json`.
+- **Target Files**:
+  - `package.json`, `package-lock.json`, `.env.example`
+  - `src/lib/telemetry/cloudflare.ts` *(new)*, `src/lib/telemetry/index.ts` *(updated)*
+  - `src/i18n/detect.ts`, `src/proxy.ts`, `src/app/robots.ts`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-18`, `UNIT-14`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly.
+
+---
+
+## `UNIT-26`: `CloudflareAnalytics.tsx` Client Component & Token-Gated Layout Integration
+- **Scope**:
+  - Create `'use client'` `src/components/telemetry/CloudflareAnalytics.tsx` wrapping `next/script` (`id="cloudflare-web-analytics"`, `src={CLOUDFLARE_BEACON_SCRIPT_URL}`, `strategy="afterInteractive"`, `defer`, `data-cf-beacon={config}`) inside `<Suspense fallback={null}>`, skipping rendering whenever `isTelemetryExcludedPath(pathname)` is true (`/admin`, `/[locale]/admin/*`) or `config` is `null`.
+  - Update Server Component `src/app/[locale]/layout.tsx` to resolve `cfBeaconToken = resolveCloudflareBeaconToken(process.env.NEXT_PUBLIC_CF_BEACON_TOKEN)` and conditionally render `{cfBeaconToken && <CloudflareAnalytics token={cfBeaconToken} />}` inside `<body>`.
+  - Leave `src/app/global-not-found.tsx` completely untouched (zero telemetry).
+  - Extend `scripts/verify-aidlc.ts` to assert `global-not-found.tsx` excludes Cloudflare telemetry, `CloudflareAnalytics.tsx` uses `next/script`, `isTelemetryExcludedPath`, and `buildCloudflareBeaconConfig`, `[locale]/layout.tsx` gates rendering with `resolveCloudflareBeaconToken`, and default local built HTML (`en.html`) injects zero `cloudflareinsights.com` scripts.
+- **Target Files**:
+  - `src/components/telemetry/CloudflareAnalytics.tsx` *(new)*
+  - `src/app/[locale]/layout.tsx`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-25`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes cleanly (plus SSG sanity build check with `NEXT_PUBLIC_CF_BEACON_TOKEN=0123456789abcdef0123456789abcdef`).
+
+---
+
+## `UNIT-27`: 4-Locale Privacy & Sidebar Copy (`en`/`vi`/`ja`/`zh`), Operations Docs & Final Verification
+- **Scope**:
+  - Update `nav.privacyDesc` in `src/i18n/locales/{en,vi,ja,zh}/common.ts` and `shared.lastUpdatedDate` + `privacy` (`metaDescription`, `keywords`, `sections`) in `src/i18n/locales/{en,vi,ja,zh}/pages.ts` with 100% recursive leaf-key, section-count, bullet-count, and `{{placeholder}}` parity across all 4 locales.
+  - Update `aidlc-docs/operations/release-and-packaging.md` with Cloudflare Web Analytics deployment guide (Manual `NEXT_PUBLIC_CF_BEACON_TOKEN` vs Automatic Setup, avoiding duplicate injection, `/admin` Rules exclusion) and updated `28 tools / 7 categories / 164 sitemap URLs` posture.
+  - Extend `scripts/verify-aidlc.ts` to assert updated `privacyDesc` and `pages.privacy` accurately disclose cookieless Cloudflare Web Analytics (Pageviews & Core Web Vitals) across all 4 locales alongside full 4-locale leaf-key parity.
+- **Target Files**:
+  - `src/i18n/locales/{en,vi,ja,zh}/common.ts`
+  - `src/i18n/locales/{en,vi,ja,zh}/pages.ts`
+  - `aidlc-docs/operations/release-and-packaging.md`, `scripts/verify-aidlc.ts`
+- **Dependencies**: `UNIT-25`, `UNIT-26`.
+- **Verification Criteria**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` passes with 0 errors across all routes.

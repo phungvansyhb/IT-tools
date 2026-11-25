@@ -4,7 +4,7 @@ export const viPages: PagesDictionary = {
   shared: {
     breadcrumbHome: 'Trang chủ',
     lastUpdatedLabel: 'Cập nhật lần cuối',
-    lastUpdatedDate: '2026-11-19',
+    lastUpdatedDate: '2026-11-25',
     exploreToolsHeading: 'Khám phá Bộ công cụ',
     relatedPagesHeading: 'Thông tin & Chính sách khác',
     openFeedbackBtn: 'Gửi góp ý',
@@ -133,22 +133,22 @@ export const viPages: PagesDictionary = {
   privacy: {
     navLabel: 'Quyền riêng tư',
     title: 'Chính sách Quyền riêng tư',
-    metaTitle: 'Chính sách Quyền riêng tư — Lưu trữ Cục bộ, Cookie & Supabase | OmniDev IT-Tools',
+    metaTitle: 'Chính sách Quyền riêng tư — Xử lý Cục bộ, Cookie & Cloudflare Web Analytics | OmniDev IT-Tools',
     metaDescription:
-      'Chính sách minh bạch của OmniDev IT-Tools: không theo dõi bên thứ ba, danh sách khóa localStorage & sessionStorage, cookie thiết yếu omnidev_locale và đồng bộ Supabase tùy chọn.',
+      'Chính sách minh bạch của OmniDev IT-Tools: 28 công cụ xử lý 100% phía client, khóa localStorage & sessionStorage, cookie thiết yếu omnidev_locale, Cloudflare Web Analytics không cookie tùy chọn và Supabase.',
     subtitle:
-      'Minh bạch hoàn toàn về những gì chỉ nằm trong bộ nhớ trình duyệt, những gì lưu cục bộ/theo phiên và những gì chỉ đồng bộ khi bạn chọn.',
+      'Minh bạch hoàn toàn về dữ liệu chỉ nằm trong bộ nhớ trình duyệt, dữ liệu lưu cục bộ và cách hoạt động của thống kê hiệu năng không cookie tùy chọn.',
     keywords: [
       'chính sách quyền riêng tư omnidev',
       'bảo mật phía client',
       'khóa localstorage',
       'cookie omnidev_locale',
-      'công cụ không theo dõi',
+      'cloudflare web analytics không cookie',
     ],
     sections: [
       {
-        heading: 'Không Theo dõi Dữ liệu & Thực thi Phía Client',
-        body: 'OmniDev không nhúng trình theo dõi quảng cáo bên thứ ba, mã phân tích hành vi hay beacon thu thập dữ liệu. Dữ liệu bạn dán vào công cụ (JWT, mã băm, regex, ảnh, tệp JSON/YAML/CSV, luồng micro) đều nằm lại trong môi trường trình duyệt cục bộ.',
+        heading: '100% Thực thi Phía Client & Không Theo dõi Payload',
+        body: 'OmniDev không nhúng trình theo dõi quảng cáo, mã định danh liên trang hay ghi nhật ký payload. Toàn bộ 28 công cụ chạy trong môi trường trình duyệt cục bộ — dữ liệu bạn dán hoặc tải lên (JWT, mã băm, regex, ảnh, tệp JSON/YAML/CSV, luồng micro) không bao giờ rời khỏi thiết bị.',
       },
       {
         heading: 'Bộ nhớ Trình duyệt (`localStorage` & `sessionStorage`)',
@@ -161,6 +161,15 @@ export const viPages: PagesDictionary = {
       {
         heading: 'Cookie Thiết yếu Duy nhất (`omnidev_locale`)',
         body: 'OmniDev chỉ đặt một cookie bên thứ nhất thiết yếu (`omnidev_locale`, `SameSite=Lax`, thời hạn 1 năm) để ghi nhớ ngôn ngữ hiển thị (`en`, `vi`, `ja`, `zh`) khi SSR/proxy điều hướng. Tuyệt đối không dùng cookie quảng cáo hay theo dõi liên trang.',
+      },
+      {
+        heading: 'Tùy chọn Cloudflare Web Analytics (Pageviews & Core Web Vitals)',
+        body: 'Trên môi trường triển khai có cấu hình `NEXT_PUBLIC_CF_BEACON_TOKEN` (hoặc Cloudflare Automatic Setup), OmniDev có thể nạp Cloudflare Web Analytics (`static.cloudflareinsights.com/beacon.min.js`) để đo lượt xem trang tổng hợp và chỉ số Core Web Vitals (`LCP`, `INP`, `CLS`, `FCP`, `TTFB`). Tính năng này mặc định tắt hoàn toàn khi chạy local hoặc tự lưu trữ.',
+        bullets: [
+          '100% Không Cookie & Không Fingerprint: Cloudflare Web Analytics không đặt cookie, không đọc/ghi `localStorage` và không tạo dấu vân tay IP hay User-Agent để theo dõi chéo trang.',
+          'Chỉ Đo Đường dẫn Sạch: Chỉ thu thập số lượt xem tổng hợp và chỉ số hiệu năng Web Vitals — chuỗi truy vấn (`?state=`) và mảnh `#hash` không được dùng để thu thập nội dung nhập vào công cụ.',
+          'Loại trừ Admin & Trang lỗi Gốc: Beacon thủ công bỏ qua các route `/admin`, `/{locale}/admin/*` cũng như trang lỗi gốc ngoài locale (`global-not-found`).',
+        ],
       },
       {
         heading: 'Đồng bộ Supabase Tùy chọn, Góp ý & Speed Test',

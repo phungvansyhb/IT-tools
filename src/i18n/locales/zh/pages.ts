@@ -4,7 +4,7 @@ export const zhPages: PagesDictionary = {
   shared: {
     breadcrumbHome: '首页',
     lastUpdatedLabel: '最后更新',
-    lastUpdatedDate: '2026-11-19',
+    lastUpdatedDate: '2026-11-25',
     exploreToolsHeading: '探索工具套件',
     relatedPagesHeading: '更多信息与政策',
     openFeedbackBtn: '发送反馈',
@@ -133,22 +133,22 @@ export const zhPages: PagesDictionary = {
   privacy: {
     navLabel: '隐私政策',
     title: '隐私政策',
-    metaTitle: '隐私政策 — 本地存储、Cookie 与可选 Supabase 同步 | OmniDev IT-Tools',
+    metaTitle: '隐私政策 — 本地执行、Cookie 与 Cloudflare Web Analytics | OmniDev IT-Tools',
     metaDescription:
-      'OmniDev IT-Tools 透明隐私声明：零第三方追踪、localStorage 与 sessionStorage 存储清单、必要 Cookie omnidev_locale 及可选 Supabase 同步机制。',
+      'OmniDev IT-Tools 透明隐私声明：28 款工具 100% 客户端运行、localStorage 与 sessionStorage 存储清单、必要 Cookie omnidev_locale、可选无 Cookie Cloudflare Web Analytics 及 Supabase 同步。',
     subtitle:
-      '清晰说明哪些数据仅留在浏览器内存中、哪些保存在本地/会话存储中，以及哪些仅在您主动启用时同步。',
+      '清晰说明哪些数据仅留在浏览器内存中、哪些保存在本地存储中，以及可选的无 Cookie 性能统计如何工作。',
     keywords: [
       'omnidev 隐私政策',
       '客户端隐私',
       'localstorage 键名',
       'omnidev_locale cookie',
-      '零追踪开发者工具',
+      'cloudflare web analytics 无 cookie',
     ],
     sections: [
       {
-        heading: '零载荷追踪与客户端本地执行',
-        body: 'OmniDev 不嵌入任何第三方广告追踪器、行为分析脚本或遥测信标。您在工具中输入的内容（JWT 令牌、哈希、正则、图片、JSON/YAML/CSV 文件、麦克风音频）均保留在本地浏览器运行时中。',
+        heading: '100% 客户端本地执行与零载荷追踪',
+        body: 'OmniDev 不嵌入广告追踪器、跨站画像脚本或载荷上传日志。全部 28 款工具均在您的本地浏览器运行时中执行——您粘贴或加载的内容（JWT 令牌、哈希、正则、图片、JSON/YAML/CSV 文件、麦克风音频）绝不会离开您的设备。',
       },
       {
         heading: '浏览器存储（`localStorage` 与 `sessionStorage`）',
@@ -161,6 +161,15 @@ export const zhPages: PagesDictionary = {
       {
         heading: '唯一严格必要的 Cookie（`omnidev_locale`）',
         body: 'OmniDev 仅写入一个严格必要的第一方 Cookie（`omnidev_locale`，`SameSite=Lax`，有效期 1 年），用于在 SSR 与代理路由解析时记住您选择的显示语言（`en`、`vi`、`ja`、`zh`）。绝不使用任何广告或跨站追踪 Cookie。',
+      },
+      {
+        heading: '可选 Cloudflare Web Analytics（页面浏览量与 Core Web Vitals）',
+        body: '在配置了 `NEXT_PUBLIC_CF_BEACON_TOKEN`（或启用 Cloudflare Automatic Setup）的托管部署环境中，OmniDev 可能会加载 Cloudflare Web Analytics（`static.cloudflareinsights.com/beacon.min.js`）以统计汇总页面浏览量及 Core Web Vitals 性能指标（`LCP`、`INP`、`CLS`、`FCP`、`TTFB`）。在本地开发或未配置的自托管实例中默认完全关闭。',
+        bullets: [
+          '100% 无 Cookie 与零指纹追踪：Cloudflare Web Analytics 不设置任何 Cookie，不读写 `localStorage`，也不通过 IP 或 User-Agent 进行跨站指纹追踪。',
+          '仅统计脱敏路径：仅采集汇总的页面访问次数与 Web Vitals 性能指标，绝不会读取 `?state=` 等查询参数或哈希片段中的工具输入数据。',
+          '排除管理后台与根级兜底错误页：手动信标脚本会自动跳过 `/admin` 与 `/{locale}/admin/*` 路由，以及非语言前缀的根级 404 兜底页面（`global-not-found`）。',
+        ],
       },
       {
         heading: '可选 Supabase 同步、反馈与测速接口',

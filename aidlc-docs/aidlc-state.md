@@ -3,25 +3,26 @@
 ## Project Metadata
 - **Project Name**: OmniDev / IT-Tools Hub — Privacy-First Developer & Utility Tools Hub
 - **Project Type**: Brownfield (`Next.js 16.4.6 App Router + TypeScript 5 + React 19.3 + Vanilla CSS Monochrome Zinc Glass / Bento Grid + Optional Supabase`)
-- **Active Phase**: `CONSTRUCTION` (Contextual 404 Recovery Hub & Root Fallback Cycle — `UNIT-22`–`UNIT-24` Complete)
+- **Active Phase**: `CONSTRUCTION` (Cloudflare Web Analytics & Core Web Vitals Cycle — `UNIT-25`–`UNIT-27` Complete)
 - **Active Stage**: `Phase 2 Construction Complete — Ready for Phase 3 Operations Verification`
-- **Last Updated**: `2026-11-20T02:20:00Z`
+- **Last Updated**: `2026-11-25T06:50:00Z`
 
 ---
 
-## Phase 1: INCEPTION Progress (Baseline v0.1.0 + i18n + Feedback + Diagnostics + Brand/Backlink + 404 Cycle)
+## Phase 1: INCEPTION Progress (Baseline v0.1.0 + i18n + Feedback + Diagnostics + Brand/Backlink + 404 + Cloudflare Web Analytics Cycle)
 - [x] **Stage 1.1: Workspace Detection** — Classified workspace (`Brownfield`) and verified baseline stack (`Next.js 16.4.6`, `React 19.3.0`, `TypeScript 5`, `js-yaml`, `lucide-react`, `@supabase/supabase-js`, `i18next`).
-- [x] **Stage 1.2: Requirements Analysis** — Validated `FR-01`–`FR-45`, `NFR-01`–`NFR-25`, `CON-01`–`CON-20`, `PRE-01`–`PRE-02`, `EX-01`–`EX-06`, `SC-01`–`SC-06` in [`requirements.md`](inception/requirements/requirements.md).
-- [x] **Stage 1.3: User Stories** — Validated `US-01`–`US-27` in [`user-stories.md`](inception/user-stories/user-stories.md).
-- [x] **Stage 1.4: Application & UI Design** — Documented Contextual 404 Recovery Hub (`NotFoundHub`), `RootNotFoundView` (`global-not-found.tsx`), pure fuzzy-match engine, and `noindex` SEO guards in [`architecture.md`](inception/application-design/architecture.md) and [`ui-design.md`](inception/application-design/ui-design.md).
-- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`–`UNIT-21` and decomposed Contextual 404 cycle into `UNIT-22`–`UNIT-24` in [`units.md`](inception/units/units.md).
+- [x] **Stage 1.2: Requirements Analysis** — Validated `FR-01`–`FR-50`, `NFR-01`–`NFR-29`, `CON-01`–`CON-23`, `PRE-01`–`PRE-03`, `EX-01`–`EX-07`, `SC-01`–`SC-07` in [`requirements.md`](inception/requirements/requirements.md).
+- [x] **Stage 1.3: User Stories** — Validated `US-01`–`US-30` in [`user-stories.md`](inception/user-stories/user-stories.md).
+- [x] **Stage 1.4: Application & UI Design** — Documented token-gated `<CloudflareAnalytics />` (`next/script`), pure `cloudflare.ts` core, `/cdn-cgi/*` proxy bypass, and 4-locale Privacy updates in [`architecture.md`](inception/application-design/architecture.md) and [`ui-design.md`](inception/application-design/ui-design.md).
+- [x] **Stage 1.5: Units Generation** — Standardized `UNIT-01`–`UNIT-24` and decomposed Cloudflare Web Analytics cycle into `UNIT-25`–`UNIT-27` in [`units.md`](inception/units/units.md).
 - [x] **Stage 1.6: Workflow Planning** — Updated [`execution-plan.md`](inception/plans/execution-plan.md) and [`construction-plan.md`](construction/plans/construction-plan.md).
 - [x] **Gate 1 Sign-Off (Baseline v0.1.0)**: Completed prior to governance standardization.
 - [x] **Gate 1 Sign-Off (i18n Expansion `UNIT-05`–`UNIT-09`)**: Approved and implemented.
 - [x] **Gate 1 Sign-Off (Feedback, Ratings & Admin Cycle `UNIT-10`–`UNIT-13`)**: Approved and implemented.
 - [x] **Gate 1 Sign-Off (Device & Network Diagnostics Cycle `UNIT-14`–`UNIT-17`)**: Approved and implemented.
 - [x] **Gate 1 Sign-Off (Brand Assets & Backlink Pages Cycle `UNIT-18`–`UNIT-21`)**: Approved and implemented.
-- [x] **Gate 1 Sign-Off (Contextual 404 Recovery Hub & Root Fallback Cycle `UNIT-22`–`UNIT-24`)**: Approved by user; Construction unlocked.
+- [x] **Gate 1 Sign-Off (Contextual 404 Recovery Hub & Root Fallback Cycle `UNIT-22`–`UNIT-24`)**: Approved and implemented.
+- [x] **Gate 1 Sign-Off (Cloudflare Web Analytics Cycle `UNIT-25`–`UNIT-27`)**: User confirmed pivot from Vercel Telemetry to Cloudflare Web Analytics; Construction complete.
 
 ---
 
@@ -55,6 +56,10 @@
 - [x] **`UNIT-23`**: `NotFoundHub` & `RootNotFoundView` UI, Shell/Feedback Integration & Monochrome CSS (`src/components/layout/{AppShell,CommandPalette}.tsx`, `src/hooks/useFeedback.tsx`, `src/components/feedback/FeedbackModal.tsx`, `src/components/not-found/*`, `src/app/globals.css`)
 - [x] **`UNIT-24`**: App Router 404 Routes (`global-not-found`, `[...rest]`, Segment Boundaries), Metadata `noindex` Guards & Full Verification (`next.config.ts`, `src/app/global-not-found.tsx`, `src/app/[locale]/{not-found,[...rest]/page}.tsx`, `src/app/[locale]/categories/[category]/{not-found,page}.tsx`, `src/app/[locale]/tools/[category]/[slug]/{not-found,page}.tsx`, `scripts/verify-aidlc.ts`)
 - [x] **Full Build & Verification (Contextual 404 Cycle)**: `npm run lint && npx tsx scripts/verify-aidlc.ts && npm run build` + HTTP `404` smoke checks
+- [x] **`UNIT-25`**: Dependency Cleanup, Pure Cloudflare Telemetry Core (`cloudflare.ts`) & `/cdn-cgi/*` Proxy / Robots Bypass (`package.json`, `.env.example`, `src/lib/telemetry/*`, `src/i18n/detect.ts`, `src/proxy.ts`, `src/app/robots.ts`, `scripts/verify-aidlc.ts`)
+- [x] **`UNIT-26`**: `CloudflareAnalytics.tsx` Client Component & Token-Gated Layout Integration (`src/components/telemetry/CloudflareAnalytics.tsx`, `src/app/[locale]/layout.tsx`, `scripts/verify-aidlc.ts`)
+- [x] **`UNIT-27`**: 4-Locale Privacy & Sidebar Copy (`en`/`vi`/`ja`/`zh`), Operations Docs & Final Verification (`src/i18n/locales/{en,vi,ja,zh}/{common,pages}.ts`, `aidlc-docs/operations/release-and-packaging.md`, `scripts/verify-aidlc.ts`)
+- [x] **Full Build & Verification (Cloudflare Web Analytics Cycle)**: `npm run lint && npm run build && npx tsx scripts/verify-aidlc.ts`
 
 ---
 

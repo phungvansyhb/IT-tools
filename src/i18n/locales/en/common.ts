@@ -16,7 +16,7 @@ export const enCommon: CommonDictionary = {
     pinnedTools: 'Pinned Tools',
     pinnedEmptyHint: 'Star any tool to pin it here.',
     privacyTitle: '100% Client-Side Privacy',
-    privacyDesc: 'All payloads stay inside your browser memory. Zero tracking or server uploads.',
+    privacyDesc: 'Tool inputs stay in your browser. Zero ad cookies; optional cookieless Cloudflare metrics.',
     syncSupabase: 'Supabase Cloud Sync',
     syncLocal: 'Local Storage Mode',
     openPaletteAria: 'Open global command palette',

@@ -353,4 +353,45 @@
 **I want** a clean Monochrome Zinc Glass 404 page with `<BrandLogo />`, `noindex, nofollow`, and quick links to all 4 language hubs,
 **So that** every broken URL looks cohesive without breaking `AppShell` or creating duplicate `<html>` tags on valid locale pages.
 
+---
 
+## `US-28`: Cookieless Pageviews & Core Web Vitals via Cloudflare Web Analytics (`FR-46`, `FR-47`, `NFR-27`)
+**As** the OmniDev maintainer deploying to Cloudflare,
+**I want** Cloudflare Web Analytics (`beacon.min.js`) to load only when a valid `NEXT_PUBLIC_CF_BEACON_TOKEN` is configured while remaining completely unmounted locally and in self-hosted setups without a token,
+**So that** I can monitor aggregate traffic and Core Web Vitals (`LCP`, `INP`, `CLS`, `FCP`, `TTFB`) in production with zero npm SDK bloat and zero external requests locally.
+
+### Acceptance Criteria
+- **Given** the app is built locally or self-hosted with `NEXT_PUBLIC_CF_BEACON_TOKEN` unset or invalid,
+- **When** `src/app/[locale]/layout.tsx` renders any localized page,
+- **Then** `<CloudflareAnalytics />` is not mounted and zero `<script>` tags or network calls to `cloudflareinsights.com` occur.
+- **Given** the app is deployed on Cloudflare with a valid `NEXT_PUBLIC_CF_BEACON_TOKEN`,
+- **When** a visitor navigates across localized routes (`/{locale}/...`),
+- **Then** Cloudflare Web Analytics loads via `next/script` (`afterInteractive`) with SPA support enabled and `/cdn-cgi/*` bypasses locale redirects in `src/proxy.ts`.
+
+---
+
+## `US-29`: Strict Token Validation & Admin Route Isolation (`FR-48`, `NFR-26`, `EX-07`)
+**As** a privacy-conscious developer or maintainer moderating `/[locale]/admin/feedback`,
+**I want** malformed beacon tokens rejected safely and `/admin` routes excluded from mounting the beacon script,
+**So that** private moderation sessions are excluded from analytics and tool query payloads (`?state=`) remain private.
+
+### Acceptance Criteria
+- **Given** a maintainer navigates directly to `/en/admin/feedback`,
+- **When** `<CloudflareAnalytics />` checks `isTelemetryExcludedPath(pathname)`,
+- **Then** no Cloudflare beacon script is rendered on the admin route.
+- **Given** `NEXT_PUBLIC_CF_BEACON_TOKEN` contains whitespace, quotes, or invalid characters,
+- **When** `resolveCloudflareBeaconToken()` runs,
+- **Then** it returns `null` and no script tag is injected.
+
+---
+
+## `US-30`: Transparent 4-Locale Privacy Disclosure & Minimal Root 404 (`FR-50`, `NFR-28`, `NFR-29`)
+**As** a developer inspecting OmniDev's Privacy Policy or Sidebar disclosure in English, Vietnamese, Japanese, or Simplified Chinese,
+**I want** clear, honest documentation explaining that tool payloads stay 100% in browser memory while optional cookieless Cloudflare Web Analytics collects aggregate pageviews and Core Web Vitals,
+**So that** I can audit the exact data posture in my preferred language.
+
+### Acceptance Criteria
+- **Given** the user reads the Sidebar privacy card or opens `/{locale}/privacy` in `en`, `vi`, `ja`, or `zh`,
+- **When** inspecting the disclosure text,
+- **Then** all 4 locales accurately explain local payload execution, zero ad cookies, `omnidev_locale` first-party cookie usage, and optional cookieless Cloudflare Web Analytics (no cookies, no `localStorage`, query strings omitted, `/admin` excluded);
+- **And** `src/app/global-not-found.tsx` continues rendering cleanly without mounting telemetry scripts.

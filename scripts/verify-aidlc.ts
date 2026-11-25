@@ -104,6 +104,14 @@ import {
   findNotFoundSuggestions,
   getNotFoundFallbackData,
 } from '../src/lib/not-found';
+import {
+  CLOUDFLARE_BEACON_SCRIPT_URL,
+  buildCloudflareBeaconConfig,
+  extractTelemetryPathname,
+  isTelemetryExcludedPath,
+  resolveCloudflareBeaconToken,
+  sanitizeTelemetryUrl,
+} from '../src/lib/telemetry';
 
 async function runVerification() {
   console.log('1. Verifying Registry Integrity...');
@@ -287,10 +295,10 @@ async function runVerification() {
   const robotsConfig = robots();
   const rules = Array.isArray(robotsConfig.rules) ? robotsConfig.rules : [robotsConfig.rules];
   const disallowList = rules.flatMap((r) => (Array.isArray(r.disallow) ? r.disallow : r.disallow ? [r.disallow] : []));
-  for (const requiredDisallow of ['/*/admin', '/*/admin/*', '/admin', '/admin/*', '/api/*']) {
+  for (const requiredDisallow of ['/*/admin', '/*/admin/*', '/admin', '/admin/*', '/api/*', '/cdn-cgi/*']) {
     assert.ok(disallowList.includes(requiredDisallow), `Expected robots.ts disallow to include ${requiredDisallow}`);
   }
-  console.log('   ✓ SEO sitemap (164 routes across 4 locales), Info Pages SEO builders, robots.ts admin & /api/* guard, and Schema.org JSON-LD validated.');
+  console.log('   ✓ SEO sitemap (164 routes across 4 locales), Info Pages SEO builders, robots.ts admin, /api/* & /cdn-cgi/* guard, and Schema.org JSON-LD validated.');
 
   console.log('4. Verifying i18n Core Runtime, Locale Detection & Canonical English Bundle...');
   assert.deepEqual([...SUPPORTED_LOCALES], ['en', 'vi', 'ja', 'zh']);
@@ -534,7 +542,22 @@ async function runVerification() {
         );
       }
     }
-    console.log('   ✓ Built HTML <html lang="...">, admin noindex meta, and 20 static info pages (canonical, og:image, JSON-LD) validated for en, vi, ja, zh-Hans.');
+
+    if (!resolveCloudflareBeaconToken(process.env.NEXT_PUBLIC_CF_BEACON_TOKEN)) {
+      const enHtml = fs.readFileSync(path.join(nextAppDir, 'en.html'), 'utf8');
+      assert.equal(
+        enHtml.includes('cloudflareinsights.com'),
+        false,
+        'Built en.html must not inject cloudflareinsights.com when NEXT_PUBLIC_CF_BEACON_TOKEN is unset/invalid'
+      );
+      assert.equal(
+        enHtml.includes('data-cf-beacon'),
+        false,
+        'Built en.html must not inject data-cf-beacon when NEXT_PUBLIC_CF_BEACON_TOKEN is unset/invalid'
+      );
+    }
+
+    console.log('   ✓ Built HTML <html lang="...">, admin noindex meta, zero local cloudflareinsights injection, and 20 static info pages validated for en, vi, ja, zh-Hans.');
   }
 
   console.log('7. Verifying Pure Feedback Core (Validation, Debug Context, Aggregation & Filtering)...');
@@ -957,6 +980,9 @@ async function runVerification() {
     '/robots.txt',
     '/api/speedtest/ping',
     '/_next/static/chunk.js',
+    '/cdn-cgi',
+    '/cdn-cgi/rum',
+    '/cdn-cgi/scripts/test.js',
   ]) {
     assert.equal(shouldBypassLocaleProxy(bypassPath), true, `Expected proxy bypass for ${bypassPath}`);
   }
@@ -1082,6 +1108,213 @@ async function runVerification() {
   assert.ok(!localeNfSource.includes('glass-btn'), 'Legacy .glass-btn stub must be removed from [locale]/not-found.tsx');
 
   console.log('   ✓ Pure 404 suggestion engine, sanitization, /admin & /api exclusion, fallback data, route boundaries, and noindex metadata validated.');
+
+  console.log('11. Verifying Pure Cloudflare Telemetry Core, Vercel Cleanup, Proxy Matcher & Robots Bypass...');
+  const pkgJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8')) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  };
+  assert.equal(
+    pkgJson.dependencies?.['@vercel/analytics'],
+    undefined,
+    'package.json must not depend on @vercel/analytics'
+  );
+  assert.equal(
+    pkgJson.dependencies?.['@vercel/speed-insights'],
+    undefined,
+    'package.json must not depend on @vercel/speed-insights'
+  );
+  assert.equal(
+    pkgJson.devDependencies?.['@vercel/analytics'],
+    undefined,
+    'package.json devDependencies must not include @vercel/analytics'
+  );
+  assert.equal(
+    pkgJson.devDependencies?.['@vercel/speed-insights'],
+    undefined,
+    'package.json devDependencies must not include @vercel/speed-insights'
+  );
+
+  assert.equal(
+    CLOUDFLARE_BEACON_SCRIPT_URL,
+    'https://static.cloudflareinsights.com/beacon.min.js'
+  );
+
+  // resolveCloudflareBeaconToken()
+  assert.equal(
+    resolveCloudflareBeaconToken('0123456789abcdef0123456789abcdef'),
+    '0123456789abcdef0123456789abcdef'
+  );
+  assert.equal(
+    resolveCloudflareBeaconToken('  0123456789abcdef0123456789abcdef  '),
+    '0123456789abcdef0123456789abcdef'
+  );
+  assert.equal(resolveCloudflareBeaconToken(''), null);
+  assert.equal(resolveCloudflareBeaconToken('   '), null);
+  assert.equal(resolveCloudflareBeaconToken('short'), null);
+  assert.equal(resolveCloudflareBeaconToken('bad token with spaces'), null);
+  assert.equal(resolveCloudflareBeaconToken('bad"quote'), null);
+  assert.equal(resolveCloudflareBeaconToken('<script>alert(1)</script>'), null);
+  assert.equal(resolveCloudflareBeaconToken('a'.repeat(129)), null);
+  assert.equal(resolveCloudflareBeaconToken(null), null);
+  assert.equal(resolveCloudflareBeaconToken(undefined), null);
+
+  // buildCloudflareBeaconConfig()
+  const defaultBeaconJson = buildCloudflareBeaconConfig('  0123456789abcdef0123456789abcdef  ');
+  assert.ok(defaultBeaconJson !== null);
+  assert.deepEqual(JSON.parse(defaultBeaconJson), {
+    token: '0123456789abcdef0123456789abcdef',
+    spa: true,
+  });
+  const nonSpaBeaconJson = buildCloudflareBeaconConfig('0123456789abcdef0123456789abcdef', {
+    spa: false,
+  });
+  assert.ok(nonSpaBeaconJson !== null);
+  assert.deepEqual(JSON.parse(nonSpaBeaconJson), {
+    token: '0123456789abcdef0123456789abcdef',
+    spa: false,
+  });
+  assert.equal(buildCloudflareBeaconConfig('bad token'), null);
+  assert.equal(buildCloudflareBeaconConfig(undefined), null);
+
+  // extractTelemetryPathname()
+  assert.equal(
+    extractTelemetryPathname('https://example.com/vi/admin/feedback?x=1#top'),
+    '/vi/admin/feedback'
+  );
+  assert.equal(
+    extractTelemetryPathname('/vi/tools/text/jwt-decoder?state=abc#h'),
+    '/vi/tools/text/jwt-decoder'
+  );
+  assert.equal(extractTelemetryPathname('vi/admin'), '/vi/admin');
+  assert.equal(extractTelemetryPathname('https://example.com///en//tools'), '/en/tools');
+  assert.equal(extractTelemetryPathname('/'), '/');
+
+  // isTelemetryExcludedPath()
+  assert.equal(isTelemetryExcludedPath('https://omnidev.app/en/admin/feedback'), true);
+  assert.equal(isTelemetryExcludedPath('/admin'), true);
+  assert.equal(isTelemetryExcludedPath('/vi/admin'), true);
+  assert.equal(isTelemetryExcludedPath('/admin/feedback'), true);
+  assert.equal(isTelemetryExcludedPath('/vi/admin/'), true);
+  assert.equal(isTelemetryExcludedPath('/ja/admin/'), true);
+  assert.equal(isTelemetryExcludedPath('https://omnidev.app/en/anything', '/[locale]/admin/feedback'), true);
+  assert.equal(isTelemetryExcludedPath('/en/anything', '/[locale]/admin'), true);
+  assert.equal(isTelemetryExcludedPath('/en/administrator'), false);
+  assert.equal(isTelemetryExcludedPath('/vi/tools/text/admin-notes'), false);
+  assert.equal(isTelemetryExcludedPath('/vi/tools/text/jwt-decoder'), false);
+  assert.equal(isTelemetryExcludedPath('/en'), false);
+
+  // sanitizeTelemetryUrl()
+  assert.equal(
+    sanitizeTelemetryUrl('https://omnidev.app/vi/tools/text/jwt-decoder?state=SECRET&q=foo#hash'),
+    'https://omnidev.app/vi/tools/text/jwt-decoder'
+  );
+  assert.equal(
+    sanitizeTelemetryUrl('/vi/tools/text/jwt-decoder?state=SECRET#hash'),
+    '/vi/tools/text/jwt-decoder'
+  );
+
+  // Proxy bypass + src/proxy.ts matcher + robots() /cdn-cgi/* guard
+  assert.equal(shouldBypassLocaleProxy('/cdn-cgi/rum'), true);
+  assert.equal(shouldBypassLocaleProxy('/cdn-cgi'), true);
+  assert.equal(shouldBypassLocaleProxy('/cdn-cgi/scripts/test.js'), true);
+
+  const proxySource = fs.readFileSync(path.join(process.cwd(), 'src/proxy.ts'), 'utf8');
+  assert.ok(proxySource.includes('cdn-cgi'), 'Expected src/proxy.ts matcher to exclude cdn-cgi');
+  assert.equal(proxySource.includes('_vercel'), false, 'Expected src/proxy.ts not to contain _vercel');
+  assert.ok(disallowList.includes('/cdn-cgi/*'), 'Expected robots() disallow to include /cdn-cgi/*');
+  assert.equal(disallowList.includes('/_vercel/*'), false, 'Expected robots() disallow not to include /_vercel/*');
+
+  // UNIT-26: CloudflareAnalytics client component, token-gated layout & global-not-found isolation
+  const cfComponentPath = path.join(process.cwd(), 'src/components/telemetry/CloudflareAnalytics.tsx');
+  assert.ok(fs.existsSync(cfComponentPath), 'Missing src/components/telemetry/CloudflareAnalytics.tsx');
+  const cfComponentSource = fs.readFileSync(cfComponentPath, 'utf8');
+  assert.ok(
+    cfComponentSource.startsWith("'use client'") || cfComponentSource.startsWith('"use client"'),
+    'CloudflareAnalytics.tsx must start with "use client" directive'
+  );
+  assert.ok(
+    cfComponentSource.includes("from 'next/script'") || cfComponentSource.includes('from "next/script"'),
+    'CloudflareAnalytics.tsx must import next/script'
+  );
+  assert.ok(
+    cfComponentSource.includes('CLOUDFLARE_BEACON_SCRIPT_URL'),
+    'CloudflareAnalytics.tsx must use CLOUDFLARE_BEACON_SCRIPT_URL'
+  );
+  assert.ok(
+    cfComponentSource.includes('buildCloudflareBeaconConfig'),
+    'CloudflareAnalytics.tsx must use buildCloudflareBeaconConfig'
+  );
+  assert.ok(
+    cfComponentSource.includes('isTelemetryExcludedPath'),
+    'CloudflareAnalytics.tsx must use isTelemetryExcludedPath'
+  );
+
+  const localeLayoutSource = fs.readFileSync(path.join(process.cwd(), 'src/app/[locale]/layout.tsx'), 'utf8');
+  assert.ok(
+    localeLayoutSource.includes('resolveCloudflareBeaconToken'),
+    '[locale]/layout.tsx must validate token via resolveCloudflareBeaconToken'
+  );
+  assert.ok(
+    localeLayoutSource.includes('<CloudflareAnalytics'),
+    '[locale]/layout.tsx must render <CloudflareAnalytics'
+  );
+
+  const globalNotFoundSource = fs.readFileSync(path.join(process.cwd(), 'src/app/global-not-found.tsx'), 'utf8');
+  assert.equal(
+    globalNotFoundSource.includes('CloudflareAnalytics'),
+    false,
+    'global-not-found.tsx must not mount CloudflareAnalytics'
+  );
+  assert.equal(
+    globalNotFoundSource.includes('cloudflareinsights.com'),
+    false,
+    'global-not-found.tsx must not include cloudflareinsights.com'
+  );
+  assert.equal(
+    globalNotFoundSource.includes('data-cf-beacon'),
+    false,
+    'global-not-found.tsx must not include data-cf-beacon'
+  );
+
+  // UNIT-27: 4-locale Cloudflare Web Analytics disclosure & privacy section/bullet parity
+  const expectedPrivacySectionsCount = enBundle.pages.privacy.sections.length;
+  assert.equal(expectedPrivacySectionsCount, 5, 'Expected 5 sections in en privacy policy');
+  for (const loc of SUPPORTED_LOCALES) {
+    const locBundle = getBundle(loc);
+    assert.ok(
+      locBundle.common.nav.privacyDesc.includes('Cloudflare'),
+      `Expected ${loc} common.nav.privacyDesc to disclose Cloudflare`
+    );
+    assert.equal(
+      locBundle.pages.shared.lastUpdatedDate,
+      '2026-11-25',
+      `Expected ${loc} pages.shared.lastUpdatedDate to be 2026-11-25`
+    );
+    assert.equal(
+      locBundle.pages.privacy.sections.length,
+      expectedPrivacySectionsCount,
+      `Expected ${loc} pages.privacy.sections length ${expectedPrivacySectionsCount}`
+    );
+    const privacyText = locBundle.pages.privacy.sections
+      .map((sec) => [sec.heading, sec.body, ...(sec.bullets ?? [])].join(' '))
+      .join(' ');
+    assert.ok(
+      privacyText.includes('Cloudflare'),
+      `Expected ${loc} pages.privacy.sections to disclose Cloudflare`
+    );
+    locBundle.pages.privacy.sections.forEach((sec, idx) => {
+      const expectedBullets = enBundle.pages.privacy.sections[idx].bullets?.length ?? 0;
+      const actualBullets = sec.bullets?.length ?? 0;
+      assert.equal(
+        actualBullets,
+        expectedBullets,
+        `Bullet count mismatch in ${loc} pages.privacy.sections[${idx}]: got ${actualBullets}, expected ${expectedBullets}`
+      );
+    });
+  }
+
+  console.log('   ✓ Pure Cloudflare telemetry core, client component, token-gated layout, global-not-found isolation, /cdn-cgi/* proxy bypass, proxy matcher, robots guard, and 4-locale privacy copy validated.');
 
   console.log('\nALL AIDLC VERIFICATION CHECKS PASSED!');
 }

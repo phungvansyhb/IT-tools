@@ -4,7 +4,7 @@ export const jaPages: PagesDictionary = {
   shared: {
     breadcrumbHome: 'ホーム',
     lastUpdatedLabel: '最終更新日',
-    lastUpdatedDate: '2026-11-19',
+    lastUpdatedDate: '2026-11-25',
     exploreToolsHeading: 'ツールスイートを探す',
     relatedPagesHeading: 'その他の情報・ポリシー',
     openFeedbackBtn: 'フィードバック送信',
@@ -133,22 +133,22 @@ export const jaPages: PagesDictionary = {
   privacy: {
     navLabel: 'プライバシーポリシー',
     title: 'プライバシーポリシー',
-    metaTitle: 'プライバシーポリシー — ローカル保存・Cookie・Supabase について | OmniDev IT-Tools',
+    metaTitle: 'プライバシーポリシー — ローカル処理・Cookie・Cloudflare Web Analytics | OmniDev IT-Tools',
     metaDescription:
-      'OmniDev IT-Tools の透明性方針：サードパーティ追跡なし、localStorage・sessionStorage の利用項目、必須 Cookie omnidev_locale、任意の Supabase 同期。',
+      'OmniDev IT-Tools の透明性方針：28種類のツールは100%クライアント実行、localStorage・sessionStorage の利用項目、必須 Cookie omnidev_locale、任意の Cookie レス Cloudflare Web Analytics。',
     subtitle:
-      'ブラウザメモリ内に留まる情報、ローカル/セッションに保存される情報、オプトイン時のみ同期される情報を明確に開示します。',
+      'ブラウザメモリ内に留まる情報、ローカルに保存される情報、および任意で有効化される Cookie レス計測の仕組みを明確に開示します。',
     keywords: [
       'omnidev プライバシーポリシー',
       'クライアントサイドプライバシー',
       'localstorage キー',
       'omnidev_locale cookie',
-      'トラッキングなし開発ツール',
+      'cloudflare web analytics cookieレス',
     ],
     sections: [
       {
-        heading: 'ペイロード追跡ゼロ＆クライアント側実行',
-        body: 'OmniDev にはサードパーティの広告トラッカー、行動分析スクリプト、テレメトリービーコンは一切含まれていません。ツールに入力したデータ（JWT、ハッシュ、正規表現、画像、JSON/YAML/CSV、マイク音声）はローカルブラウザ実行環境内に留まります。',
+        heading: '100% クライアント側実行＆ペイロード追跡ゼロ',
+        body: 'OmniDev には広告トラッカー、クロスサイトプロファイリング、入力ペイロードのサーバー送信はありません。28種類すべてのツールはローカルブラウザ内で動作し、入力または読み込んだデータ（JWT、ハッシュ、正規表現、画像、JSON/YAML/CSV、マイク音声）が端末外へ出ることはありません。',
       },
       {
         heading: 'ブラウザストレージ（`localStorage` と `sessionStorage`）',
@@ -161,6 +161,15 @@ export const jaPages: PagesDictionary = {
       {
         heading: '厳密に必須な Cookie（`omnidev_locale`）',
         body: 'OmniDev は SSR/プロキシの言語ルーティングのために、単一のファーストパーティ必須 Cookie（`omnidev_locale`、`SameSite=Lax`、有効期限1年）のみを使用して表示言語（`en`, `vi`, `ja`, `zh`）を記憶します。広告やクロスサイト追跡 Cookie は使用しません。',
+      },
+      {
+        heading: '任意の Cloudflare Web Analytics（ページビュー＆Core Web Vitals）',
+        body: '`NEXT_PUBLIC_CF_BEACON_TOKEN`（または Cloudflare Automatic Setup）が設定された公開環境では、集計ページビューと Core Web Vitals（`LCP`, `INP`, `CLS`, `FCP`, `TTFB`）を計測するため Cloudflare Web Analytics（`static.cloudflareinsights.com/beacon.min.js`）を読み込む場合があります。ローカル開発環境や未設定のセルフホスト環境では既定で完全に無効です。',
+        bullets: [
+          '100% Cookie レス＆フィンガープリントなし: Cloudflare Web Analytics は Cookie を発行せず、`localStorage` への読み書きや IP・User-Agent によるサイト横断追跡を行いません。',
+          'サニタイズ済みルートのみ計測: 集計ページビューと Web Vitals 指標のみを取得し、`?state=` などのクエリ文字列やハッシュからツール入力内容を取得することはありません。',
+          '管理画面・ルートエラーの除外: 手動ビーコンは `/admin` および `/{locale}/admin/*` ルート、さらにロケール外のルートエラーフォールバック（`global-not-found`）では読み込まれません。',
+        ],
       },
       {
         heading: '任意の Supabase 同期・フィードバック・速度テスト',

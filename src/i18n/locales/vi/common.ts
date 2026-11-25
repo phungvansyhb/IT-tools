@@ -17,7 +17,7 @@ export const viCommon: CommonDictionary = {
     pinnedEmptyHint: 'Gắn sao bất kỳ công cụ nào để ghim tại đây.',
     privacyTitle: '100% Riêng tư Phía Client',
     privacyDesc:
-      'Mọi dữ liệu xử lý hoàn toàn trong bộ nhớ trình duyệt. Không theo dõi hay tải lên máy chủ.',
+      'Dữ liệu công cụ xử lý cục bộ 100%. Không cookie quảng cáo; tùy chọn thống kê Cloudflare không cookie.',
     syncSupabase: 'Đồng bộ Đám mây Supabase',
     syncLocal: 'Chế độ Lưu trữ Cục bộ',
     openPaletteAria: 'Mở bảng lệnh toàn cục',

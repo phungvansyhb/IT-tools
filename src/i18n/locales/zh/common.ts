@@ -16,7 +16,7 @@ export const zhCommon: CommonDictionary = {
     pinnedTools: '已固定工具',
     pinnedEmptyHint: '点击星标即可将常用工具固定到此处。',
     privacyTitle: '100% 客户端本地隐私',
-    privacyDesc: '所有数据均在浏览器内存中处理。零追踪，零服务器上传。',
+    privacyDesc: '工具数据仅在浏览器本地处理。无广告 Cookie，可选无 Cookie 的 Cloudflare 统计。',
     syncSupabase: 'Supabase 云端同步',
     syncLocal: '本地存储模式',
     openPaletteAria: '打开全局命令面板',

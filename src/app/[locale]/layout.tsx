@@ -11,7 +11,9 @@ import { LocaleHtmlLangSync } from '@/i18n/LocaleHtmlLangSync';
 import { UserWorkspaceProvider } from '@/hooks/useUserWorkspace';
 import { FeedbackProvider } from '@/hooks/useFeedback';
 import { AppShell } from '@/components/layout/AppShell';
+import { CloudflareAnalytics } from '@/components/telemetry/CloudflareAnalytics';
 import { buildHomeMetadata, getMetadataBase } from '@/lib/seo';
+import { resolveCloudflareBeaconToken } from '@/lib/telemetry';
 
 const inter = Inter({
   variable: '--font-sans',
@@ -67,6 +69,10 @@ export default async function LocaleRootLayout({
     notFound();
   }
 
+  const cfBeaconToken = resolveCloudflareBeaconToken(
+    process.env.NEXT_PUBLIC_CF_BEACON_TOKEN
+  );
+
   return (
     <html
       lang={LOCALE_META[locale].htmlLang}
@@ -83,6 +89,7 @@ export default async function LocaleRootLayout({
             </FeedbackProvider>
           </UserWorkspaceProvider>
         </I18nProvider>
+        {cfBeaconToken && <CloudflareAnalytics token={cfBeaconToken} />}
       </body>
     </html>
   );

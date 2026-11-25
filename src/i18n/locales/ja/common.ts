@@ -17,7 +17,7 @@ export const jaCommon: CommonDictionary = {
     pinnedEmptyHint: 'ツールの星アイコンをクリックしてピン留めできます。',
     privacyTitle: '100% クライアント側で完結',
     privacyDesc:
-      'すべての処理はブラウザメモリ内で完結します。トラッキングやサーバー送信は一切ありません。',
+      'ツール入力はブラウザ内完結。広告Cookieなし・任意でCookieレスのCloudflare計測。',
     syncSupabase: 'Supabase クラウド同期',
     syncLocal: 'ローカルストレージモード',
     openPaletteAria: 'グローバルコマンドパレットを開く',

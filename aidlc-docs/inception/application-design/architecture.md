@@ -215,4 +215,42 @@ Unmatched / Missing Routes:
   - `AppShell.tsx` listens for `OPEN_COMMAND_PALETTE_EVENT = 'omnidev:open-command-palette'` (optional `{ query?: string }`) and forwards `initialQuery` to `CommandPalette.tsx`.
   - `useFeedback.tsx` & `FeedbackModal.tsx` support optional sanitized `defaultTitle` (`<= 140` chars) for one-click "Report Broken Link" submissions.
 
+---
+
+## 8. Cloudflare Web Analytics & Core Web Vitals Architecture (`UNIT-25` – `UNIT-27`)
+
+### 8.1 Token-Gated Client Boundary & Layout Scope
+- **Zero Extra npm Dependencies (`CON-22`)**: Uses Next.js built-in `next/script` (`strategy="afterInteractive"`, `defer`) to load `https://static.cloudflareinsights.com/beacon.min.js` with `data-cf-beacon='{"token":"...","spa":true}'`.
+- **Server → Client Flow**:
+  ```text
+  src/app/[locale]/layout.tsx (Server Component)
+    │ reads process.env.NEXT_PUBLIC_CF_BEACON_TOKEN
+    │ validates via resolveCloudflareBeaconToken(...) -> string | null
+    ▼
+  {cfBeaconToken && <CloudflareAnalytics token={cfBeaconToken} />}
+    │
+    ▼
+  src/components/telemetry/CloudflareAnalytics.tsx ('use client')
+    ├── <Suspense fallback={null}>
+    │     └── checks usePathname() via isTelemetryExcludedPath(pathname)
+    │         └── if non-admin: renders <Script id="cloudflare-web-analytics" src={CLOUDFLARE_BEACON_SCRIPT_URL} strategy="afterInteractive" defer data-cf-beacon={buildCloudflareBeaconConfig(token)} />
+    │   </Suspense>
+    └── omitted entirely when token is unset/invalid or route is /admin
+  ```
+- **Root 404 Isolation (`NFR-28`)**: `src/app/global-not-found.tsx` deliberately omits `<CloudflareAnalytics />` to avoid bot-scan noise (`.php`, `.env`, legacy `.html`) and keep root fallback HTML minimal.
+
+### 8.2 Pure Node-Testable Telemetry Core (`src/lib/telemetry/cloudflare.ts`)
+Zero React, DOM, or Next.js runtime imports (`tsx`-testable in `scripts/verify-aidlc.ts`):
+- `CLOUDFLARE_BEACON_SCRIPT_URL = 'https://static.cloudflareinsights.com/beacon.min.js'`
+- `resolveCloudflareBeaconToken(rawToken?: string | null): string | null` — trims and validates `^[a-zA-Z0-9_-]{8,128}$`; returns `null` for empty/placeholder/invalid values.
+- `buildCloudflareBeaconConfig(token: string, options?: { spa?: boolean }): string | null` — returns serialized JSON `{"token":"...","spa":true}` only for valid tokens.
+- `extractTelemetryPathname(rawUrlOrPath: string): string` — safely extracts and normalizes pathname without `?query` or `#hash`.
+- `isTelemetryExcludedPath(rawUrlOrPath: string, routeTemplate?: string | null): boolean` — strips optional locale prefix via `stripLocalePrefix()` and returns `true` for `/admin`, `/admin/*`, `/[locale]/admin`, `/[locale]/admin/*` (never excluding non-admin lookalikes like `/en/administrator`).
+- `sanitizeTelemetryUrl(rawUrl: string): string` — strips all `?query` (`?state=`, `?q=`) and `#hash` fragments from absolute or relative URLs.
+
+### 8.3 Proxy Bypass, Crawler Hygiene & 4-Locale Privacy Copy
+- **`src/i18n/detect.ts` & `src/proxy.ts`**: Bypass `/cdn-cgi` and `/cdn-cgi/*` (Cloudflare edge endpoints including `/cdn-cgi/rum` when proxied) from locale `307` redirects.
+- **`src/app/robots.ts`**: Append `'/cdn-cgi/*'` to `disallow` while keeping `sitemap.ts` strictly at `164` URLs.
+- **4-Locale Disclosures (`en`, `vi`, `ja`, `zh`)**: Update `nav.privacyDesc` (`common.ts`) and `privacy` (`pages.ts`) across all 4 locales with 100% recursive key/section/bullet parity, and document Cloudflare Dashboard setup (`PRE-03`) in `.env.example` and `aidlc-docs/operations/release-and-packaging.md`.
+
 
