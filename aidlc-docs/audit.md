@@ -157,3 +157,15 @@
   - `src/i18n/locales/{en,vi,ja,zh}/{common.ts,pages.ts}` — Truthful 4-locale Privacy Policy & Sidebar disclosure (`shared.lastUpdatedDate = '2026-11-25'`, 5 sections with 100% recursive key and bullet-count parity).
   - `scripts/verify-aidlc.ts` — Section 11 + Section 3/6/9 assertions covering Cloudflare telemetry core, `CloudflareAnalytics.tsx`, layout gating, `global-not-found.tsx` isolation, `/cdn-cgi/*` proxy bypass, `robots()` disallow, zero `@vercel/*` deps, zero `cloudflareinsights.com` in default local HTML, and 4-locale privacy copy parity.
 - **Verification & Gate Status**: `npm run lint` (0 errors), `NEXT_PUBLIC_CF_BEACON_TOKEN=0123456789abcdef0123456789abcdef npm run build` (178/178 static pages; beacon preloaded on `/en` and omitted on `/en/admin/feedback`), and clean default `npm run build && npx tsx scripts/verify-aidlc.ts` (all 11 suites: 164 sitemap URLs, 1,440 keys × 4 locales parity, zero `cloudflareinsights.com` in default local HTML) passed with exit code 0.
+
+## [2026-11-25T07:16:00Z] — Prompt 10: Fix Cloudflare Workers OpenNext Deploy Error (`code: 10143` — Worker `tien-ich`)
+- **Phase / Stage**: `OPERATIONS / Release & Packaging (Cloudflare Workers OpenNext Setup)`
+- **User Input**: `"hiện tại đang bị lỗi build như sau : ... Service binding 'WORKER_SELF_REFERENCE' references Worker 'omnidev-it-tools' which was not found [code: 10143] ... tôi phải làm sao"` → confirmed adding OpenNext Cloudflare configuration for Worker `"tien-ich"` and committing/pushing.
+- **Clarifications / Decisions**:
+  - Root cause: repo lacked `wrangler.jsonc` and `open-next.config.ts`, so Wrangler ran `@opennextjs/cloudflare migrate` on deploy and generated `WORKER_SELF_REFERENCE.service = "omnidev-it-tools"` from `package.json` `"name"`, mismatching the actual Cloudflare Worker `"tien-ich"`.
+  - User approved committing `@opennextjs/cloudflare`, `wrangler`, `wrangler.jsonc` (`name: "tien-ich"`, `WORKER_SELF_REFERENCE.service: "tien-ich"`), `open-next.config.ts`, `public/_headers`, `package.json` scripts (`cf:build`, `preview`, `deploy`, `upload`, `cf-typegen`), `next.config.ts` dev hook, `.gitignore`, and `eslint.config.mjs` ignores.
+- **Artifacts & Code Updated**:
+  - `wrangler.jsonc` *(new)*, `open-next.config.ts` *(new)*, `public/_headers` *(new)*.
+  - `package.json`, `package-lock.json`, `next.config.ts`, `eslint.config.mjs`, `.gitignore`.
+  - `aidlc-docs/operations/release-and-packaging.md`, `aidlc-docs/audit.md`.
+- **Verification & Gate Status**: `npm run cf:build` (`opennextjs-cloudflare build` -> `.open-next/worker.js` + `178/178` static pages), `OPEN_NEXT_DEPLOY=true npx wrangler deploy --dry-run` (`tien-ich` + `WORKER_SELF_REFERENCE (tien-ich)`), `npm run lint`, and `npx tsx scripts/verify-aidlc.ts` (all 11 suites) passed with exit code 0.

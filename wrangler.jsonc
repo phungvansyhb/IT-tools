@@ -1,0 +1,27 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "tien-ich",
+	"compatibility_date": "2026-11-23",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference service binding: service name must match the Cloudflare Worker name
+			// See https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "tien-ich"
+		}
+	],
+	"images": {
+		// Enable Cloudflare Images binding for Next.js image optimization
+		// See https://opennext.js.org/cloudflare/howtos/image
+		"binding": "IMAGES"
+	},
+	"observability": {
+		"enabled": true
+	}
+}
