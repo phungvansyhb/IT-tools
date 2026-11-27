@@ -44,7 +44,7 @@ export function RootNotFoundView() {
         <div className="root-notfound-brand">
           <BrandLogo size={36} />
           <div className="root-notfound-brand-text">
-            <span className="root-notfound-brand-name">OmniDev</span>
+            <span className="root-notfound-brand-name">TienIchDev</span>
             <span className="subtle-text root-notfound-brand-sub">IT-Tools Hub</span>
           </div>
           <span className="glass-pill glass-pill-active font-mono" style={{ marginLeft: 'auto' }}>
@@ -57,7 +57,7 @@ export function RootNotFoundView() {
             Page not found
           </h1>
           <p className="muted-text" style={{ margin: 0, fontSize: '0.94rem', lineHeight: 1.6 }}>
-            The URL you requested does not match an active route on OmniDev IT-Tools. Choose your
+            The URL you requested does not match an active route on TienIchDev. Choose your
             preferred language hub or return to the main workspace.
           </p>
 
@@ -72,7 +72,7 @@ export function RootNotFoundView() {
         <div className="root-notfound-actions">
           <Link href={localePath('en', '/')} className="btn btn-primary">
             <Home size={15} />
-            <span>Back to OmniDev Hub</span>
+            <span>Back to TienIchDev</span>
           </Link>
           <Link href={localePath('en', '/help')} className="btn">
             <HelpCircle size={15} />

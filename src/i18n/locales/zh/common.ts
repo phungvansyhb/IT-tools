@@ -2,9 +2,9 @@ import type { CommonDictionary } from '../../types';
 
 export const zhCommon: CommonDictionary = {
   brand: {
-    name: 'OmniDev',
+    name: 'TienIchDev',
     subtitle: 'IT-Tools Hub',
-    siteName: 'OmniDev IT-Tools',
+    siteName: 'TienIchDev',
     siteTagline: '隐私优先的开发者实用工具中心',
   },
   nav: {
@@ -55,7 +55,7 @@ export const zhCommon: CommonDictionary = {
     openSourceLabel: 'GitHub 开源仓库',
     githubLabel: 'GitHub',
     feedbackBtn: '发送反馈',
-    copyrightLine: '© {{year}} OmniDev IT-Tools. 100% 客户端本地运行。',
+    copyrightLine: '© {{year}} TienIchDev. 100% 客户端本地运行。',
     backToHome: '返回首页',
   },
   actions: {
@@ -120,7 +120,7 @@ export const zhCommon: CommonDictionary = {
     untitledPreset: '未命名预设',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 28+ 隐私优先的浏览器开发者工具',
+    homeTitle: 'TienIchDev — 28+ 隐私优先的浏览器开发者工具',
     homeDescription:
       '高性能、100% 客户端运行的开发者实用工具：图片转换与压缩、JSON/YAML/CSV、SHA-256、JWT 解码器、正则测试、OKLCH 与 WCAG 对比度、Chmod、Cron 及 DevOps 速查表。',
     homeKeywords: [
@@ -179,14 +179,14 @@ export const zhCommon: CommonDictionary = {
       page: '页面',
     },
     seoTitle: {
-      tool: '404 — 未找到工具 | OmniDev IT-Tools',
-      category: '404 — 未找到分类 | OmniDev IT-Tools',
-      general: '404 — 页面未找到 | OmniDev IT-Tools',
+      tool: '404 — 未找到工具 | TienIchDev',
+      category: '404 — 未找到分类 | TienIchDev',
+      general: '404 — 页面未找到 | TienIchDev',
     },
     seoDescription: {
-      tool: '未找到请求的开发者工具。请在 OmniDev IT-Tools 上浏览 28 款隐私优先的浏览器实用工具。',
-      category: '未找到请求的工具分类。请在 OmniDev IT-Tools 上浏览全部 7 个开发者套件。',
-      general: '在 OmniDev IT-Tools 上未找到请求的路由。',
+      tool: '未找到请求的开发者工具。请在 TienIchDev 上浏览 28 款隐私优先的浏览器实用工具。',
+      category: '未找到请求的工具分类。请在 TienIchDev 上浏览全部 7 个开发者套件。',
+      general: '在 TienIchDev 上未找到请求的路由。',
     },
   },
   locales: {

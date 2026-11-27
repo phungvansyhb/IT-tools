@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Noto_Sans_JP, Noto_Sans_SC } from 'next/font/google';
 import '../globals.css';
 import '@/styles/glass.css';
@@ -38,6 +38,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const dynamicParams = false;
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
+    { media: '(prefers-color-scheme: light)', color: '#fafafa' },
+  ],
+  colorScheme: 'dark light',
+};
 
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));

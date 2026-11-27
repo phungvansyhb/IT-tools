@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { SUPPORTED_LOCALES, isValidLocale } from '@/i18n/config';
 import { getBundle } from '@/i18n/translator';
+import { getMetadataBase } from '@/lib/seo';
 import { AdminFeedbackClient } from '@/components/admin/AdminFeedbackClient';
 
 export function generateStaticParams() {
@@ -17,6 +18,7 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!isValidLocale(locale)) {
     return {
+      metadataBase: getMetadataBase(),
       robots: {
         index: false,
         follow: false,
@@ -28,6 +30,7 @@ export async function generateMetadata({
   const { adminFeedback } = getBundle(locale).common;
 
   return {
+    metadataBase: getMetadataBase(),
     title: adminFeedback.pageTitle,
     description: adminFeedback.pageDescription,
     robots: {

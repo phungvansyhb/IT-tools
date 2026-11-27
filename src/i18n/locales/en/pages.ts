@@ -19,14 +19,14 @@ export const enPages: PagesDictionary = {
   },
   about: {
     navLabel: 'About',
-    title: 'About OmniDev IT-Tools',
-    metaTitle: 'About OmniDev IT-Tools — 100% Client-Side Developer Workspace',
+    title: 'About TienIchDev',
+    metaTitle: 'About TienIchDev — 100% Client-Side Developer Workspace',
     metaDescription:
-      'Learn about OmniDev IT-Tools: 28 browser-native developer utilities across 7 suites built for speed, zero payload uploads, and multilingual accessibility.',
+      'Learn about TienIchDev: 28 browser-native developer utilities across 7 suites built for speed, zero payload uploads, and multilingual accessibility.',
     subtitle:
       'A privacy-first, monochrome Bento workspace bringing 28 essential developer, design, DevOps, and hardware diagnostic utilities directly into your browser.',
     keywords: [
-      'about omnidev',
+      'about tienichdev',
       'client-side developer tools',
       'browser utilities',
       'privacy-first it tools',
@@ -35,7 +35,7 @@ export const enPages: PagesDictionary = {
     sections: [
       {
         heading: 'Built for Absolute Local Privacy',
-        body: 'Developers routinely paste sensitive JWTs, internal configs, SSH/Nginx snippets, hashes, and local media into random online utilities. OmniDev eliminates that risk by executing every transformation strictly inside your browser memory using standard Web APIs.',
+        body: 'Developers routinely paste sensitive JWTs, internal configs, SSH/Nginx snippets, hashes, and local media into random online utilities. TienIchDev eliminates that risk by executing every transformation strictly inside your browser memory using standard Web APIs.',
         bullets: [
           'HTML5 Canvas & Web Crypto APIs handle image conversion, compression, and SHA-1/256/384/512 hashing locally.',
           'Structured JSON, YAML, CSV, Regex, JWT, OKLCH, Chmod, and Cron engines run synchronously in client memory with zero external API calls.',
@@ -57,20 +57,20 @@ export const enPages: PagesDictionary = {
       },
       {
         heading: 'Open Architecture & Optional Cloud Sync',
-        body: 'By default, OmniDev persists your pinned tools, presets, usage counters, and feedback locally in browser storage. When a maintainer connects Supabase, anonymous workspace preferences (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) can sync seamlessly without requiring user sign-up.',
+        body: 'By default, TienIchDev persists your pinned tools, presets, usage counters, and feedback locally in browser storage. When a maintainer connects Supabase, anonymous workspace preferences (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) can sync seamlessly without requiring user sign-up.',
       },
     ],
   },
   help: {
     navLabel: 'Help & FAQ',
     title: 'Help & Frequently Asked Questions',
-    metaTitle: 'Help & FAQ — Keyboard, Audio, Speed Test & Workspace Guide | OmniDev IT-Tools',
+    metaTitle: 'Help & FAQ — Keyboard, Audio, Speed Test & Workspace Guide | TienIchDev',
     metaDescription:
-      'Troubleshooting and usage guide for OmniDev IT-Tools: client-side privacy, Keyboard Capture Mode (Esc × 2), Mic HTTPS permissions, Speaker 35% safe limiter, and Speed Test.',
+      'Troubleshooting and usage guide for TienIchDev: client-side privacy, Keyboard Capture Mode (Esc × 2), Mic HTTPS permissions, Speaker 35% safe limiter, and Speed Test.',
     subtitle:
-      'Practical answers on how OmniDev handles browser permissions, hardware diagnostics, local state persistence, and keyboard shortcuts.',
+      'Practical answers on how TienIchDev handles browser permissions, hardware diagnostics, local state persistence, and keyboard shortcuts.',
     keywords: [
-      'omnidev help',
+      'tienichdev help',
       'it tools faq',
       'keyboard capture esc',
       'microphone permission https',
@@ -111,12 +111,12 @@ export const enPages: PagesDictionary = {
       {
         question: 'Why does the Mic Tester ask for HTTPS or Microphone Permission?',
         answer:
-          'Browsers restrict `navigator.mediaDevices.getUserMedia` to secure contexts (`https://` or `localhost`) to protect user hardware. Once you grant permission, OmniDev renders real-time waveform/spectrum levels and optional local playback without uploading any audio stream.',
+          'Browsers restrict `navigator.mediaDevices.getUserMedia` to secure contexts (`https://` or `localhost`) to protect user hardware. Once you grant permission, TienIchDev renders real-time waveform/spectrum levels and optional local playback without uploading any audio stream.',
       },
       {
         question: 'How do Speaker Tester output switching (`setSinkId`) and the 35% limiter work?',
         answer:
-          'OmniDev defaults the master gain to a hearing-safe `35%` ceiling so test tones, sweeps, and noise bursts do not startle you or damage headphones. On supported browsers (such as Chrome/Edge with `HTMLMediaElement.setSinkId`), you can also switch audio output devices directly.',
+          'TienIchDev defaults the master gain to a hearing-safe `35%` ceiling so test tones, sweeps, and noise bursts do not startle you or damage headphones. On supported browsers (such as Chrome/Edge with `HTMLMediaElement.setSinkId`), you can also switch audio output devices directly.',
       },
       {
         question: 'How does the Self-Hosted Speed Test work without third-party servers?',
@@ -133,13 +133,13 @@ export const enPages: PagesDictionary = {
   privacy: {
     navLabel: 'Privacy Policy',
     title: 'Privacy Policy',
-    metaTitle: 'Privacy Policy — Local Execution, Cookies & Cloudflare Web Analytics | OmniDev IT-Tools',
+    metaTitle: 'Privacy Policy — Local Execution, Cookies & Cloudflare Web Analytics | TienIchDev',
     metaDescription:
-      'Transparent privacy policy for OmniDev IT-Tools: 100% client-side tool execution, localStorage & sessionStorage usage, omnidev_locale cookie, optional cookieless Cloudflare Web Analytics, and Supabase sync.',
+      'Transparent privacy policy for TienIchDev: 100% client-side tool execution, localStorage & sessionStorage usage, omnidev_locale cookie, optional cookieless Cloudflare Web Analytics, and Supabase sync.',
     subtitle:
       'Complete transparency on what stays in your browser memory, what is saved locally, and how optional cookieless performance metrics work.',
     keywords: [
-      'omnidev privacy policy',
+      'tienichdev privacy policy',
       'client-side privacy',
       'localstorage keys',
       'omnidev_locale cookie',
@@ -148,11 +148,11 @@ export const enPages: PagesDictionary = {
     sections: [
       {
         heading: '100% Client-Side Tool Execution & Zero Payload Tracking',
-        body: 'OmniDev does not embed advertising trackers, cross-site profiling scripts, or payload logging. All 28 tools run inside your local browser runtime—inputs you paste or upload (JWT tokens, hashes, regexes, images, JSON/YAML/CSV files, microphone streams) never leave your device.',
+        body: 'TienIchDev does not embed advertising trackers, cross-site profiling scripts, or payload logging. All 28 tools run inside your local browser runtime—inputs you paste or upload (JWT tokens, hashes, regexes, images, JSON/YAML/CSV files, microphone streams) never leave your device.',
       },
       {
         heading: 'Browser Storage (`localStorage` & `sessionStorage`)',
-        body: 'To provide a persistent workspace without requiring accounts, OmniDev stores preferences and drafts strictly in your browser storage:',
+        body: 'To provide a persistent workspace without requiring accounts, TienIchDev stores preferences and drafts strictly in your browser storage:',
         bullets: [
           '`localStorage`: `omnidev_client_id`, `omnidev_theme`, `omnidev_locale`, `omnidev_favorites`, `omnidev_pinned_snippets`, `omnidev_presets`, `omnidev_metrics`, `omnidev_speedtest_history`, `omnidev_tool_ratings`, `omnidev_feedback_submissions`, `omnidev_feedback_last_submit_at`, and `omnidev_admin_supabase_auth` (admin console only).',
           '`sessionStorage`: Temporary `omnidev:draft:<toolId>` drafts created right before switching languages so your work-in-progress survives locale navigation.',
@@ -160,11 +160,11 @@ export const enPages: PagesDictionary = {
       },
       {
         heading: 'Strictly Necessary Cookie (`omnidev_locale`)',
-        body: 'OmniDev sets a single strictly necessary first-party cookie (`omnidev_locale`, `SameSite=Lax`, 1-year expiry) solely to remember your chosen display language (`en`, `vi`, `ja`, `zh`) during SSR/proxy route resolution. No advertising or cross-site tracking cookies are used.',
+        body: 'TienIchDev sets a single strictly necessary first-party cookie (`omnidev_locale`, `SameSite=Lax`, 1-year expiry) solely to remember your chosen display language (`en`, `vi`, `ja`, `zh`) during SSR/proxy route resolution. No advertising or cross-site tracking cookies are used.',
       },
       {
         heading: 'Optional Cloudflare Web Analytics (Pageviews & Core Web Vitals)',
-        body: 'On hosted deployments where `NEXT_PUBLIC_CF_BEACON_TOKEN` (or Cloudflare Automatic Setup) is configured, OmniDev may load Cloudflare Web Analytics (`static.cloudflareinsights.com/beacon.min.js`) to measure aggregate pageviews and Core Web Vitals (`LCP`, `INP`, `CLS`, `FCP`, `TTFB`). It is disabled by default in local/self-hosted environments.',
+        body: 'On hosted deployments where `NEXT_PUBLIC_CF_BEACON_TOKEN` (or Cloudflare Automatic Setup) is configured, TienIchDev may load Cloudflare Web Analytics (`static.cloudflareinsights.com/beacon.min.js`) to measure aggregate pageviews and Core Web Vitals (`LCP`, `INP`, `CLS`, `FCP`, `TTFB`). It is disabled by default in local/self-hosted environments.',
         bullets: [
           '100% Cookieless & Zero Fingerprinting: Cloudflare Web Analytics does not set cookies, does not read or write `localStorage`, and does not fingerprint IP addresses or User-Agents across sites.',
           'Sanitized Routes Only: Only aggregate pageview counts and Web Vitals performance metrics are measured—query strings (such as `?state=`) and URL fragments are never used to capture tool inputs.',
@@ -173,7 +173,7 @@ export const enPages: PagesDictionary = {
       },
       {
         heading: 'Optional Supabase Sync, Feedback & Speed Test Endpoints',
-        body: 'When Supabase environment variables are configured by the host deployment, OmniDev syncs anonymous workspace records (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) keyed by your random `omnidev_client_id`.',
+        body: 'When Supabase environment variables are configured by the host deployment, TienIchDev syncs anonymous workspace records (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) keyed by your random `omnidev_client_id`.',
         bullets: [
           'Feedback Modal: Contact email and diagnostic debug context are strictly opt-in; debug context automatically strips `?state=` query strings and `#hash` fragments so sensitive tool payloads are never sent.',
           'Speed Test (`/api/speedtest/*`): Validates same-origin headers and streams/discards `<= 4 MiB` ephemeral buffers in memory without logging or storing test payloads.',
@@ -184,13 +184,13 @@ export const enPages: PagesDictionary = {
   terms: {
     navLabel: 'Terms of Use',
     title: 'Terms of Use',
-    metaTitle: 'Terms of Use — Open-Source Utilities & Diagnostics Disclaimer | OmniDev IT-Tools',
+    metaTitle: 'Terms of Use — Open-Source Utilities & Diagnostics Disclaimer | TienIchDev',
     metaDescription:
-      'Terms of Use for OmniDev IT-Tools covering acceptable use, client-side calculation disclaimers, hardware audio safety, and same-origin speed test limits.',
+      'Terms of Use for TienIchDev covering acceptable use, client-side calculation disclaimers, hardware audio safety, and same-origin speed test limits.',
     subtitle:
-      'Simple, clear terms governing the use of OmniDev browser utilities, diagnostic tools, and self-hosted endpoints.',
+      'Simple, clear terms governing the use of TienIchDev browser utilities, diagnostic tools, and self-hosted endpoints.',
     keywords: [
-      'omnidev terms of use',
+      'tienichdev terms of use',
       'developer tools disclaimer',
       'open source license',
       'speed test fair use',
@@ -198,7 +198,7 @@ export const enPages: PagesDictionary = {
     sections: [
       {
         heading: '1. License & Permitted Use',
-        body: 'OmniDev IT-Tools is provided as a free, open-source developer utility suite for personal, educational, and commercial engineering workflows. You may inspect, self-host, and customize the codebase in accordance with the repository license.',
+        body: 'TienIchDev is provided as a free, open-source developer utility suite for personal, educational, and commercial engineering workflows. You may inspect, self-host, and customize the codebase in accordance with the repository license.',
       },
       {
         heading: '2. Accuracy & "As-Is" Disclaimer',
@@ -217,15 +217,15 @@ export const enPages: PagesDictionary = {
   contact: {
     navLabel: 'Contact',
     title: 'Contact & Community Support',
-    metaTitle: 'Contact & Bug Reports — Feedback Modal, GitHub & Support | OmniDev IT-Tools',
+    metaTitle: 'Contact & Bug Reports — Feedback Modal, GitHub & Support | TienIchDev',
     metaDescription:
-      'Reach the OmniDev IT-Tools maintainers: submit bug reports or feature requests via the built-in Feedback Modal, open GitHub issues, or contact support.',
+      'Reach the TienIchDev maintainers: submit bug reports or feature requests via the built-in Feedback Modal, open GitHub issues, or contact support.',
     subtitle:
       'Found an edge case, translation glitch, or have an idea for tool #29? Reach us directly through the channel that fits best.',
     keywords: [
-      'contact omnidev',
+      'contact tienichdev',
       'report bug it tools',
-      'feature request omnidev',
+      'feature request tienichdev',
       'github issues',
     ],
     sections: [

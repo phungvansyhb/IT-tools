@@ -19,14 +19,14 @@ export const zhPages: PagesDictionary = {
   },
   about: {
     navLabel: '关于我们',
-    title: '关于 OmniDev IT-Tools',
-    metaTitle: '关于 OmniDev IT-Tools — 100% 客户端本地运行的开发者工作区',
+    title: '关于 TienIchDev',
+    metaTitle: '关于 TienIchDev — 100% 客户端本地运行的开发者工作区',
     metaDescription:
-      '了解 OmniDev IT-Tools：涵盖 7 大套件共 28 款浏览器原生开发者工具，追求极速响应、零数据上传与四语言本地化体验。',
+      '了解 TienIchDev：涵盖 7 大套件共 28 款浏览器原生开发者工具，追求极速响应、零数据上传与四语言本地化体验。',
     subtitle:
       '一个隐私优先的单色 Bento 工作区，将 28 款开发、设计、DevOps 与硬件网络诊断实用工具直接带入您的浏览器。',
     keywords: [
-      '关于 omnidev',
+      '关于 tienichdev',
       '客户端开发者工具',
       '浏览器实用工具',
       '隐私优先 it tools',
@@ -35,7 +35,7 @@ export const zhPages: PagesDictionary = {
     sections: [
       {
         heading: '为绝对本地隐私而设计',
-        body: '开发者在日常工作中常需要将敏感 JWT、内部配置、SSH/Nginx 片段、哈希值及本地图片粘贴到第三方网页。OmniDev 通过标准 Web API 将所有计算严格保留在浏览器内存中，彻底消除外泄风险。',
+        body: '开发者在日常工作中常需要将敏感 JWT、内部配置、SSH/Nginx 片段、哈希值及本地图片粘贴到第三方网页。TienIchDev 通过标准 Web API 将所有计算严格保留在浏览器内存中，彻底消除外泄风险。',
         bullets: [
           'HTML5 Canvas 与 Web Crypto API 在本地完成图像格式转换、压缩以及 SHA-1/256/384/512 哈希校验。',
           'JSON、YAML、CSV、正则表达式、JWT、OKLCH、Chmod 与 Cron 引擎均在客户端内存同步执行，零外部 API 请求。',
@@ -57,20 +57,20 @@ export const zhPages: PagesDictionary = {
       },
       {
         heading: '开放架构与可选云端同步',
-        body: '默认情况下，OmniDev 将固定工具、预设、使用计数与反馈记录保存在本地浏览器存储中。当部署维护者接入 Supabase 后，无需注册账号即可同步匿名工作区记录（`user_favorites`、`saved_presets`、`tool_metrics`、`tool_ratings`、`feedback_submissions`）。',
+        body: '默认情况下，TienIchDev 将固定工具、预设、使用计数与反馈记录保存在本地浏览器存储中。当部署维护者接入 Supabase 后，无需注册账号即可同步匿名工作区记录（`user_favorites`、`saved_presets`、`tool_metrics`、`tool_ratings`、`feedback_submissions`）。',
       },
     ],
   },
   help: {
     navLabel: '帮助与常见问题',
     title: '帮助与常见问题',
-    metaTitle: '帮助与 FAQ — 键盘、音频、测速与工作区指南 | OmniDev IT-Tools',
+    metaTitle: '帮助与 FAQ — 键盘、音频、测速与工作区指南 | TienIchDev',
     metaDescription:
-      'OmniDev IT-Tools 使用指南与故障排查：客户端隐私、键盘捕获模式（Esc × 2）、麦克风 HTTPS 权限、扬声器 35% 安全限幅及同源测速。',
+      'TienIchDev 使用指南与故障排查：客户端隐私、键盘捕获模式（Esc × 2）、麦克风 HTTPS 权限、扬声器 35% 安全限幅及同源测速。',
     subtitle:
       '关于浏览器权限控制、硬件诊断功能、本地状态持久化以及工作区快捷键的实用解答。',
     keywords: [
-      'omnidev 帮助',
+      'tienichdev 帮助',
       'it tools 常见问题',
       '键盘捕获模式 esc',
       '麦克风权限 https',
@@ -111,12 +111,12 @@ export const zhPages: PagesDictionary = {
       {
         question: '为什么麦克风测试需要 HTTPS 或麦克风授权？',
         answer:
-          '出于硬件隐私保护，浏览器仅允许在安全上下文（`https://` 或 `localhost`）中调用 `navigator.mediaDevices.getUserMedia`。授权后，OmniDev 仅在本地绘制实时波形、频谱与回放测试录音，绝不上传任何音频流。',
+          '出于硬件隐私保护，浏览器仅允许在安全上下文（`https://` 或 `localhost`）中调用 `navigator.mediaDevices.getUserMedia`。授权后，TienIchDev 仅在本地绘制实时波形、频谱与回放测试录音，绝不上传任何音频流。',
       },
       {
         question: '扬声器测试的输出切换（`setSinkId`）和 35% 限幅是如何工作的？',
         answer:
-          '为避免测试音、扫频或噪声突发损伤听力或耳机，OmniDev 默认将主增益限制在安全的 `35%` 上限内。在支持 `HTMLMediaElement.setSinkId` 的浏览器（如 Chrome/Edge）中，您还可以直接选择目标音频输出设备。',
+          '为避免测试音、扫频或噪声突发损伤听力或耳机，TienIchDev 默认将主增益限制在安全的 `35%` 上限内。在支持 `HTMLMediaElement.setSinkId` 的浏览器（如 Chrome/Edge）中，您还可以直接选择目标音频输出设备。',
       },
       {
         question: '不依赖第三方服务器的自托管测速是如何工作的？',
@@ -133,13 +133,13 @@ export const zhPages: PagesDictionary = {
   privacy: {
     navLabel: '隐私政策',
     title: '隐私政策',
-    metaTitle: '隐私政策 — 本地执行、Cookie 与 Cloudflare Web Analytics | OmniDev IT-Tools',
+    metaTitle: '隐私政策 — 本地执行、Cookie 与 Cloudflare Web Analytics | TienIchDev',
     metaDescription:
-      'OmniDev IT-Tools 透明隐私声明：28 款工具 100% 客户端运行、localStorage 与 sessionStorage 存储清单、必要 Cookie omnidev_locale、可选无 Cookie Cloudflare Web Analytics 及 Supabase 同步。',
+      'TienIchDev 透明隐私声明：28 款工具 100% 客户端运行、localStorage 与 sessionStorage 存储清单、必要 Cookie omnidev_locale、可选无 Cookie Cloudflare Web Analytics 及 Supabase 同步。',
     subtitle:
       '清晰说明哪些数据仅留在浏览器内存中、哪些保存在本地存储中，以及可选的无 Cookie 性能统计如何工作。',
     keywords: [
-      'omnidev 隐私政策',
+      'tienichdev 隐私政策',
       '客户端隐私',
       'localstorage 键名',
       'omnidev_locale cookie',
@@ -148,11 +148,11 @@ export const zhPages: PagesDictionary = {
     sections: [
       {
         heading: '100% 客户端本地执行与零载荷追踪',
-        body: 'OmniDev 不嵌入广告追踪器、跨站画像脚本或载荷上传日志。全部 28 款工具均在您的本地浏览器运行时中执行——您粘贴或加载的内容（JWT 令牌、哈希、正则、图片、JSON/YAML/CSV 文件、麦克风音频）绝不会离开您的设备。',
+        body: 'TienIchDev 不嵌入广告追踪器、跨站画像脚本或载荷上传日志。全部 28 款工具均在您的本地浏览器运行时中执行——您粘贴或加载的内容（JWT 令牌、哈希、正则、图片、JSON/YAML/CSV 文件、麦克风音频）绝不会离开您的设备。',
       },
       {
         heading: '浏览器存储（`localStorage` 与 `sessionStorage`）',
-        body: '为了在无需注册账号的情况下保存您的工作区偏好与临时草稿，OmniDev 仅在本地浏览器存储中读写以下键名：',
+        body: '为了在无需注册账号的情况下保存您的工作区偏好与临时草稿，TienIchDev 仅在本地浏览器存储中读写以下键名：',
         bullets: [
           '`localStorage`: `omnidev_client_id`, `omnidev_theme`, `omnidev_locale`, `omnidev_favorites`, `omnidev_pinned_snippets`, `omnidev_presets`, `omnidev_metrics`, `omnidev_speedtest_history`, `omnidev_tool_ratings`, `omnidev_feedback_submissions`, `omnidev_feedback_last_submit_at`，以及 `omnidev_admin_supabase_auth`（仅管理员审核台使用）。',
           '`sessionStorage`: 在切换显示语言前生成的临时草稿 `omnidev:draft:<toolId>`，确保跨语言跳转后工作进度不丢失。',
@@ -160,11 +160,11 @@ export const zhPages: PagesDictionary = {
       },
       {
         heading: '唯一严格必要的 Cookie（`omnidev_locale`）',
-        body: 'OmniDev 仅写入一个严格必要的第一方 Cookie（`omnidev_locale`，`SameSite=Lax`，有效期 1 年），用于在 SSR 与代理路由解析时记住您选择的显示语言（`en`、`vi`、`ja`、`zh`）。绝不使用任何广告或跨站追踪 Cookie。',
+        body: 'TienIchDev 仅写入一个严格必要的第一方 Cookie（`omnidev_locale`，`SameSite=Lax`，有效期 1 年），用于在 SSR 与代理路由解析时记住您选择的显示语言（`en`、`vi`、`ja`、`zh`）。绝不使用任何广告或跨站追踪 Cookie。',
       },
       {
         heading: '可选 Cloudflare Web Analytics（页面浏览量与 Core Web Vitals）',
-        body: '在配置了 `NEXT_PUBLIC_CF_BEACON_TOKEN`（或启用 Cloudflare Automatic Setup）的托管部署环境中，OmniDev 可能会加载 Cloudflare Web Analytics（`static.cloudflareinsights.com/beacon.min.js`）以统计汇总页面浏览量及 Core Web Vitals 性能指标（`LCP`、`INP`、`CLS`、`FCP`、`TTFB`）。在本地开发或未配置的自托管实例中默认完全关闭。',
+        body: '在配置了 `NEXT_PUBLIC_CF_BEACON_TOKEN`（或启用 Cloudflare Automatic Setup）的托管部署环境中，TienIchDev 可能会加载 Cloudflare Web Analytics（`static.cloudflareinsights.com/beacon.min.js`）以统计汇总页面浏览量及 Core Web Vitals 性能指标（`LCP`、`INP`、`CLS`、`FCP`、`TTFB`）。在本地开发或未配置的自托管实例中默认完全关闭。',
         bullets: [
           '100% 无 Cookie 与零指纹追踪：Cloudflare Web Analytics 不设置任何 Cookie，不读写 `localStorage`，也不通过 IP 或 User-Agent 进行跨站指纹追踪。',
           '仅统计脱敏路径：仅采集汇总的页面访问次数与 Web Vitals 性能指标，绝不会读取 `?state=` 等查询参数或哈希片段中的工具输入数据。',
@@ -173,7 +173,7 @@ export const zhPages: PagesDictionary = {
       },
       {
         heading: '可选 Supabase 同步、反馈与测速接口',
-        body: '当部署方配置了 Supabase 环境变量时，OmniDev 会以随机生成的 `omnidev_client_id` 为标识同步匿名工作区记录（`user_favorites`、`saved_presets`、`tool_metrics`、`tool_ratings`、`feedback_submissions`）。',
+        body: '当部署方配置了 Supabase 环境变量时，TienIchDev 会以随机生成的 `omnidev_client_id` 为标识同步匿名工作区记录（`user_favorites`、`saved_presets`、`tool_metrics`、`tool_ratings`、`feedback_submissions`）。',
         bullets: [
           '反馈弹窗：联系邮箱与诊断上下文均为严格可选（opt-in）；诊断上下文会自动剥离 `?state=` 查询参数与 `#hash` 片段，绝不附带敏感工具输入。',
           '网络测速（`/api/speedtest/*`）：校验同源请求头并在内存中流式收发及丢弃 `<= 4 MiB` 的临时缓冲区，不记录日志也不落盘保存。',
@@ -184,13 +184,13 @@ export const zhPages: PagesDictionary = {
   terms: {
     navLabel: '使用条款',
     title: '使用条款',
-    metaTitle: '使用条款 — 开源工具与免责声明 | OmniDev IT-Tools',
+    metaTitle: '使用条款 — 开源工具与免责声明 | TienIchDev',
     metaDescription:
-      'OmniDev IT-Tools 使用条款：许可范围、客户端计算结果免责声明、音频硬件安全提示及同源测速接口合理使用限制。',
+      'TienIchDev 使用条款：许可范围、客户端计算结果免责声明、音频硬件安全提示及同源测速接口合理使用限制。',
     subtitle:
-      '关于使用 OmniDev 浏览器实用工具、硬件诊断模块及自托管接口的简洁明了条款。',
+      '关于使用 TienIchDev 浏览器实用工具、硬件诊断模块及自托管接口的简洁明了条款。',
     keywords: [
-      'omnidev 使用条款',
+      'tienichdev 使用条款',
       '开发者工具免责声明',
       '开源协议',
       '测速合理使用',
@@ -198,7 +198,7 @@ export const zhPages: PagesDictionary = {
     sections: [
       {
         heading: '1. 开源许可与允许用途',
-        body: 'OmniDev IT-Tools 作为免费开源的开发者工具套件提供，可用于个人学习、教学演示及商业研发工作流。您可依据代码仓库许可协议自由查阅、自托管和二次定制。',
+        body: 'TienIchDev 作为免费开源的开发者工具套件提供，可用于个人学习、教学演示及商业研发工作流。您可依据代码仓库许可协议自由查阅、自托管和二次定制。',
       },
       {
         heading: '2. 准确性与“按原样”免责声明',
@@ -217,15 +217,15 @@ export const zhPages: PagesDictionary = {
   contact: {
     navLabel: '联系我们',
     title: '联系与社区支持',
-    metaTitle: '联系我们与 Bug 报告 — 反馈弹窗、GitHub 与支持 | OmniDev IT-Tools',
+    metaTitle: '联系我们与 Bug 报告 — 反馈弹窗、GitHub 与支持 | TienIchDev',
     metaDescription:
-      '联系 OmniDev IT-Tools 维护团队：通过应用内反馈弹窗提交 Bug 报告或功能建议、前往 GitHub 提 Issue 或通过支持邮箱联系。',
+      '联系 TienIchDev 维护团队：通过应用内反馈弹窗提交 Bug 报告或功能建议、前往 GitHub 提 Issue 或通过支持邮箱联系。',
     subtitle:
       '发现了边界 Bug、翻译瑕疵，或者对第 29 款工具有好点子？欢迎通过最适合您的渠道联系我们。',
     keywords: [
-      '联系 omnidev',
+      '联系 tienichdev',
       '提交 bug it tools',
-      '功能建议 omnidev',
+      '功能建议 tienichdev',
       'github issues',
     ],
     sections: [

@@ -4,11 +4,15 @@ export const dynamic = 'force-static';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'OmniDev IT-Tools Hub',
-    short_name: 'OmniDev',
+    id: '/',
+    name: 'TienIchDev — IT-Tools Hub',
+    short_name: 'TienIchDev',
     description:
       'Privacy-first browser developer & diagnostic tools: 28 tools across 7 categories including image processing, JSON/YAML/CSV, SHA-256, JWT, Regex, OKLCH, Chmod, Cron, DevOps cheatsheets, and hardware/network diagnostics.',
     start_url: '/',
+    scope: '/',
+    lang: 'en',
+    categories: ['developer', 'utilities', 'productivity'],
     display: 'standalone',
     background_color: '#09090b',
     theme_color: '#10b981',

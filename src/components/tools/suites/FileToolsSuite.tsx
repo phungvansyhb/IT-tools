@@ -39,7 +39,7 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
 
   // 2. Hash calculator
   const [hashText, setHashText] = useState<string>(
-    typeof initialState?.hashText === 'string' ? initialState.hashText : 'omnidev-integrity-check'
+    typeof initialState?.hashText === 'string' ? initialState.hashText : 'tienichdev-integrity-check'
   );
   const [hashFileName, setHashFileName] = useState<string>('');
   const [expectedHash, setExpectedHash] = useState<string>(
@@ -61,7 +61,7 @@ export function FileToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   const [rightText, setRightText] = useState<string>(
     typeof initialState?.rightText === 'string'
       ? initialState.rightText
-      : 'server {\n  listen 443 ssl;\n  server_name api.omnidev.io;\n  http2 on;\n}'
+      : 'server {\n  listen 443 ssl;\n  server_name tien-ich-dev.pages.dev;\n  http2 on;\n}'
   );
 
   useEffect(() => {

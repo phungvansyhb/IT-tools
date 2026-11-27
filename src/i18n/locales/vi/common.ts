@@ -2,9 +2,9 @@ import type { CommonDictionary } from '../../types';
 
 export const viCommon: CommonDictionary = {
   brand: {
-    name: 'OmniDev',
+    name: 'Tiện Ích Dev',
     subtitle: 'IT-Tools Hub',
-    siteName: 'OmniDev IT-Tools',
+    siteName: 'Tiện Ích Dev',
     siteTagline: 'Trung tâm Tiện ích & Công cụ Lập trình Viên Riêng tư Hàng đầu',
   },
   nav: {
@@ -57,7 +57,7 @@ export const viCommon: CommonDictionary = {
     openSourceLabel: 'Mã nguồn mở trên GitHub',
     githubLabel: 'GitHub',
     feedbackBtn: 'Gửi góp ý',
-    copyrightLine: '© {{year}} OmniDev IT-Tools. Xử lý 100% phía Client.',
+    copyrightLine: '© {{year}} Tiện Ích Dev. Xử lý 100% phía Client.',
     backToHome: 'Quay về Trang chủ',
   },
   actions: {
@@ -122,7 +122,7 @@ export const viCommon: CommonDictionary = {
     untitledPreset: 'Cấu hình chưa đặt tên',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 28+ Công cụ Lập trình Trình duyệt Riêng tư',
+    homeTitle: 'Tiện Ích Dev — 28+ Công cụ Lập trình Trình duyệt Riêng tư',
     homeDescription:
       'Tiện ích lập trình hiệu năng cao, chạy 100% phía client: chuyển đổi & nén ảnh, JSON/YAML/CSV, SHA-256, giải mã JWT, kiểm thử Regex, màu OKLCH & tương phản WCAG, Chmod, Cron và cheatsheet DevOps.',
     homeKeywords: [
@@ -181,14 +181,14 @@ export const viCommon: CommonDictionary = {
       page: 'Trang',
     },
     seoTitle: {
-      tool: '404 — Không tìm thấy công cụ | OmniDev IT-Tools',
-      category: '404 — Không tìm thấy danh mục | OmniDev IT-Tools',
-      general: '404 — Không tìm thấy trang | OmniDev IT-Tools',
+      tool: '404 — Không tìm thấy công cụ | Tiện Ích Dev',
+      category: '404 — Không tìm thấy danh mục | Tiện Ích Dev',
+      general: '404 — Không tìm thấy trang | Tiện Ích Dev',
     },
     seoDescription: {
-      tool: 'Không tìm thấy công cụ lập trình bạn yêu cầu. Khám phá 28 tiện ích trình duyệt riêng tư trên OmniDev IT-Tools.',
-      category: 'Không tìm thấy danh mục công cụ bạn yêu cầu. Xem tất cả 7 bộ công cụ lập trình trên OmniDev IT-Tools.',
-      general: 'Không tìm thấy đường dẫn bạn yêu cầu trên OmniDev IT-Tools.',
+      tool: 'Không tìm thấy công cụ lập trình bạn yêu cầu. Khám phá 28 tiện ích trình duyệt riêng tư trên Tiện Ích Dev.',
+      category: 'Không tìm thấy danh mục công cụ bạn yêu cầu. Xem tất cả 7 bộ công cụ lập trình trên Tiện Ích Dev.',
+      general: 'Không tìm thấy đường dẫn bạn yêu cầu trên Tiện Ích Dev.',
     },
   },
   locales: {

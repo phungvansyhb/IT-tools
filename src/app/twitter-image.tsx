@@ -3,7 +3,7 @@ import { BrandOgTemplate } from '@/lib/brand/og-template';
 
 export const dynamic = 'force-static';
 
-export const alt = 'OmniDev / IT-Tools Hub — Privacy-First Developer & Diagnostic Tools';
+export const alt = 'TienIchDev — Privacy-First Developer & Diagnostic Tools';
 
 export const size = {
   width: 1200,

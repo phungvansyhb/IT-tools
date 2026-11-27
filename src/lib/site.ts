@@ -1,4 +1,4 @@
-export const DEFAULT_SITE_URL = 'http://localhost:3000';
+export const DEFAULT_SITE_URL = 'https://tien-ich-dev.pages.dev';
 export const DEFAULT_GITHUB_URL = 'https://github.com/phungvansyhb/IT-tools';
 
 export interface SiteConfig {

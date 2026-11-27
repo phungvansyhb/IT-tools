@@ -19,14 +19,14 @@ export const viPages: PagesDictionary = {
   },
   about: {
     navLabel: 'Giới thiệu',
-    title: 'Giới thiệu OmniDev IT-Tools',
-    metaTitle: 'Giới thiệu OmniDev IT-Tools — Không gian Công cụ Lập trình 100% Phía Client',
+    title: 'Giới thiệu Tiện Ích Dev',
+    metaTitle: 'Giới thiệu Tiện Ích Dev — Không gian Công cụ Lập trình 100% Phía Client',
     metaDescription:
-      'Tìm hiểu về OmniDev IT-Tools: 28 tiện ích lập trình chạy gốc trên trình duyệt thuộc 7 bộ chuyên biệt, không tải dữ liệu lên máy chủ và hỗ trợ 4 ngôn ngữ.',
+      'Tìm hiểu về Tiện Ích Dev: 28 tiện ích lập trình chạy gốc trên trình duyệt thuộc 7 bộ chuyên biệt, không tải dữ liệu lên máy chủ và hỗ trợ 4 ngôn ngữ.',
     subtitle:
       'Không gian làm việc Bento đơn sắc ưu tiên quyền riêng tư, mang 28 công cụ thiết yếu về lập trình, thiết kế, DevOps và chẩn đoán phần cứng trực tiếp vào trình duyệt của bạn.',
     keywords: [
-      'giới thiệu omnidev',
+      'giới thiệu tiện ích dev',
       'công cụ lập trình phía client',
       'tiện ích trình duyệt',
       'it tools bảo mật',
@@ -35,7 +35,7 @@ export const viPages: PagesDictionary = {
     sections: [
       {
         heading: 'Xây dựng vì Quyền riêng tư Cục bộ Tuyệt đối',
-        body: 'Lập trình viên thường xuyên phải dán JWT nhạy cảm, cấu hình nội bộ, đoạn mã SSH/Nginx, chuỗi băm và tệp media vào các trang web bên thứ ba. OmniDev loại bỏ rủi ro đó bằng cách thực thi mọi phép biến đổi hoàn toàn trong bộ nhớ trình duyệt qua các Web API tiêu chuẩn.',
+        body: 'Lập trình viên thường xuyên phải dán JWT nhạy cảm, cấu hình nội bộ, đoạn mã SSH/Nginx, chuỗi băm và tệp media vào các trang web bên thứ ba. Tiện Ích Dev loại bỏ rủi ro đó bằng cách thực thi mọi phép biến đổi hoàn toàn trong bộ nhớ trình duyệt qua các Web API tiêu chuẩn.',
         bullets: [
           'HTML5 Canvas và Web Crypto API xử lý chuyển đổi ảnh, nén ảnh và tính mã băm SHA-1/256/384/512 ngay trên máy.',
           'Các bộ xử lý JSON, YAML, CSV, Regex, JWT, OKLCH, Chmod và Cron chạy đồng bộ trong bộ nhớ client mà không gọi API ngoài.',
@@ -57,20 +57,20 @@ export const viPages: PagesDictionary = {
       },
       {
         heading: 'Kiến trúc Mở & Tùy chọn Đồng bộ Đám mây',
-        body: 'Mặc định, OmniDev lưu công cụ đã ghim, cấu hình mẫu, bộ đếm sử dụng và góp ý ngay trong bộ nhớ trình duyệt. Khi người vận hành cấu hình Supabase, các tùy chọn ẩn danh (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) có thể đồng bộ mượt mà không cần đăng ký tài khoản.',
+        body: 'Mặc định, Tiện Ích Dev lưu công cụ đã ghim, cấu hình mẫu, bộ đếm sử dụng và góp ý ngay trong bộ nhớ trình duyệt. Khi người vận hành cấu hình Supabase, các tùy chọn ẩn danh (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) có thể đồng bộ mượt mà không cần đăng ký tài khoản.',
       },
     ],
   },
   help: {
     navLabel: 'Trợ giúp & FAQ',
     title: 'Trợ giúp & Câu hỏi Thường gặp',
-    metaTitle: 'Trợ giúp & FAQ — Hướng dẫn Bàn phím, Âm thanh, Speed Test | OmniDev IT-Tools',
+    metaTitle: 'Trợ giúp & FAQ — Hướng dẫn Bàn phím, Âm thanh, Speed Test | Tiện Ích Dev',
     metaDescription:
-      'Hướng dẫn sử dụng và xử lý sự cố OmniDev IT-Tools: bảo mật phía client, Chế độ Bắt phím (Esc × 2), quyền Micro HTTPS, giới hạn âm lượng Loa 35% và Speed Test.',
+      'Hướng dẫn sử dụng và xử lý sự cố Tiện Ích Dev: bảo mật phía client, Chế độ Bắt phím (Esc × 2), quyền Micro HTTPS, giới hạn âm lượng Loa 35% và Speed Test.',
     subtitle:
-      'Giải đáp thực tế về cách OmniDev xử lý quyền trình duyệt, chẩn đoán phần cứng, lưu trạng thái cục bộ và phím tắt hệ thống.',
+      'Giải đáp thực tế về cách Tiện Ích Dev xử lý quyền trình duyệt, chẩn đoán phần cứng, lưu trạng thái cục bộ và phím tắt hệ thống.',
     keywords: [
-      'trợ giúp omnidev',
+      'trợ giúp tiện ích dev',
       'hỏi đáp it tools',
       'chế độ bắt phím esc',
       'quyền micro https',
@@ -111,12 +111,12 @@ export const viPages: PagesDictionary = {
       {
         question: 'Tại sao Kiểm tra Micro yêu cầu HTTPS hoặc quyền truy cập Micro?',
         answer:
-          'Trình duyệt giới hạn `navigator.mediaDevices.getUserMedia` chỉ hoạt động trong ngữ cảnh bảo mật (`https://` hoặc `localhost`) nhằm bảo vệ phần cứng người dùng. Sau khi bạn cấp quyền, OmniDev hiển thị sóng âm, phổ tần theo thời gian thực và phát lại cục bộ mà không tải bất kỳ luồng âm thanh nào lên mạng.',
+          'Trình duyệt giới hạn `navigator.mediaDevices.getUserMedia` chỉ hoạt động trong ngữ cảnh bảo mật (`https://` hoặc `localhost`) nhằm bảo vệ phần cứng người dùng. Sau khi bạn cấp quyền, Tiện Ích Dev hiển thị sóng âm, phổ tần theo thời gian thực và phát lại cục bộ mà không tải bất kỳ luồng âm thanh nào lên mạng.',
       },
       {
         question: 'Tính năng đổi đầu ra Loa (`setSinkId`) và giới hạn 35% hoạt động thế nào?',
         answer:
-          'OmniDev mặc định đặt trần âm lượng tổng ở mức an toàn `35%` để âm thanh thử nghiệm, quét tần số hay nhiễu trắng/hồng không gây giật mình hoặc hại tai nghe. Trên các trình duyệt hỗ trợ (`HTMLMediaElement.setSinkId` như Chrome/Edge), bạn có thể chọn trực tiếp thiết bị phát đầu ra.',
+          'Tiện Ích Dev mặc định đặt trần âm lượng tổng ở mức an toàn `35%` để âm thanh thử nghiệm, quét tần số hay nhiễu trắng/hồng không gây giật mình hoặc hại tai nghe. Trên các trình duyệt hỗ trợ (`HTMLMediaElement.setSinkId` như Chrome/Edge), bạn có thể chọn trực tiếp thiết bị phát đầu ra.',
       },
       {
         question: 'Công cụ Speed Test tự lưu trữ hoạt động ra sao khi không dùng máy chủ bên thứ ba?',
@@ -133,13 +133,13 @@ export const viPages: PagesDictionary = {
   privacy: {
     navLabel: 'Quyền riêng tư',
     title: 'Chính sách Quyền riêng tư',
-    metaTitle: 'Chính sách Quyền riêng tư — Xử lý Cục bộ, Cookie & Cloudflare Web Analytics | OmniDev IT-Tools',
+    metaTitle: 'Chính sách Quyền riêng tư — Xử lý Cục bộ, Cookie & Cloudflare Web Analytics | Tiện Ích Dev',
     metaDescription:
-      'Chính sách minh bạch của OmniDev IT-Tools: 28 công cụ xử lý 100% phía client, khóa localStorage & sessionStorage, cookie thiết yếu omnidev_locale, Cloudflare Web Analytics không cookie tùy chọn và Supabase.',
+      'Chính sách minh bạch của Tiện Ích Dev: 28 công cụ xử lý 100% phía client, khóa localStorage & sessionStorage, cookie thiết yếu omnidev_locale, Cloudflare Web Analytics không cookie tùy chọn và Supabase.',
     subtitle:
       'Minh bạch hoàn toàn về dữ liệu chỉ nằm trong bộ nhớ trình duyệt, dữ liệu lưu cục bộ và cách hoạt động của thống kê hiệu năng không cookie tùy chọn.',
     keywords: [
-      'chính sách quyền riêng tư omnidev',
+      'chính sách quyền riêng tư tiện ích dev',
       'bảo mật phía client',
       'khóa localstorage',
       'cookie omnidev_locale',
@@ -148,11 +148,11 @@ export const viPages: PagesDictionary = {
     sections: [
       {
         heading: '100% Thực thi Phía Client & Không Theo dõi Payload',
-        body: 'OmniDev không nhúng trình theo dõi quảng cáo, mã định danh liên trang hay ghi nhật ký payload. Toàn bộ 28 công cụ chạy trong môi trường trình duyệt cục bộ — dữ liệu bạn dán hoặc tải lên (JWT, mã băm, regex, ảnh, tệp JSON/YAML/CSV, luồng micro) không bao giờ rời khỏi thiết bị.',
+        body: 'Tiện Ích Dev không nhúng trình theo dõi quảng cáo, mã định danh liên trang hay ghi nhật ký payload. Toàn bộ 28 công cụ chạy trong môi trường trình duyệt cục bộ — dữ liệu bạn dán hoặc tải lên (JWT, mã băm, regex, ảnh, tệp JSON/YAML/CSV, luồng micro) không bao giờ rời khỏi thiết bị.',
       },
       {
         heading: 'Bộ nhớ Trình duyệt (`localStorage` & `sessionStorage`)',
-        body: 'Để duy trì không gian làm việc liên tục mà không bắt buộc tạo tài khoản, OmniDev chỉ lưu tùy chọn và bản nháp trong bộ nhớ trình duyệt:',
+        body: 'Để duy trì không gian làm việc liên tục mà không bắt buộc tạo tài khoản, Tiện Ích Dev chỉ lưu tùy chọn và bản nháp trong bộ nhớ trình duyệt:',
         bullets: [
           '`localStorage`: `omnidev_client_id`, `omnidev_theme`, `omnidev_locale`, `omnidev_favorites`, `omnidev_pinned_snippets`, `omnidev_presets`, `omnidev_metrics`, `omnidev_speedtest_history`, `omnidev_tool_ratings`, `omnidev_feedback_submissions`, `omnidev_feedback_last_submit_at`, và `omnidev_admin_supabase_auth` (chỉ cho bảng quản trị).',
           '`sessionStorage`: Bản nháp tạm `omnidev:draft:<toolId>` được tạo ngay trước khi chuyển ngôn ngữ để giữ nguyên nội dung đang thao tác.',
@@ -160,11 +160,11 @@ export const viPages: PagesDictionary = {
       },
       {
         heading: 'Cookie Thiết yếu Duy nhất (`omnidev_locale`)',
-        body: 'OmniDev chỉ đặt một cookie bên thứ nhất thiết yếu (`omnidev_locale`, `SameSite=Lax`, thời hạn 1 năm) để ghi nhớ ngôn ngữ hiển thị (`en`, `vi`, `ja`, `zh`) khi SSR/proxy điều hướng. Tuyệt đối không dùng cookie quảng cáo hay theo dõi liên trang.',
+        body: 'Tiện Ích Dev chỉ đặt một cookie bên thứ nhất thiết yếu (`omnidev_locale`, `SameSite=Lax`, thời hạn 1 năm) để ghi nhớ ngôn ngữ hiển thị (`en`, `vi`, `ja`, `zh`) khi SSR/proxy điều hướng. Tuyệt đối không dùng cookie quảng cáo hay theo dõi liên trang.',
       },
       {
         heading: 'Tùy chọn Cloudflare Web Analytics (Pageviews & Core Web Vitals)',
-        body: 'Trên môi trường triển khai có cấu hình `NEXT_PUBLIC_CF_BEACON_TOKEN` (hoặc Cloudflare Automatic Setup), OmniDev có thể nạp Cloudflare Web Analytics (`static.cloudflareinsights.com/beacon.min.js`) để đo lượt xem trang tổng hợp và chỉ số Core Web Vitals (`LCP`, `INP`, `CLS`, `FCP`, `TTFB`). Tính năng này mặc định tắt hoàn toàn khi chạy local hoặc tự lưu trữ.',
+        body: 'Trên môi trường triển khai có cấu hình `NEXT_PUBLIC_CF_BEACON_TOKEN` (hoặc Cloudflare Automatic Setup), Tiện Ích Dev có thể nạp Cloudflare Web Analytics (`static.cloudflareinsights.com/beacon.min.js`) để đo lượt xem trang tổng hợp và chỉ số Core Web Vitals (`LCP`, `INP`, `CLS`, `FCP`, `TTFB`). Tính năng này mặc định tắt hoàn toàn khi chạy local hoặc tự lưu trữ.',
         bullets: [
           '100% Không Cookie & Không Fingerprint: Cloudflare Web Analytics không đặt cookie, không đọc/ghi `localStorage` và không tạo dấu vân tay IP hay User-Agent để theo dõi chéo trang.',
           'Chỉ Đo Đường dẫn Sạch: Chỉ thu thập số lượt xem tổng hợp và chỉ số hiệu năng Web Vitals — chuỗi truy vấn (`?state=`) và mảnh `#hash` không được dùng để thu thập nội dung nhập vào công cụ.',
@@ -173,7 +173,7 @@ export const viPages: PagesDictionary = {
       },
       {
         heading: 'Đồng bộ Supabase Tùy chọn, Góp ý & Speed Test',
-        body: 'Khi máy chủ triển khai có cấu hình biến môi trường Supabase, OmniDev đồng bộ các bản ghi ẩn danh (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) gắn với mã `omnidev_client_id` ngẫu nhiên của bạn.',
+        body: 'Khi máy chủ triển khai có cấu hình biến môi trường Supabase, Tiện Ích Dev đồng bộ các bản ghi ẩn danh (`user_favorites`, `saved_presets`, `tool_metrics`, `tool_ratings`, `feedback_submissions`) gắn với mã `omnidev_client_id` ngẫu nhiên của bạn.',
         bullets: [
           'Hộp thoại Góp ý: Email liên hệ và ngữ cảnh lỗi hoàn toàn là tùy chọn (opt-in); ngữ cảnh lỗi tự động loại bỏ chuỗi `?state=` và `#hash` để payload nhạy cảm không bao giờ bị gửi đi.',
           'Speed Test (`/api/speedtest/*`): Kiểm tra header cùng nguồn và truyền/hủy bộ đệm tạm `<= 4 MiB` trong RAM mà không ghi nhật ký hay lưu trữ nội dung.',
@@ -184,13 +184,13 @@ export const viPages: PagesDictionary = {
   terms: {
     navLabel: 'Điều khoản Sử dụng',
     title: 'Điều khoản Sử dụng',
-    metaTitle: 'Điều khoản Sử dụng — Tiện ích Mã nguồn mở & Miễn trừ Trách nhiệm | OmniDev IT-Tools',
+    metaTitle: 'Điều khoản Sử dụng — Tiện ích Mã nguồn mở & Miễn trừ Trách nhiệm | Tiện Ích Dev',
     metaDescription:
-      'Điều khoản sử dụng OmniDev IT-Tools về phạm vi dùng hợp lệ, miễn trừ trách nhiệm tính toán phía client, an toàn thiết bị âm thanh và giới hạn Speed Test.',
+      'Điều khoản sử dụng Tiện Ích Dev về phạm vi dùng hợp lệ, miễn trừ trách nhiệm tính toán phía client, an toàn thiết bị âm thanh và giới hạn Speed Test.',
     subtitle:
-      'Các điều khoản ngắn gọn, rõ ràng cho việc sử dụng bộ tiện ích trình duyệt, công cụ chẩn đoán và endpoint tự lưu trữ của OmniDev.',
+      'Các điều khoản ngắn gọn, rõ ràng cho việc sử dụng bộ tiện ích trình duyệt, công cụ chẩn đoán và endpoint tự lưu trữ của Tiện Ích Dev.',
     keywords: [
-      'điều khoản sử dụng omnidev',
+      'điều khoản sử dụng tiện ích dev',
       'miễn trừ trách nhiệm it tools',
       'giấy phép mã nguồn mở',
       'giới hạn speed test',
@@ -198,7 +198,7 @@ export const viPages: PagesDictionary = {
     sections: [
       {
         heading: '1. Giấy phép & Phạm vi Sử dụng Hợp lệ',
-        body: 'OmniDev IT-Tools được cung cấp miễn phí dưới dạng bộ tiện ích lập trình mã nguồn mở cho mục đích cá nhân, học tập và kỹ thuật thương mại. Bạn có thể xem, tự lưu trữ và tùy biến mã nguồn theo giấy phép của kho lưu trữ.',
+        body: 'Tiện Ích Dev được cung cấp miễn phí dưới dạng bộ tiện ích lập trình mã nguồn mở cho mục đích cá nhân, học tập và kỹ thuật thương mại. Bạn có thể xem, tự lưu trữ và tùy biến mã nguồn theo giấy phép của kho lưu trữ.',
       },
       {
         heading: '2. Độ chính xác & Nguyên trạng ("As-Is")',
@@ -217,15 +217,15 @@ export const viPages: PagesDictionary = {
   contact: {
     navLabel: 'Liên hệ',
     title: 'Liên hệ & Hỗ trợ Cộng đồng',
-    metaTitle: 'Liên hệ & Báo lỗi — Hộp thoại Góp ý, GitHub & Hỗ trợ | OmniDev IT-Tools',
+    metaTitle: 'Liên hệ & Báo lỗi — Hộp thoại Góp ý, GitHub & Hỗ trợ | Tiện Ích Dev',
     metaDescription:
-      'Liên hệ đội ngũ duy trì OmniDev IT-Tools: gửi báo lỗi hoặc đề xuất tính năng qua Hộp thoại Góp ý tích hợp, mở GitHub Issue hoặc gửi email hỗ trợ.',
+      'Liên hệ đội ngũ duy trì Tiện Ích Dev: gửi báo lỗi hoặc đề xuất tính năng qua Hộp thoại Góp ý tích hợp, mở GitHub Issue hoặc gửi email hỗ trợ.',
     subtitle:
       'Phát hiện lỗi biên, lỗi dịch thuật hoặc có ý tưởng cho công cụ thứ #29? Hãy liên hệ với chúng tôi qua kênh phù hợp nhất.',
     keywords: [
-      'liên hệ omnidev',
+      'liên hệ tiện ích dev',
       'báo lỗi it tools',
-      'đề xuất tính năng omnidev',
+      'đề xuất tính năng tiện ích dev',
       'github issues',
     ],
     sections: [

@@ -185,3 +185,43 @@
   - Removed: `wrangler.jsonc`, `open-next.config.ts`, `src/proxy.ts`, `src/app/[locale]/[...rest]/page.tsx`, `src/app/api/speedtest/*`.
   - `scripts/verify-aidlc.ts`, `aidlc-docs/operations/release-and-packaging.md`, `aidlc-docs/audit.md`.
 - **Verification & Gate Status**: `npm run lint`, `npm run build` (`178/178` static pages exported cleanly into `out/` including `index.html`, `404.html`, `en/vi/ja/zh.html`, `sitemap.xml`, `robots.txt`, `_headers`, `_redirects`), and `npx tsx scripts/verify-aidlc.ts` (all 11 suites) passed with exit code 0.
+
+## [2026-11-27T02:06:00Z] — Prompt 12: Configure Production Domain (`https://tien-ich-dev.pages.dev`) for App Meta, SEO, Sitemap, Robots & Social Cards
+- **Phase / Stage**: `OPERATIONS / Release & Packaging (Production Domain SEO & Metadata Alignment)`
+- **User Input**: `"Tôi đã deploy web lên cloudfare với tên miền tien-ich-dev.pages.dev, hãy cập nhật lại meta của app , seo , sitemap ,.. cho đúng"`
+- **Clarifications / Decisions**:
+  - Updated `DEFAULT_SITE_URL` in `src/lib/site.ts` and `.env.example` from `http://localhost:3000` to `https://tien-ich-dev.pages.dev` (still overridable via `NEXT_PUBLIC_SITE_URL` if a custom domain is attached later).
+  - Enriched `src/lib/seo.ts` (`applicationName`, `authors`/`creator`/`publisher`, `category`, explicit `robots` + `googleBot` directives, `image/png` MIME on OpenGraph images, `Organization` publisher logo in `WebSite` JSON-LD, and `image`/`isAccessibleForFree` in `SoftwareApplication` JSON-LD).
+  - Exported `viewport` (`themeColor` for dark/light + `colorScheme`) in `src/app/[locale]/layout.tsx`, added `metadataBase` in `src/app/[locale]/admin/feedback/page.tsx`, enriched `src/app/manifest.ts` (`id`, `scope`, `lang`, `categories`), and displayed the live host (`tien-ich-dev.pages.dev`) dynamically inside `src/lib/brand/og-template.tsx`.
+  - Upgraded root `public/index.html` with full SEO, canonical (`https://tien-ich-dev.pages.dev/en`), `hreflang` alternates (`en`, `vi`, `ja`, `zh-Hans`, `x-default`), OpenGraph, Twitter Card, manifest, and icon tags (removing conflicting `noindex` + `canonical`).
+  - Added HTTP-level `X-Robots-Tag: noindex, nofollow` for `/admin`, `/*/admin/*`, `/api/*` and cache headers for `/sitemap.xml`, `/robots.txt`, `/manifest.webmanifest` in `public/_headers`.
+  - Extended `scripts/verify-aidlc.ts` to assert `DEFAULT_SITE_URL === 'https://tien-ich-dev.pages.dev'` and zero `http://localhost:3000` leaks across `out/sitemap.xml`, `out/robots.txt`, `out/en.html`, and `out/index.html`.
+- **Artifacts & Code Updated**:
+  - `src/lib/site.ts`, `.env.example`, `src/lib/seo.ts`, `src/lib/brand/og-template.tsx`.
+  - `src/app/[locale]/layout.tsx`, `src/app/[locale]/admin/feedback/page.tsx`, `src/app/manifest.ts`.
+  - `public/index.html`, `public/_headers`.
+  - `scripts/verify-aidlc.ts`, `README.md`, `aidlc-docs/operations/release-and-packaging.md`, `aidlc-docs/aidlc-state.md`, `aidlc-docs/audit.md`.
+- **Verification & Gate Status**: `npm run lint` (0 errors), `npm run build` (`178/178` static routes exported into `out/`), `npx tsx scripts/verify-aidlc.ts` (all 11 suites including exported domain checks), and `rg "localhost:3000" out/` (0 matches) all passed with exit code 0.
+
+## [2026-11-27T02:24:00Z] — Prompt 13: Rebrand UI, Page Titles, Logo Text, Metadata & 4-Locale Copy to `Tiện Ích Dev` (`vi`) / `TienIchDev` (`en`/`ja`/`zh`)
+- **Phase / Stage**: `OPERATIONS / Release & Packaging (Brand & SEO Alignment)`
+- **User Input**: `"page title, logo là omnidev đã đổi chưa"` → confirmed `A1` (`Tiện Ích Dev` for `vi`, `TienIchDev` for `en`/`ja`/`zh`) and `A2` (full display/SEO/OG/manifest/info-page rebrand while keeping `>_` terminal icon and legacy `omnidev_*` browser storage/cookie keys intact).
+- **Clarifications / Decisions**:
+  - Updated `brand.name`, `brand.siteName`, `footer.copyrightLine`, `seo.homeTitle`, `notFound.seoTitle/seoDescription`, and all 5 info pages (`about`, `help`, `privacy`, `terms`, `contact`) across `en`, `vi`, `ja`, and `zh`.
+  - Updated `src/lib/seo.ts` (`SITE_NAME`, `SOCIAL_IMAGE_ALT`, localized `applicationName`/`authors`/`creator`/`publisher`), `src/app/manifest.ts`, `src/app/{opengraph-image,twitter-image}.tsx`, `src/lib/brand/og-template.tsx`, `public/index.html`, `src/components/not-found/RootNotFoundView.tsx`, `src/components/admin/AdminFeedbackClient.tsx`, tool sample strings (`FileToolsSuite.tsx`, `TextToolsSuite.tsx`, `MicTesterPanel.tsx`), `src/app/globals.css`, and `README.md`.
+  - Preserved the `>_` `<BrandLogo />` mark and all `omnidev_*` / `omnidev:*` `localStorage`/`sessionStorage`/`cookie`/event keys (including accurate documentation in Privacy Policy) so existing users retain saved favorites, presets, theme, and locale preferences.
+- **Artifacts & Code Updated**:
+  - `src/i18n/locales/{en,vi,ja,zh}/{common,pages}.ts`, `src/lib/seo.ts`, `src/lib/brand/og-template.tsx`.
+  - `src/app/{manifest.ts,opengraph-image.tsx,twitter-image.tsx,globals.css}`, `public/index.html`.
+  - `src/components/not-found/RootNotFoundView.tsx`, `src/components/admin/AdminFeedbackClient.tsx`, `src/components/tools/suites/{FileToolsSuite,TextToolsSuite}.tsx`, `src/components/tools/suites/diagnostics/MicTesterPanel.tsx`.
+  - `scripts/verify-aidlc.ts`, `README.md`, `aidlc-docs/aidlc-state.md`, `aidlc-docs/audit.md`.
+- **Verification & Gate Status**: `npm run lint` (0 errors), `npm run build` (`178/178` static pages exported cleanly into `out/`), `npx tsx scripts/verify-aidlc.ts` (all 11 suites including `Tiện Ích Dev` / `TienIchDev` localization and `https://tien-ich-dev.pages.dev` export assertions), and `<title>` / `og:site_name` HTML audit all passed with exit code 0.
+
+## [2026-11-27T02:27:30Z] — Prompt 14: Git Commit & Push Production SEO/Domain & Brand Rebrand (`tien-ich-dev.pages.dev`)
+- **Phase / Stage**: `OPERATIONS / Release & Packaging (Git Commit & Push)`
+- **User Input**: `"commit và push"`
+- **Clarifications / Decisions**:
+  - Committed and pushed all production domain (`https://tien-ich-dev.pages.dev`), SEO/metadata/sitemap/robots/manifest/headers updates, and `Tiện Ích Dev` (`vi`) / `TienIchDev` (`en`/`ja`/`zh`) rebrand changes to trigger Cloudflare Pages automatic deployment.
+- **Artifacts & Code Updated**:
+  - Staged and committed all modified files from Prompts 12–13 plus this audit entry.
+- **Verification & Gate Status**: Verified clean working tree after `git commit` and `git push` to origin.

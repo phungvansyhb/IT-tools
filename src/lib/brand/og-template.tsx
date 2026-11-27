@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSiteConfig } from '@/lib/site';
 
 const FEATURE_PILLS = [
   '100% Client-Side',
@@ -8,6 +9,8 @@ const FEATURE_PILLS = [
 ] as const;
 
 export function BrandOgTemplate() {
+  const siteHost = new URL(getSiteConfig().siteUrl).host;
+
   return (
     <div
       style={{
@@ -117,7 +120,7 @@ export function BrandOgTemplate() {
             color: '#f4f4f5',
           }}
         >
-          OmniDev / IT-Tools Hub
+          TienIchDev / IT-Tools Hub
         </div>
         <div
           style={{
@@ -146,7 +149,7 @@ export function BrandOgTemplate() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '14px',
+            gap: '12px',
           }}
         >
           {FEATURE_PILLS.map((pill) => (
@@ -155,12 +158,12 @@ export function BrandOgTemplate() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '10px 18px',
+                padding: '10px 16px',
                 borderRadius: '12px',
                 backgroundColor: '#18181b',
                 border: '1px solid #27272a',
                 color: '#f4f4f5',
-                fontSize: '20px',
+                fontSize: '18px',
                 fontWeight: 500,
               }}
             >
@@ -175,12 +178,12 @@ export function BrandOgTemplate() {
             alignItems: 'center',
             gap: '8px',
             color: '#10b981',
-            fontSize: '22px',
+            fontSize: '20px',
             fontWeight: 700,
           }}
         >
           <span>&gt;_</span>
-          <span style={{ color: '#a1a1aa', fontWeight: 500 }}>OmniDev</span>
+          <span style={{ color: '#a1a1aa', fontWeight: 500 }}>{siteHost}</span>
         </div>
       </div>
     </div>

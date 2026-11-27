@@ -19,3 +19,27 @@
 /twitter-image
   Content-Type: image/png
   Cache-Control: public,max-age=86400
+
+/sitemap.xml
+  Cache-Control: public,max-age=3600
+
+/robots.txt
+  Cache-Control: public,max-age=3600
+
+/manifest.webmanifest
+  Cache-Control: public,max-age=86400
+
+/admin
+  X-Robots-Tag: noindex, nofollow
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+
+/*/admin
+  X-Robots-Tag: noindex, nofollow
+
+/*/admin/*
+  X-Robots-Tag: noindex, nofollow
+
+/api/*
+  X-Robots-Tag: noindex, nofollow

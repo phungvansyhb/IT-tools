@@ -891,7 +891,7 @@ export function MicTesterPanel({
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <a
                   href={recordingUrl}
-                  download={`omnidev-mic-test.${recordingExt}`}
+                  download={`tienichdev-mic-test.${recordingExt}`}
                   className="btn btn-sm btn-primary"
                 >
                   <Download size={14} />

@@ -95,7 +95,7 @@ export function TextToolsSuite({ toolId, initialState, onStateChange, onRun }: T
   const [encInput, setEncInput] = useState<string>(
     typeof initialState?.encInput === 'string'
       ? initialState.encInput
-      : 'OmniDev <IT-Tools> & Privacy 🚀'
+      : 'TienIchDev <IT-Tools> & Privacy 🚀'
   );
 
   useEffect(() => {

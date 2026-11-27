@@ -2,9 +2,9 @@ import type { CommonDictionary } from '../../types';
 
 export const jaCommon: CommonDictionary = {
   brand: {
-    name: 'OmniDev',
+    name: 'TienIchDev',
     subtitle: 'IT-Tools Hub',
-    siteName: 'OmniDev IT-Tools',
+    siteName: 'TienIchDev',
     siteTagline: 'プライバシー優先の開発者向けユーティリティハブ',
   },
   nav: {
@@ -57,7 +57,7 @@ export const jaCommon: CommonDictionary = {
     openSourceLabel: 'GitHub でソースを公開',
     githubLabel: 'GitHub',
     feedbackBtn: 'フィードバック送信',
-    copyrightLine: '© {{year}} OmniDev IT-Tools. 100% クライアント側で実行。',
+    copyrightLine: '© {{year}} TienIchDev. 100% クライアント側で実行。',
     backToHome: 'ホームハブに戻る',
   },
   actions: {
@@ -122,7 +122,7 @@ export const jaCommon: CommonDictionary = {
     untitledPreset: '無題のプリセット',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 28+ プライバシー重視のブラウザ開発者ツール',
+    homeTitle: 'TienIchDev — 28+ プライバシー重視のブラウザ開発者ツール',
     homeDescription:
       '100% クライアント側で動作する高速開発者ユーティリティ：画像変換・圧縮、JSON/YAML/CSV、SHA-256、JWT デコーダー、正規表現テスター、OKLCH & WCAG コントラスト、Chmod、Cron、DevOps チートシート。',
     homeKeywords: [
@@ -181,14 +181,14 @@ export const jaCommon: CommonDictionary = {
       page: 'ページ',
     },
     seoTitle: {
-      tool: '404 — ツールが見つかりません | OmniDev IT-Tools',
-      category: '404 — カテゴリーが見つかりません | OmniDev IT-Tools',
-      general: '404 — ページが見つかりません | OmniDev IT-Tools',
+      tool: '404 — ツールが見つかりません | TienIchDev',
+      category: '404 — カテゴリーが見つかりません | TienIchDev',
+      general: '404 — ページが見つかりません | TienIchDev',
     },
     seoDescription: {
-      tool: '指定された開発者ツールは見つかりませんでした。OmniDev IT-Tools の28種類のブラウザツールをご利用ください。',
-      category: '指定されたツールカテゴリーは見つかりませんでした。OmniDev IT-Tools の7つの開発者スイートをご覧ください。',
-      general: '指定されたルートは OmniDev IT-Tools 上に見つかりませんでした。',
+      tool: '指定された開発者ツールは見つかりませんでした。TienIchDev の28種類のブラウザツールをご利用ください。',
+      category: '指定されたツールカテゴリーは見つかりませんでした。TienIchDev の7つの開発者スイートをご覧ください。',
+      general: '指定されたルートは TienIchDev 上に見つかりませんでした。',
     },
   },
   locales: {

@@ -360,7 +360,7 @@ async function runVerification() {
   }
 
   const tEn = getFixedT('en');
-  assert.equal(tEn('brand.name'), 'OmniDev');
+  assert.equal(tEn('brand.name'), 'TienIchDev');
   assert.equal(tEn('nav.categoriesHeading', { count: 6 }), 'Categories (6)');
   assert.equal(
     tEn('tools:engines.text.jwtSegmentsError', { count: 2 }),
@@ -418,7 +418,7 @@ async function runVerification() {
       );
     }
     const tLoc = getFixedT(loc);
-    assert.equal(tLoc('brand.name'), 'OmniDev');
+    assert.equal(tLoc('brand.name'), loc === 'vi' ? 'Tiện Ích Dev' : 'TienIchDev');
     assert.ok(tLoc('feedback.navButton').length > 0, `Expected feedback.navButton in ${loc}`);
     assert.ok(
       tLoc('feedback.errors.cooldown', { seconds: 15 }).includes('15'),
@@ -936,6 +936,7 @@ async function runVerification() {
   }
 
   // resolveSiteConfig()
+  assert.equal(DEFAULT_SITE_URL, 'https://tien-ich-dev.pages.dev');
   assert.deepEqual(resolveSiteConfig({}), {
     siteUrl: DEFAULT_SITE_URL,
     githubUrl: DEFAULT_GITHUB_URL,
@@ -992,6 +993,7 @@ async function runVerification() {
 
   // manifest()
   const webManifest = manifest();
+  assert.equal(webManifest.short_name, 'TienIchDev');
   assert.equal(webManifest.background_color, '#09090b');
   assert.equal(webManifest.theme_color, '#10b981');
   assert.equal(webManifest.icons?.length, 5, 'Expected 5 icon entries in manifest()');
@@ -999,6 +1001,14 @@ async function runVerification() {
     webManifest.icons?.some((ic) => ic.purpose === 'maskable'),
     'Expected maskable icon entry in manifest()'
   );
+
+  // Brand localization checks (vi -> Tiện Ích Dev, en/ja/zh -> TienIchDev)
+  assert.equal(getBundle('vi').common.brand.name, 'Tiện Ích Dev');
+  assert.equal(getBundle('vi').common.brand.siteName, 'Tiện Ích Dev');
+  for (const intlLoc of ['en', 'ja', 'zh'] as const) {
+    assert.equal(getBundle(intlLoc).common.brand.name, 'TienIchDev');
+    assert.equal(getBundle(intlLoc).common.brand.siteName, 'TienIchDev');
+  }
 
   // buildHomeMetadata('en')
   const homeMeta = buildHomeMetadata('en');
@@ -1233,9 +1243,52 @@ async function runVerification() {
   }
   const outDir = path.join(process.cwd(), 'out');
   if (fs.existsSync(outDir)) {
-    for (const outAsset of ['index.html', '404.html', 'en.html', 'vi.html', 'ja.html', 'zh.html', 'sitemap.xml', 'robots.txt', '_headers', '_redirects']) {
+    for (const outAsset of ['index.html', '404.html', 'en.html', 'vi.html', 'ja.html', 'zh.html', 'sitemap.xml', 'robots.txt', 'manifest.webmanifest', '_headers', '_redirects']) {
       assert.ok(fs.existsSync(path.join(outDir, outAsset)), `Missing exported static artifact: out/${outAsset}`);
     }
+    const expectedSiteOrigin = resolveSiteConfig({
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    }).siteUrl;
+    const exportedSitemap = fs.readFileSync(path.join(outDir, 'sitemap.xml'), 'utf8');
+    assert.ok(
+      exportedSitemap.includes(`<loc>${expectedSiteOrigin}/en</loc>`),
+      `Expected out/sitemap.xml to contain <loc>${expectedSiteOrigin}/en</loc>`
+    );
+    assert.ok(
+      !exportedSitemap.includes('http://localhost:3000'),
+      'out/sitemap.xml must not contain http://localhost:3000'
+    );
+    const exportedRobots = fs.readFileSync(path.join(outDir, 'robots.txt'), 'utf8');
+    assert.ok(
+      exportedRobots.includes(`Sitemap: ${expectedSiteOrigin}/sitemap.xml`),
+      `Expected out/robots.txt to contain Sitemap: ${expectedSiteOrigin}/sitemap.xml`
+    );
+    assert.ok(
+      !exportedRobots.includes('http://localhost:3000'),
+      'out/robots.txt must not contain http://localhost:3000'
+    );
+    const exportedEnHtml = fs.readFileSync(path.join(outDir, 'en.html'), 'utf8');
+    assert.ok(
+      exportedEnHtml.includes(`href="${expectedSiteOrigin}/en"`),
+      `Expected out/en.html to include canonical/hreflang for ${expectedSiteOrigin}/en`
+    );
+    assert.ok(
+      exportedEnHtml.includes(`${expectedSiteOrigin}/opengraph-image`),
+      `Expected out/en.html to include og:image for ${expectedSiteOrigin}/opengraph-image`
+    );
+    assert.ok(
+      !exportedEnHtml.includes('http://localhost:3000'),
+      'out/en.html must not contain http://localhost:3000'
+    );
+    const exportedRootHtml = fs.readFileSync(path.join(outDir, 'index.html'), 'utf8');
+    assert.ok(
+      exportedRootHtml.includes('rel="canonical" href="https://tien-ich-dev.pages.dev/en"'),
+      'Expected out/index.html to include canonical https://tien-ich-dev.pages.dev/en'
+    );
+    assert.ok(
+      exportedRootHtml.includes('https://tien-ich-dev.pages.dev/opengraph-image'),
+      'Expected out/index.html to include og:image https://tien-ich-dev.pages.dev/opengraph-image'
+    );
   }
   assert.ok(disallowList.includes('/cdn-cgi/*'), 'Expected robots() disallow to include /cdn-cgi/*');
   assert.equal(disallowList.includes('/_vercel/*'), false, 'Expected robots() disallow not to include /_vercel/*');

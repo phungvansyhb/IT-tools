@@ -19,14 +19,14 @@ export const jaPages: PagesDictionary = {
   },
   about: {
     navLabel: '概要',
-    title: 'OmniDev IT-Tools について',
-    metaTitle: 'OmniDev IT-Tools について — 100% クライアント側で完結する開発者ワークスペース',
+    title: 'TienIchDev について',
+    metaTitle: 'TienIchDev について — 100% クライアント側で完結する開発者ワークスペース',
     metaDescription:
-      'OmniDev IT-Tools の紹介：7カテゴリー・28種類のブラウザネイティブ開発ツール。高速動作、サーバー送信ゼロ、4言語完全対応。',
+      'TienIchDev の紹介：7カテゴリー・28種類のブラウザネイティブ開発ツール。高速動作、サーバー送信ゼロ、4言語完全対応。',
     subtitle:
       '開発・デザイン・DevOps・ハードウェア診断に欠かせない28種類のユーティリティをブラウザ上で安全に実行できる、プライバシー優先のモノクロ Bento ワークスペースです。',
     keywords: [
-      'omnidev 概要',
+      'tienichdev 概要',
       'クライアントサイド開発ツール',
       'ブラウザユーティリティ',
       'プライバシー重視 it tools',
@@ -35,7 +35,7 @@ export const jaPages: PagesDictionary = {
     sections: [
       {
         heading: '完全なローカルプライバシーのために設計',
-        body: '開発者は日々、機密性の高い JWT、設定ファイル、SSH/Nginx スニペット、ハッシュ値、ローカル画像を外部サイトに貼り付けがちです。OmniDev は標準 Web API を用いてすべての変換をブラウザメモリ内だけで実行し、そのリスクを排除します。',
+        body: '開発者は日々、機密性の高い JWT、設定ファイル、SSH/Nginx スニペット、ハッシュ値、ローカル画像を外部サイトに貼り付けがちです。TienIchDev は標準 Web API を用いてすべての変換をブラウザメモリ内だけで実行し、そのリスクを排除します。',
         bullets: [
           'HTML5 Canvas と Web Crypto API により、画像変換・圧縮や SHA-1/256/384/512 ハッシュ計算をローカルで処理します。',
           'JSON、YAML、CSV、正規表現、JWT、OKLCH、Chmod、Cron エンジンは外部 API 通信なしで同期実行されます。',
@@ -64,13 +64,13 @@ export const jaPages: PagesDictionary = {
   help: {
     navLabel: 'ヘルプ・FAQ',
     title: 'ヘルプ＆よくある質問',
-    metaTitle: 'ヘルプ＆FAQ — キーボード・音声・速度テストガイド | OmniDev IT-Tools',
+    metaTitle: 'ヘルプ＆FAQ — キーボード・音声・速度テストガイド | TienIchDev',
     metaDescription:
-      'OmniDev IT-Tools の使い方とトラブルシューティング：クライアント側プライバシー、キーボードキャプチャ（Esc × 2）、マイク HTTPS 権限、スピーカー 35% 上限、速度テスト。',
+      'TienIchDev の使い方とトラブルシューティング：クライアント側プライバシー、キーボードキャプチャ（Esc × 2）、マイク HTTPS 権限、スピーカー 35% 上限、速度テスト。',
     subtitle:
       'ブラウザ権限の扱い、ハードウェア診断、ローカル状態の保持、キーボードショートカットに関する実践的なガイドです。',
     keywords: [
-      'omnidev ヘルプ',
+      'tienichdev ヘルプ',
       'it tools faq',
       'キーボードキャプチャ esc',
       'マイク権限 https',
@@ -133,13 +133,13 @@ export const jaPages: PagesDictionary = {
   privacy: {
     navLabel: 'プライバシーポリシー',
     title: 'プライバシーポリシー',
-    metaTitle: 'プライバシーポリシー — ローカル処理・Cookie・Cloudflare Web Analytics | OmniDev IT-Tools',
+    metaTitle: 'プライバシーポリシー — ローカル処理・Cookie・Cloudflare Web Analytics | TienIchDev',
     metaDescription:
-      'OmniDev IT-Tools の透明性方針：28種類のツールは100%クライアント実行、localStorage・sessionStorage の利用項目、必須 Cookie omnidev_locale、任意の Cookie レス Cloudflare Web Analytics。',
+      'TienIchDev の透明性方針：28種類のツールは100%クライアント実行、localStorage・sessionStorage の利用項目、必須 Cookie omnidev_locale、任意の Cookie レス Cloudflare Web Analytics。',
     subtitle:
       'ブラウザメモリ内に留まる情報、ローカルに保存される情報、および任意で有効化される Cookie レス計測の仕組みを明確に開示します。',
     keywords: [
-      'omnidev プライバシーポリシー',
+      'tienichdev プライバシーポリシー',
       'クライアントサイドプライバシー',
       'localstorage キー',
       'omnidev_locale cookie',
@@ -148,7 +148,7 @@ export const jaPages: PagesDictionary = {
     sections: [
       {
         heading: '100% クライアント側実行＆ペイロード追跡ゼロ',
-        body: 'OmniDev には広告トラッカー、クロスサイトプロファイリング、入力ペイロードのサーバー送信はありません。28種類すべてのツールはローカルブラウザ内で動作し、入力または読み込んだデータ（JWT、ハッシュ、正規表現、画像、JSON/YAML/CSV、マイク音声）が端末外へ出ることはありません。',
+        body: 'TienIchDev には広告トラッカー、クロスサイトプロファイリング、入力ペイロードのサーバー送信はありません。28種類すべてのツールはローカルブラウザ内で動作し、入力または読み込んだデータ（JWT、ハッシュ、正規表現、画像、JSON/YAML/CSV、マイク音声）が端末外へ出ることはありません。',
       },
       {
         heading: 'ブラウザストレージ（`localStorage` と `sessionStorage`）',
@@ -160,7 +160,7 @@ export const jaPages: PagesDictionary = {
       },
       {
         heading: '厳密に必須な Cookie（`omnidev_locale`）',
-        body: 'OmniDev は SSR/プロキシの言語ルーティングのために、単一のファーストパーティ必須 Cookie（`omnidev_locale`、`SameSite=Lax`、有効期限1年）のみを使用して表示言語（`en`, `vi`, `ja`, `zh`）を記憶します。広告やクロスサイト追跡 Cookie は使用しません。',
+        body: 'TienIchDev は SSR/プロキシの言語ルーティングのために、単一のファーストパーティ必須 Cookie（`omnidev_locale`、`SameSite=Lax`、有効期限1年）のみを使用して表示言語（`en`, `vi`, `ja`, `zh`）を記憶します。広告やクロスサイト追跡 Cookie は使用しません。',
       },
       {
         heading: '任意の Cloudflare Web Analytics（ページビュー＆Core Web Vitals）',
@@ -184,13 +184,13 @@ export const jaPages: PagesDictionary = {
   terms: {
     navLabel: '利用規約',
     title: '利用規約',
-    metaTitle: '利用規約 — オープンソースユーティリティ＆免責事項 | OmniDev IT-Tools',
+    metaTitle: '利用規約 — オープンソースユーティリティ＆免責事項 | TienIchDev',
     metaDescription:
-      'OmniDev IT-Tools の利用規約：許可される利用範囲、クライアント側計算の免責事項、オーディオ機器安全上の注意、同一オリジン速度テストの適正利用。',
+      'TienIchDev の利用規約：許可される利用範囲、クライアント側計算の免責事項、オーディオ機器安全上の注意、同一オリジン速度テストの適正利用。',
     subtitle:
-      'OmniDev のブラウザユーティリティ、診断ツール、およびセルフホストエンドポイントの利用に関する簡潔な規約です。',
+      'TienIchDev のブラウザユーティリティ、診断ツール、およびセルフホストエンドポイントの利用に関する簡潔な規約です。',
     keywords: [
-      'omnidev 利用規約',
+      'tienichdev 利用規約',
       '開発ツール免責事項',
       'オープンソースライセンス',
       '速度テスト適正利用',
@@ -198,7 +198,7 @@ export const jaPages: PagesDictionary = {
     sections: [
       {
         heading: '1. ライセンスと許可された利用',
-        body: 'OmniDev IT-Tools は、個人・教育・商用エンジニアリング業務向けの無料オープンソース開発者ユーティリティ群として提供されます。リポジトリライセンスに従い、コードの閲覧、セルフホスト、カスタマイズが可能です。',
+        body: 'TienIchDev は、個人・教育・商用エンジニアリング業務向けの無料オープンソース開発者ユーティリティ群として提供されます。リポジトリライセンスに従い、コードの閲覧、セルフホスト、カスタマイズが可能です。',
       },
       {
         heading: '2. 正確性および現状有姿（"As-Is"）での提供',
@@ -217,15 +217,15 @@ export const jaPages: PagesDictionary = {
   contact: {
     navLabel: 'お問い合わせ',
     title: 'お問い合わせ＆コミュニティサポート',
-    metaTitle: 'お問い合わせ＆バグ報告 — フィードバック・GitHub・サポート | OmniDev IT-Tools',
+    metaTitle: 'お問い合わせ＆バグ報告 — フィードバック・GitHub・サポート | TienIchDev',
     metaDescription:
-      'OmniDev IT-Tools メンテナーへの連絡方法：アプリ内フィードバックモーダルでのバグ報告・機能要望、GitHub Issues、サポートメールのご案内。',
+      'TienIchDev メンテナーへの連絡方法：アプリ内フィードバックモーダルでのバグ報告・機能要望、GitHub Issues、サポートメールのご案内。',
     subtitle:
       'エッジケースの不具合、翻訳の改善点、あるいは29番目のツールのアイデアがありますか？最適な窓口からご連絡ください。',
     keywords: [
-      'omnidev お問い合わせ',
+      'tienichdev お問い合わせ',
       'it tools バグ報告',
-      'omnidev 機能要望',
+      'tienichdev 機能要望',
       'github issues',
     ],
     sections: [

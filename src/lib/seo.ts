@@ -12,9 +12,9 @@ import { CategoryDefinition, ToolDefinition } from '@/lib/tools/registry';
 import { getInfoPageBySlug, getLocalizedInfoPage, type InfoPageSlug } from '@/lib/info/pages';
 import type { NotFoundContext } from '@/lib/not-found/suggestions';
 
-export const SITE_NAME = 'OmniDev IT-Tools';
+export const SITE_NAME = 'TienIchDev';
 export const SITE_TAGLINE = 'Privacy-First Developer & Utility Tools Hub';
-const SOCIAL_IMAGE_ALT = 'OmniDev / IT-Tools Hub — Privacy-First Developer & Diagnostic Tools';
+const SOCIAL_IMAGE_ALT = 'TienIchDev — Privacy-First Developer & Diagnostic Tools';
 
 export function getSiteUrl(): string {
   return getSiteConfig().siteUrl;
@@ -42,9 +42,25 @@ export function buildHomeMetadata(locale: Locale = DEFAULT_LOCALE): Metadata {
 
   return {
     metadataBase: getMetadataBase(),
+    applicationName: brand.siteName,
     title: seo.homeTitle,
     description: seo.homeDescription,
     keywords: seo.homeKeywords,
+    authors: [{ name: brand.siteName, url: base }],
+    creator: brand.siteName,
+    publisher: brand.siteName,
+    category: 'technology',
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
     alternates: {
       canonical: url,
       languages: buildLanguageAlternates('/'),
@@ -64,6 +80,7 @@ export function buildHomeMetadata(locale: Locale = DEFAULT_LOCALE): Metadata {
           url: '/opengraph-image',
           width: 1200,
           height: 630,
+          type: 'image/png',
           alt: SOCIAL_IMAGE_ALT,
         },
       ],
@@ -116,6 +133,7 @@ export function buildCategoryMetadata(
           url: '/opengraph-image',
           width: 1200,
           height: 630,
+          type: 'image/png',
           alt: SOCIAL_IMAGE_ALT,
         },
       ],
@@ -172,6 +190,7 @@ export function buildToolMetadata(
           url: '/opengraph-image',
           width: 1200,
           height: 630,
+          type: 'image/png',
           alt: SOCIAL_IMAGE_ALT,
         },
       ],
@@ -196,6 +215,15 @@ export function buildWebSiteJsonLd(locale: Locale = DEFAULT_LOCALE) {
     description: brand.siteTagline,
     inLanguage: LOCALE_META[locale].htmlLang,
     url,
+    publisher: {
+      '@type': 'Organization',
+      name: brand.siteName,
+      url: base,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${base}/icons/icon-512.png`,
+      },
+    },
     potentialAction: {
       '@type': 'SearchAction',
       target: `${url}?q={search_term_string}`,
@@ -248,6 +276,8 @@ export function buildToolJsonLd(
       description: tool.longDescription,
       inLanguage: LOCALE_META[locale].htmlLang,
       url: toolUrl,
+      image: `${base}/opengraph-image`,
+      isAccessibleForFree: true,
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any (Web Browser)',
       offers: {
@@ -315,6 +345,7 @@ export function buildInfoPageMetadata(
           url: '/opengraph-image',
           width: 1200,
           height: 630,
+          type: 'image/png',
           alt: SOCIAL_IMAGE_ALT,
         },
       ],

@@ -467,7 +467,7 @@ export function AdminFeedbackClient() {
               <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <span className="glass-pill">
                   <ShieldCheck size={13} style={{ color: 'var(--accent)' }} />
-                  <span>OmniDev Admin</span>
+                  <span>TienIchDev Admin</span>
                 </span>
                 {supabaseEnabled ? (
                   <span className="glass-pill badge-success">

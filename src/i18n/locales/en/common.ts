@@ -2,9 +2,9 @@ import type { CommonDictionary } from '../../types';
 
 export const enCommon: CommonDictionary = {
   brand: {
-    name: 'OmniDev',
+    name: 'TienIchDev',
     subtitle: 'IT-Tools Hub',
-    siteName: 'OmniDev IT-Tools',
+    siteName: 'TienIchDev',
     siteTagline: 'Privacy-First Developer & Utility Tools Hub',
   },
   nav: {
@@ -56,7 +56,7 @@ export const enCommon: CommonDictionary = {
     openSourceLabel: 'Open Source on GitHub',
     githubLabel: 'GitHub',
     feedbackBtn: 'Send Feedback',
-    copyrightLine: '© {{year}} OmniDev IT-Tools. 100% Client-Side Execution.',
+    copyrightLine: '© {{year}} TienIchDev. 100% Client-Side Execution.',
     backToHome: 'Back to Home Hub',
   },
   actions: {
@@ -121,7 +121,7 @@ export const enCommon: CommonDictionary = {
     untitledPreset: 'Untitled Preset',
   },
   seo: {
-    homeTitle: 'OmniDev IT-Tools — 28+ Privacy-First Browser Developer Tools',
+    homeTitle: 'TienIchDev — 28+ Privacy-First Browser Developer Tools',
     homeDescription:
       'High-performance, 100% client-side developer utilities: Image converter & compressor, JSON/YAML/CSV, SHA-256, JWT decoder, Regex tester, OKLCH & WCAG contrast, Chmod, Cron, and DevOps cheatsheets.',
     homeKeywords: [
@@ -180,14 +180,14 @@ export const enCommon: CommonDictionary = {
       page: 'Page',
     },
     seoTitle: {
-      tool: '404 — Tool Not Found | OmniDev IT-Tools',
-      category: '404 — Category Not Found | OmniDev IT-Tools',
-      general: '404 — Page Not Found | OmniDev IT-Tools',
+      tool: '404 — Tool Not Found | TienIchDev',
+      category: '404 — Category Not Found | TienIchDev',
+      general: '404 — Page Not Found | TienIchDev',
     },
     seoDescription: {
-      tool: 'The requested developer tool could not be found. Browse 28 privacy-first browser utilities on OmniDev IT-Tools.',
-      category: 'The requested tool category could not be found. Browse all 7 developer suites on OmniDev IT-Tools.',
-      general: 'The requested route could not be found on OmniDev IT-Tools.',
+      tool: 'The requested developer tool could not be found. Browse 28 privacy-first browser utilities on TienIchDev.',
+      category: 'The requested tool category could not be found. Browse all 7 developer suites on TienIchDev.',
+      general: 'The requested route could not be found on TienIchDev.',
     },
   },
   locales: {

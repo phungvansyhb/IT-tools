@@ -1,11 +1,11 @@
 # AI-DLC Workflow State Tracker (`aidlc-state.md`)
 
 ## Project Metadata
-- **Project Name**: OmniDev / IT-Tools Hub — Privacy-First Developer & Utility Tools Hub
+- **Project Name**: TienIchDev (Tiện Ích Dev) — Privacy-First Developer & Utility Tools Hub
 - **Project Type**: Brownfield (`Next.js 16.4.6 App Router + TypeScript 5 + React 19.3 + Vanilla CSS Monochrome Zinc Glass / Bento Grid + Optional Supabase`)
-- **Active Phase**: `CONSTRUCTION` (Cloudflare Web Analytics & Core Web Vitals Cycle — `UNIT-25`–`UNIT-27` Complete)
-- **Active Stage**: `Phase 2 Construction Complete — Ready for Phase 3 Operations Verification`
-- **Last Updated**: `2026-11-25T06:50:00Z`
+- **Active Phase**: `OPERATIONS` (Cloudflare Pages Production Deployment — `https://tien-ich-dev.pages.dev`)
+- **Active Stage**: `Production Domain SEO, Metadata, Sitemap & Brand Rebrand (Tiện Ích Dev / TienIchDev) Verified`
+- **Last Updated**: `2026-11-27T02:24:00Z`
 
 ---
 
